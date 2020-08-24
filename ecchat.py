@@ -11,6 +11,20 @@ from datetime import datetime
 
 ################################################################################
 
+class eccMessage:
+
+	def __init__(self):
+
+		pass
+
+	############################################################################
+
+	def method(self):
+
+		pass
+
+################################################################################
+
 def terminate(signalNumber, frame):
 
 	logging.info('%s received - terminating' % signal.Signals(signalNumber).name)
