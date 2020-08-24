@@ -4,6 +4,7 @@ import pathlib
 import logging
 import socket
 import signal
+import zmq
 import sys
 
 from datetime import datetime
@@ -44,7 +45,35 @@ def main():
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	# TODO : Chat program
+	#====================================================
+	context    = zmq.Context()
+	subscriber = context.socket(zmq.SUB)
+	subscriber.connect('tcp://%s'%settings.zmq_address)
+	subscriber.setsockopt(zmq.SUBSCRIBE, b'')
+
+#    while True:
+
+#        [address, contents] = subscriber.recv_multipart()
+
+#        if address.decode() == 'packet':
+
+#            protocolID = contents.decode()[1:]
+
+#            logging.info('Notification for Protocol ID %s' % protocolID)
+
+#            eccbuffer = eccoin.getbuffer(int(protocolID))
+
+#            for packet in eccbuffer.values():
+
+#                message = codecs.decode(packet, 'hex').decode()
+
+#                logging.info('Received message - %s' % message)
+
+#               handle(protocolID, message)
+
+	subscriber.close()
+	context.term()
+	#====================================================
 
 	logging.info('SHUTDOWN')
 
