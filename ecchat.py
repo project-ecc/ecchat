@@ -1,3 +1,4 @@
+import datetime
 import settings
 import argparse
 import pathlib
@@ -7,7 +8,9 @@ import signal
 import zmq
 import sys
 
-from datetime import datetime
+from slickrpc import Proxy
+
+eccoin = Proxy('http://%s:%s@%s'%(settings.rpc_user, settings.rpc_pass, settings.rpc_address))
 
 ################################################################################
 
@@ -39,7 +42,7 @@ def main():
 
 	pathlib.Path('log').mkdir(parents=True, exist_ok=True)
 
-	logging.basicConfig(filename = 'log/{:%Y-%m-%d}.log'.format(datetime.now()),
+	logging.basicConfig(filename = 'log/{:%Y-%m-%d}.log'.format(datetime.datetime.now()),
 						filemode = 'a',
 						level    = logging.INFO,
 						format   = '%(asctime)s - %(levelname)s : %(message)s',
