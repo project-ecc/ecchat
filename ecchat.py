@@ -120,7 +120,7 @@ def main():
 
 			if sys.stdin.fileno() in socks:
 
-				line = sys.stdin.readline()
+				line = command_line_args.name + '> ' + sys.stdin.readline()
 
 				eccoin.sendpacket(command_line_args.tag, settings.protocol_id, settings.protocol_ver, line)
 
@@ -133,7 +133,7 @@ def main():
 					protocolID = contents.decode()[1:]
 
 					bufferCmd = "GetBufferRequest:" + protocolID + str(bufferIdx := bufferIdx + 1)
-					print(bufferCmd)
+
 					bufferSig = eccoin.buffersignmessage(bufferKey, bufferCmd)
 
 					eccbuffer = eccoin.getbuffer(int(protocolID), bufferSig)
@@ -142,7 +142,7 @@ def main():
 
 						message = codecs.decode(packet, 'hex').decode()
 
-						print('Received message - %s' % message)
+						print(message)
 
 	subscriber.close()
 	context.term()
