@@ -95,8 +95,6 @@ def main():
 	bufferKey  = eccoin.registerbuffer(settings.protocol_id)
 	bufferIdx  = 0
 
-	print(routingKey)
-
 	# Initialise zmq
 
 	context    = zmq.Context()
@@ -113,6 +111,14 @@ def main():
 	# Setup route to remote tag
 
 	if checkRoute(command_line_args.tag):
+
+		print('')
+		print('*******************************************')
+		print('*** Welcome to ECC Messaging via ecchat ***')
+		print('*** The route to your other party is ok ***')
+		print('*** Enjoy your p2p e2ee private chat :) ***')
+		print('*******************************************')
+		print('')
 
 		while True:
 
