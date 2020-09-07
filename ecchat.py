@@ -5,12 +5,35 @@ import pathlib
 import logging
 import socket
 import signal
+import codecs
 import zmq
 import sys
 
 from slickrpc import Proxy
 
 eccoin = Proxy('http://%s:%s@%s'%(settings.rpc_user, settings.rpc_pass, settings.rpc_address))
+
+################################################################################
+
+def checkRoute(routingTag):
+
+	try:
+
+		eccoin.findroute(routingTag)
+
+		isRoute = eccoin.haveroute(routingTag)
+
+	except exc.RpcInvalidAddressOrKey:
+
+		print('Routing tag has invalid base64 encoding : %s' % routingTag)
+
+		return False
+
+	if not isRoute:
+
+		print('No route available to : %s' % routingTag)
+
+	return isRoute
 
 ################################################################################
 
@@ -40,6 +63,10 @@ def terminate(signalNumber, frame):
 
 def main():
 
+	if sys.version_info[0] < 3:
+
+		raise "Use Python 3"
+
 	pathlib.Path('log').mkdir(parents=True, exist_ok=True)
 
 	logging.basicConfig(filename = 'log/{:%Y-%m-%d}.log'.format(datetime.datetime.now()),
@@ -55,42 +82,70 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Simple command line chat for ECC')
 
-	#argparser.add_argument('-a', '--addr', action='store', help='address to accept connections', type=str, default = '127.0.0.1')
-	#argparser.add_argument('-p', '--port', action='store', help='port for client connections'  , type=int, default = 5222)
+	argparser.add_argument('-n', '--name', action='store', help='nickname    (local)' , type=str, default = '')
+	argparser.add_argument('-t', '--tag' , action='store', help='routing tag (remote)', type=str, default = '')
 
 	command_line_args = argparser.parse_args()
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	#====================================================
+	# Initialise eccoind
+
+	routingKey = eccoin.getroutingpubkey()
+	bufferKey  = eccoin.registerbuffer(settings.protocol_id)
+	bufferIdx  = 0
+
+	print(routingKey)
+
+	# Initialise zmq
+
 	context    = zmq.Context()
 	subscriber = context.socket(zmq.SUB)
+
 	subscriber.connect('tcp://%s'%settings.zmq_address)
 	subscriber.setsockopt(zmq.SUBSCRIBE, b'')
 
-#    while True:
+	poller = zmq.Poller()
 
-#        [address, contents] = subscriber.recv_multipart()
+	poller.register(sys.stdin,  zmq.POLLIN)
+	poller.register(subscriber, zmq.POLLIN)
 
-#        if address.decode() == 'packet':
+	# Setup route to remote tag
 
-#            protocolID = contents.decode()[1:]
+	if checkRoute(command_line_args.tag):
 
-#            logging.info('Notification for Protocol ID %s' % protocolID)
+		while True:
 
-#            eccbuffer = eccoin.getbuffer(int(protocolID))
+			socks = dict(poller.poll())
 
-#            for packet in eccbuffer.values():
+			if sys.stdin.fileno() in socks:
 
-#                message = codecs.decode(packet, 'hex').decode()
+				line = sys.stdin.readline()
 
-#                logging.info('Received message - %s' % message)
+				eccoin.sendpacket(command_line_args.tag, settings.protocol_id, settings.protocol_ver, line)
 
-#               handle(protocolID, message)
+			if subscriber in socks:
+
+				[address, contents] = subscriber.recv_multipart(zmq.DONTWAIT)
+
+				if address.decode() == 'packet':
+
+					protocolID = contents.decode()[1:]
+
+					bufferCmd = "GetBufferRequest:" + protocolID + str(bufferIdx := bufferIdx + 1)
+					print(bufferCmd)
+					bufferSig = eccoin.buffersignmessage(bufferKey, bufferCmd)
+
+					eccbuffer = eccoin.getbuffer(int(protocolID), bufferSig)
+
+					for packet in eccbuffer.values():
+
+						message = codecs.decode(packet, 'hex').decode()
+
+						print('Received message - %s' % message)
 
 	subscriber.close()
 	context.term()
-	#====================================================
 
 	logging.info('SHUTDOWN')
 
