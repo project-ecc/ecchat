@@ -6,6 +6,7 @@ import logging
 import socket
 import signal
 import codecs
+import json
 import zmq
 import sys
 
@@ -37,17 +38,38 @@ def checkRoute(routingTag):
 
 ################################################################################
 
-class eccMessage:
+class eccPacket(dict):
 
-	def __init__(self):
+	TYPE_MESSAGE = "message"
 
-		pass
+	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
+
+		# TOTO: Add some validation checks here
+
+		self.packet = {	"_id"	= _id,
+						"_ver"	= _ver,
+						"_to"	= _to,
+						"_from"	= _from,
+						"_type"	= _type,
+						"_data"	= _data}
 
 	############################################################################
 
-	def method(self):
+	@classmethod
 
-		pass
+	def from_json(cls, json_string = '')
+
+		d = json.loads(json_string)
+
+		# TOTO: Add some validation checks here
+
+		return cls(d['_id'], d['_ver'], d['_to'], d['_from'], d['_type'], d[_data])
+
+	############################################################################
+
+	def send(self):
+
+		eccoin.sendpacket(self._to, self._id, self._ver, json.dumps(self.packet))
 
 ################################################################################
 
@@ -91,7 +113,7 @@ def main():
 
 	# Initialise eccoind
 
-	routingKey = eccoin.getroutingpubkey()
+	routingTag = eccoin.getroutingpubkey()
 	bufferKey  = eccoin.registerbuffer(settings.protocol_id)
 	bufferIdx  = 0
 
@@ -128,7 +150,9 @@ def main():
 
 				line = command_line_args.name + '> ' + sys.stdin.readline()
 
-				eccoin.sendpacket(command_line_args.tag, settings.protocol_id, settings.protocol_ver, line)
+				packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_MESSAGE, line)
+
+				packet.send()
 
 			if subscriber in socks:
 
