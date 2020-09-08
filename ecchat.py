@@ -69,7 +69,7 @@ class eccPacket(dict):
 
 	def send(self):
 
-		eccoin.sendpacket(self._to, self._id, self._ver, json.dumps(self.packet))
+		eccoin.sendpacket(self.packet["_to"], self.packet["_id"], self.packet["_ver"], json.dumps(self.packet))
 
 ################################################################################
 
