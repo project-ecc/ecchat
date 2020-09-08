@@ -46,18 +46,18 @@ class eccPacket(dict):
 
 		# TOTO: Add some validation checks here
 
-		self.packet = {	"_id"	= _id,
-						"_ver"	= _ver,
-						"_to"	= _to,
-						"_from"	= _from,
-						"_type"	= _type,
-						"_data"	= _data}
+		self.packet = {	"_id"	: _id,
+						"_ver"	: _ver,
+						"_to"	: _to,
+						"_from"	: _from,
+						"_type"	: _type,
+						"_data"	: _data}
 
 	############################################################################
 
 	@classmethod
 
-	def from_json(cls, json_string = '')
+	def from_json(cls, json_string = ''):
 
 		d = json.loads(json_string)
 
