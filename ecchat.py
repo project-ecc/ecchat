@@ -11,6 +11,7 @@ import zmq
 import sys
 
 from slickrpc import Proxy
+from slickrpc import exc
 
 eccoin = Proxy('http://%s:%s@%s'%(settings.rpc_user, settings.rpc_pass, settings.rpc_address))
 
@@ -38,7 +39,7 @@ def checkRoute(routingTag):
 
 ################################################################################
 
-class eccPacket(dict):
+class eccPacket():
 
 	TYPE_MESSAGE = "message"
 
@@ -63,7 +64,13 @@ class eccPacket(dict):
 
 		# TOTO: Add some validation checks here
 
-		return cls(d['_id'], d['_ver'], d['_to'], d['_from'], d['_type'], d[_data])
+		return cls(d['_id'], d['_ver'], d['_to'], d['_from'], d['_type'], d['_data'])
+
+	############################################################################
+
+	def get_data(self):
+
+		return self.packet['_data']
 
 	############################################################################
 
@@ -148,11 +155,11 @@ def main():
 
 			if sys.stdin.fileno() in socks:
 
-				line = command_line_args.name + '> ' + sys.stdin.readline()
+				line = command_line_args.name + '> ' + sys.stdin.readline().strip('\n')
 
-				packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_MESSAGE, line)
+				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_MESSAGE, line)
 
-				packet.send()
+				ecc_packet.send()
 
 			if subscriber in socks:
 
@@ -172,7 +179,9 @@ def main():
 
 						message = codecs.decode(packet, 'hex').decode()
 
-						print(message)
+						ecc_packet = eccPacket.from_json(message)
+
+						print(ecc_packet.get_data())
 
 	subscriber.close()
 	context.term()
