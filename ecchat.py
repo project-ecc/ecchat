@@ -41,18 +41,20 @@ def checkRoute(routingTag):
 
 class eccPacket():
 
-	TYPE_MESSAGE = "message"
+	TYPE_chatMsg = 'chatMsg'
+	TYPE_addrReq = 'addrReq'
+	TYPE_addrRes = 'addrRes'
 
 	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
 
 		# TOTO: Add some validation checks here
 
-		self.packet = {	"_id"	: _id,
-						"_ver"	: _ver,
-						"_to"	: _to,
-						"_from"	: _from,
-						"_type"	: _type,
-						"_data"	: _data}
+		self.packet = {	'_id'	: _id,
+						'_ver'	: _ver,
+						'_to'	: _to,
+						'_from'	: _from,
+						'_type'	: _type,
+						'_data'	: _data}
 
 	############################################################################
 
@@ -68,6 +70,18 @@ class eccPacket():
 
 	############################################################################
 
+	def get_from(self):
+
+		return self.packet['_from']
+
+	############################################################################
+
+	def get_type(self):
+
+		return self.packet['_type']
+
+	############################################################################
+
 	def get_data(self):
 
 		return self.packet['_data']
@@ -76,7 +90,7 @@ class eccPacket():
 
 	def send(self):
 
-		eccoin.sendpacket(self.packet["_to"], self.packet["_id"], self.packet["_ver"], json.dumps(self.packet))
+		eccoin.sendpacket(self.packet['_to'], self.packet['_id'], self.packet['_ver'], json.dumps(self.packet))
 
 ################################################################################
 
@@ -94,7 +108,7 @@ def main():
 
 	if sys.version_info[0] < 3:
 
-		raise "Use Python 3"
+		raise 'Use Python 3'
 
 	pathlib.Path('log').mkdir(parents=True, exist_ok=True)
 
@@ -157,7 +171,7 @@ def main():
 
 				line = command_line_args.name + '> ' + sys.stdin.readline().strip('\n')
 
-				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_MESSAGE, line)
+				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_chatMsg, line)
 
 				ecc_packet.send()
 
@@ -169,7 +183,7 @@ def main():
 
 					protocolID = contents.decode()[1:]
 
-					bufferCmd = "GetBufferRequest:" + protocolID + str(bufferIdx := bufferIdx + 1)
+					bufferCmd = 'GetBufferRequest:' + protocolID + str(bufferIdx := bufferIdx + 1)
 
 					bufferSig = eccoin.buffersignmessage(bufferKey, bufferCmd)
 
@@ -181,7 +195,21 @@ def main():
 
 						ecc_packet = eccPacket.from_json(message)
 
-						print(ecc_packet.get_data())
+						if   ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
+
+							print(ecc_packet.get_data())
+
+						elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
+
+							pass
+
+						elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
+
+							pass
+
+						else:
+
+							pass
 
 	subscriber.close()
 	context.term()
@@ -190,7 +218,7 @@ def main():
 
 ################################################################################
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
 	main()
 
