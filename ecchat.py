@@ -90,7 +90,7 @@ class eccPacket():
 
 	def send(self):
 
-		eccoin.sendpacket(self.packet['_to'], self.packet['_id'], self.packet['_ver'], json.dumps(self.packet))
+		eccoin.sendpacket(self.packet['_to'], self.packet['_id'], json.dumps(self.packet))
 
 ################################################################################
 
@@ -163,15 +163,25 @@ def main():
 		print('*******************************************')
 		print('')
 
-		while True:
+		bExit = False
+
+		while not bExit:
 
 			socks = dict(poller.poll())
 
 			if sys.stdin.fileno() in socks:
 
-				line = command_line_args.name + '> ' + sys.stdin.readline().strip('\n')
+				line = sys.stdin.readline().strip('\n')
 
-				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_chatMsg, line)
+				if line == "exit":
+
+					bExit = True
+
+					continue
+
+				data = command_line_args.name + '> ' + line
+
+				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_chatMsg, data)
 
 				ecc_packet.send()
 
@@ -210,6 +220,12 @@ def main():
 						else:
 
 							pass
+
+	bufferCmd = 'ReleaseBufferRequest'
+
+	bufferSig = eccoin.buffersignmessage(bufferKey, bufferCmd)
+
+	eccoin.releasebuffer(settings.protocol_id, bufferSig)
 
 	subscriber.close()
 	context.term()
