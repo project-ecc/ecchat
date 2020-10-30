@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# coding: UTF-8
+
 import datetime
 import settings
 import argparse
@@ -13,7 +16,7 @@ import sys
 from slickrpc import Proxy
 from slickrpc import exc
 
-eccoin = Proxy('http://%s:%s@%s'%(settings.rpc_user, settings.rpc_pass, settings.rpc_address))
+eccoin = Proxy('http://%s:%s@%s' % (settings.rpc_user, settings.rpc_pass, settings.rpc_address))
 
 ################################################################################
 
@@ -44,17 +47,18 @@ class eccPacket():
 	TYPE_chatMsg = 'chatMsg'
 	TYPE_addrReq = 'addrReq'
 	TYPE_addrRes = 'addrRes'
+	TYPE_txidInf = 'txidInf'
 
 	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
 
 		# TOTO: Add some validation checks here
 
-		self.packet = {	'_id'	: _id,
-						'_ver'	: _ver,
-						'_to'	: _to,
-						'_from'	: _from,
-						'_type'	: _type,
-						'_data'	: _data}
+		self.packet = {	'id'	: _id,
+						'ver'	: _ver,
+						'to'	: _to,
+						'from'	: _from,
+						'type'	: _type,
+						'data'	: _data}
 
 	############################################################################
 
@@ -66,31 +70,31 @@ class eccPacket():
 
 		# TOTO: Add some validation checks here
 
-		return cls(d['_id'], d['_ver'], d['_to'], d['_from'], d['_type'], d['_data'])
+		return cls(d['id'], d['ver'], d['to'], d['from'], d['type'], d['data'])
 
 	############################################################################
 
 	def get_from(self):
 
-		return self.packet['_from']
+		return self.packet['from']
 
 	############################################################################
 
 	def get_type(self):
 
-		return self.packet['_type']
+		return self.packet['type']
 
 	############################################################################
 
 	def get_data(self):
 
-		return self.packet['_data']
+		return self.packet['data']
 
 	############################################################################
 
 	def send(self):
 
-		eccoin.sendpacket(self.packet['_to'], self.packet['_id'], json.dumps(self.packet))
+		eccoin.sendpacket(self.packet['to'], self.packet['id'], json.dumps(self.packet))
 
 ################################################################################
 
