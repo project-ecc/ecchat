@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: UTF-8
 
+import settings
 import signal
 import urwid
 import time
@@ -10,7 +11,7 @@ import re
 
 # ZMQ event loop adapter for urwid
 
-import zmqeventloop
+from zmqeventloop import zmqEventLoop
 
 ################################################################################
 
@@ -309,11 +310,33 @@ class ChatApp:
 
 	############################################################################
 
+	def zmqHandler(self):
+
+		[address, contents] = self.subscriber.recv_multipart(zmq.DONTWAIT)
+		
+		self.append_message_ecchat('ZMQ event')
+
+	############################################################################
+
 	def run(self):
+
+		self.event_loop = zmqEventLoop()
+
+		# Initialise zmq
+
+		self.context    = zmq.Context()
+		self.subscriber = self.context.socket(zmq.SUB)
+
+		self.subscriber.connect('tcp://%s'%settings.zmq_address)
+		self.subscriber.setsockopt(zmq.SUBSCRIBE, b'')
+
+		self.event_loop.watch_queue(self.subscriber, self.zmqHandler, zmq.POLLIN)
+
+		# Initialize & run urwid
 
 		self.build_ui()
 
-		self.loop = urwid.MainLoop(widget = self.window, palette = self._palette, handle_mouse = True, unhandled_input = self.unhandled_keypress)
+		self.loop = urwid.MainLoop(widget = self.window, palette = self._palette, handle_mouse = True, unhandled_input = self.unhandled_keypress, event_loop = self.event_loop)
 
 		self.loop.set_alarm_in(1, self.clock_refresh)
 

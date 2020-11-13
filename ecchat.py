@@ -9,9 +9,17 @@ import logging
 import socket
 import signal
 import codecs
+import urwid
+import time
 import json
 import zmq
 import sys
+
+# ZMQ event loop adapter for urwid
+
+from zmqeventloop import zmqEventLoop
+
+# Full node RPC interface
 
 from slickrpc import Proxy
 from slickrpc import exc
@@ -129,12 +137,16 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Simple command line chat for ECC')
 
-	argparser.add_argument('-n', '--name', action='store', help='nickname    (local)' , type=str, default = '')
-	argparser.add_argument('-t', '--tag' , action='store', help='routing tag (remote)', type=str, default = '')
+	argparser.add_argument('-n', '--name', action='store', help='nickname    (local)' , type=str, default = '', required=True)
+	argparser.add_argument('-t', '--tag' , action='store', help='routing tag (remote)', type=str, default = '', required=True)
 
 	command_line_args = argparser.parse_args()
 
 	logging.info('Arguments %s', vars(command_line_args))
+
+	#app = ChatApp()
+
+	#app.run()
 
 	# Initialise eccoind
 
