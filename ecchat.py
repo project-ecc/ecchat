@@ -319,9 +319,9 @@ class ChatApp:
 
 				self.append_message(1, text)
 
-				balance = eccoin.getblockcount()
+				blocks = eccoin.getblockcount()
 
-				self.append_message(0, '{:d}'.format(balance))
+				self.append_message(0, '{:d}'.format(blocks))
 
 			elif text.startswith('/balance'):
 
