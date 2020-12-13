@@ -7,6 +7,7 @@ import argparse
 import pathlib
 import logging
 import socket
+import pycurl
 import signal
 import codecs
 import urwid
@@ -475,7 +476,21 @@ class ChatApp:
 
 		self.bufferKey = ""
 
-		self.selfTag = eccoin.getroutingpubkey()
+		try:
+
+			self.selfTag = eccoin.getroutingpubkey()
+
+		except pycurl.error:
+
+			print('Failed to connect - check that local eccoin daemon is running')
+
+			return False
+
+		except exc.RpcInWarmUp:
+
+			print('Failed to connect - local eccoin daemon is starting but not ready - try again after 60 seconds')
+
+			return False
 
 		try:
 
@@ -483,7 +498,7 @@ class ChatApp:
 
 		except exc.RpcInternalError:
 
-			print('API Buffer was not correctly unregistered previously - restart eccoin daemon to fix')
+			print('API Buffer was not correctly unregistered previously - restart local eccoin daemon to fix')
 
 			return False
 
