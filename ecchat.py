@@ -14,6 +14,9 @@ import time
 import json
 import zmq
 import sys
+import re
+
+from itertools import count
 
 # ZMQ event loop adapter for urwid
 
@@ -91,15 +94,21 @@ class YesNoDialog(urwid.WidgetWrap):
 
 		super().__init__(self.view)
 
+	############################################################################
+
 	def on_yes(self, *args, **kwargs):
 
 		self.loop.widget = self.parent
 
 		urwid.emit_signal(self, 'commit')
 
+	############################################################################
+
 	def on_no(self, *args, **kwargs):
 
 		self.loop.widget = self.parent
+
+	############################################################################
 
 	def show(self):
 
@@ -113,11 +122,15 @@ class MessageListBox(urwid.ListBox):
 
 		super().__init__(body)
 
+	############################################################################
+
 	def render(self, size, *args, **kwargs):
 
 		self.last_render_size = size
 
 		return super().render(size, *args, **kwargs)
+
+	############################################################################
 
 	def key(self, key):
 
@@ -189,6 +202,8 @@ class eccPacket():
 
 class ChatApp:
 
+	_bufferIdx = count(start=1)
+
 	_clock_fmt = '[%H:%M:%S] '
 
 	_palette = [
@@ -204,13 +219,25 @@ class ChatApp:
 				('btn_nm', 'black'           , 'brown'      , 'default' ),
 				('btn_hl', 'black'           , 'yellow'     , 'standout')]
 
-	def __init__(self):
+	def __init__(self, name, tag):
 
 		urwid.set_encoding('utf-8')
 
-		self.TxID = ''
+		self.version = '1.1'
 
-		self.balance = 10000000
+		self.party_name = ['ecchat', name, '[other]']
+
+		self.party_separator  = ['|', '>', '<']
+
+		self.party_name_style = ['ecchat', 'self', 'other']
+
+		self.party_text_style = ['ecchat', 'text', 'text']
+
+		self.party_size = max(len(t) for t in self.party_name)
+
+		self.otherTag = tag
+
+		self.TxID = ''
 
 	############################################################################
 
@@ -218,7 +245,7 @@ class ChatApp:
 
 		self.walker = urwid.SimpleListWalker([])
 
-		self.headerT = urwid.Text    (u'ecchat 1.0 : henry > borg')
+		self.headerT = urwid.Text    (u'ecchat {} : {} > {}'.format(self.version, self.party_name[1], self.party_name[2]))
 		self.headerA = urwid.AttrMap (self.headerT, 'header')
 
 		self.scrollT = MessageListBox(self.walker)
@@ -236,25 +263,9 @@ class ChatApp:
 
 	############################################################################
 
-	def append_message_self(self, text):
+	def append_message(self, party, text):
 
-		self.walker.append(urwid.Text([('time', time.strftime(self._clock_fmt)), ('self', u' henry > '), ('text', text)]))
-
-		self.scrollT.set_focus(len(self.scrollT.body) - 1)
-
-	############################################################################
-
-	def append_message_other(self, text):
-
-		self.walker.append(urwid.Text([('time', time.strftime(self._clock_fmt)), ('other', u'  borg < '), ('text', text)]))
-
-		self.scrollT.set_focus(len(self.scrollT.body) - 1)
-
-	############################################################################
-
-	def append_message_ecchat(self, text):
-
-		self.walker.append(urwid.Text([('time', time.strftime(self._clock_fmt)), ('ecchat', u'ecchat $ '), ('ecchat', text)]))
+		self.walker.append(urwid.Text([('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (self.party_text_style[party], text)]))
 
 		self.scrollT.set_focus(len(self.scrollT.body) - 1)
 
@@ -284,30 +295,32 @@ class ChatApp:
 
 				self.footerT.set_edit_text(u'')
 
-				self.append_message_self(text)
+				self.append_message(1, text)
 
-				self.append_message_ecchat('%-8s - %s' % ('/help', 'display help information'))
-				self.append_message_ecchat('%-8s - %s' % ('/exit', 'exit - also /quit and ESC'))
-				self.append_message_ecchat('%-8s - %s' % ('/version', 'display ecchat version info'))
-				self.append_message_ecchat('%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
-				self.append_message_ecchat('%-8s - %s' % ('/send x', 'send $ECC x to other party'))
-				self.append_message_ecchat('%-8s - %s' % ('/txid', 'display TxID of last send'))
+				self.append_message(0, '%-8s - %s' % ('/help', 'display help information'))
+				self.append_message(0, '%-8s - %s' % ('/exit', 'exit - also /quit and ESC'))
+				self.append_message(0, '%-8s - %s' % ('/version', 'display ecchat version info'))
+				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
+				self.append_message(0, '%-8s - %s' % ('/send x', 'send $ECC x to other party'))
+				self.append_message(0, '%-8s - %s' % ('/txid', 'display TxID of last send'))
 
 			elif text.startswith('/balance'):
 
 				self.footerT.set_edit_text(u'')
 
-				self.append_message_self(text)
+				self.append_message(1, text)
 
-				self.append_message_ecchat('%d' % self.balance)
+				balance = eccoin.getbalance()
+
+				self.append_message(0, '{:f}'.format(balance))
 
 			elif text.startswith('/version'):
 
 				self.footerT.set_edit_text(u'')
 
-				self.append_message_self(text)
+				self.append_message(1, text)
 
-				self.append_message_ecchat('1.0')
+				self.append_message(0, self.version)
 
 			elif text.startswith('/send'):
 
@@ -319,33 +332,33 @@ class ChatApp:
 
 				self.footerT.set_edit_text(u'')
 
-				self.append_message_self(text)
+				self.append_message(1, text)
 
-				self.append_message_ecchat('$ECC %s sent ' % amount)
-
-				self.balance -= int(amount)
+				self.append_message(0, '$ECC %s sent ' % amount)
 
 			elif text.startswith('/txid'):
 
 				self.footerT.set_edit_text(u'')
 
-				self.append_message_self(text)
+				self.append_message(1, text)
 
 				if self.TxID:
 
-					self.append_message_ecchat('TxID = %s' % self.TxID)
+					self.append_message(0, 'TxID = %s' % self.TxID)
 
 				else:
 
-					self.append_message_ecchat('TxID = %s' % 'none')
+					self.append_message(0, 'TxID = %s' % 'none')
 
 			else:
 
 				self.footerT.set_edit_text(u'')
 
-				self.append_message_self(text)
+				self.append_message(1, text)
 
-				self.append_message_other('Thanks - good stuff !!!')
+				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_chatMsg, text)
+
+				ecc_packet.send()
 
 	############################################################################
 
@@ -385,59 +398,135 @@ class ChatApp:
 
 	############################################################################
 
+	def zmqInitialise(self):
+
+		self.event_loop = zmqEventLoop()
+	
+		self.context    = zmq.Context()
+	
+		self.subscriber = self.context.socket(zmq.SUB)
+	
+		self.subscriber.connect('tcp://%s'%settings.zmq_address)
+	
+		self.subscriber.setsockopt(zmq.SUBSCRIBE, b'')
+	
+		self.event_loop.watch_queue(self.subscriber, self.zmqHandler, zmq.POLLIN)
+
+	############################################################################
+
+	def zmqShutdown(self):
+
+		self.subscriber.close()
+
+		self.context.term()
+
+	############################################################################
+
 	def zmqHandler(self):
 
 		[address, contents] = self.subscriber.recv_multipart(zmq.DONTWAIT)
 		
-		self.append_message_ecchat('ZMQ event')
+		if address.decode() == 'packet':
 
-	#############################################################################
+			protocolID = contents.decode()[1:]
 
-	def checkRoute(routingTag):
+			bufferCmd = 'GetBufferRequest:' + protocolID + str(next(self._bufferIdx))
+
+			bufferSig = eccoin.buffersignmessage(self.bufferKey, bufferCmd)
+
+			eccbuffer = eccoin.getbuffer(int(protocolID), bufferSig)
+
+			for packet in eccbuffer.values():
+
+				message = codecs.decode(packet, 'hex').decode()
+
+				ecc_packet = eccPacket.from_json(message)
+
+				if   ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
+
+					self.append_message(2, ecc_packet.get_data())
+
+				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
+
+					pass
+
+				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
+
+					pass
+
+				else:
+
+					pass
+
+	############################################################################
+
+	def eccoinInitialise(self):
+
+		self.bufferKey = ""
+
+		self.selfTag = eccoin.getroutingpubkey()
 
 		try:
 
-			eccoin.findroute(routingTag)
+			self.bufferKey = eccoin.registerbuffer(settings.protocol_id)
 
-			isRoute = eccoin.haveroute(routingTag)
+		except exc.RpcInternalError:
+
+			print('API Buffer was not correctly unregistered previously - restart eccoin daemon to fix')
+
+			return False
+
+		try:
+
+			eccoin.findroute(self.otherTag)
+
+			isRoute = eccoin.haveroute(self.otherTag)
 
 		except exc.RpcInvalidAddressOrKey:
 
-			print('Routing tag has invalid base64 encoding : %s' % routingTag)
+			print('Routing tag has invalid base64 encoding : %s' % self.otherTag)
 
 			return False
 
 		if not isRoute:
 
-			print('No route available to : %s' % routingTag)
+			print('No route available to : %s' % self.otherTag)
 
 		return isRoute
 
 	############################################################################
 
+	def eccoinShutdown(self):
+
+		if self.bufferKey:
+
+			bufferSig = eccoin.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
+
+			eccoin.releasebuffer(settings.protocol_id, bufferSig)
+
+	############################################################################
+
 	def run(self):
 
-		self.event_loop = zmqEventLoop()
+		if self.eccoinInitialise():
 
-		# Initialise zmq
+			self.zmqInitialise()
 
-		self.context    = zmq.Context()
-		self.subscriber = self.context.socket(zmq.SUB)
+			self.build_ui()
 
-		self.subscriber.connect('tcp://%s'%settings.zmq_address)
-		self.subscriber.setsockopt(zmq.SUBSCRIBE, b'')
+			self.loop = urwid.MainLoop(widget          = self.window,
+			                           palette         = self._palette,
+			                           handle_mouse    = True,
+			                           unhandled_input = self.unhandled_keypress,
+			                           event_loop      = self.event_loop)
 
-		self.event_loop.watch_queue(self.subscriber, self.zmqHandler, zmq.POLLIN)
+			self.loop.set_alarm_in(1, self.clock_refresh)
 
-		# Initialize & run urwid
+			self.loop.run()
 
-		self.build_ui()
+			self.zmqShutdown()
 
-		self.loop = urwid.MainLoop(widget = self.window, palette = self._palette, handle_mouse = True, unhandled_input = self.unhandled_keypress, event_loop = self.event_loop)
-
-		self.loop.set_alarm_in(1, self.clock_refresh)
-
-		self.loop.run()
+		self.eccoinShutdown()
 
 ################################################################################
 
@@ -479,108 +568,9 @@ def main():
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	app = ChatApp(command_line_args.namw, command_line_args.tag)
+	app = ChatApp(command_line_args.name, command_line_args.tag)
 
 	app.run()
-
-	# Initialise eccoind
-
-	#routingTag = eccoin.getroutingpubkey()
-	#bufferKey  = eccoin.registerbuffer(settings.protocol_id)
-	#bufferIdx  = 0
-
-	# Initialise zmq
-
-	#context    = zmq.Context()
-	#subscriber = context.socket(zmq.SUB)
-
-	#subscriber.connect('tcp://%s'%settings.zmq_address)
-	#subscriber.setsockopt(zmq.SUBSCRIBE, b'')
-
-	#poller = zmq.Poller()
-
-	#poller.register(sys.stdin,  zmq.POLLIN)
-	#poller.register(subscriber, zmq.POLLIN)
-
-	# Setup route to remote tag
-
-	if False:
-	#if checkRoute(command_line_args.tag):
-
-		print('')
-		print('*******************************************')
-		print('*** Welcome to ECC Messaging via ecchat ***')
-		print('*** The route to your other party is ok ***')
-		print('*** Enjoy your p2p e2ee private chat :) ***')
-		print('*******************************************')
-		print('')
-
-		bExit = False
-
-		while not bExit:
-
-			socks = dict(poller.poll())
-
-			if sys.stdin.fileno() in socks:
-
-				line = sys.stdin.readline().strip('\n')
-
-				if line == "exit":
-
-					bExit = True
-
-					continue
-
-				data = command_line_args.name + '> ' + line
-
-				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, command_line_args.tag, routingTag, eccPacket.TYPE_chatMsg, data)
-
-				ecc_packet.send()
-
-			if subscriber in socks:
-
-				[address, contents] = subscriber.recv_multipart(zmq.DONTWAIT)
-
-				if address.decode() == 'packet':
-
-					protocolID = contents.decode()[1:]
-
-					bufferCmd = 'GetBufferRequest:' + protocolID + str(bufferIdx := bufferIdx + 1)
-
-					bufferSig = eccoin.buffersignmessage(bufferKey, bufferCmd)
-
-					eccbuffer = eccoin.getbuffer(int(protocolID), bufferSig)
-
-					for packet in eccbuffer.values():
-
-						message = codecs.decode(packet, 'hex').decode()
-
-						ecc_packet = eccPacket.from_json(message)
-
-						if   ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
-
-							print(ecc_packet.get_data())
-
-						elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
-
-							pass
-
-						elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
-
-							pass
-
-						else:
-
-							pass
-
-	#bufferCmd = 'ReleaseBufferRequest'
-
-	#bufferSig = eccoin.buffersignmessage(bufferKey, bufferCmd)
-
-	#eccoin.releasebuffer(settings.protocol_id, bufferSig)
-
-	#subscriber.close()
-	#context.term()
 
 	logging.info('SHUTDOWN')
 
