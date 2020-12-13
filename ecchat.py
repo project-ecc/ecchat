@@ -300,9 +300,28 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/help', 'display help information'))
 				self.append_message(0, '%-8s - %s' % ('/exit', 'exit - also /quit and ESC'))
 				self.append_message(0, '%-8s - %s' % ('/version', 'display ecchat version info'))
+				self.append_message(0, '%-8s - %s' % ('/blocks', 'display eccoin block count'))
 				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
 				self.append_message(0, '%-8s - %s' % ('/send x', 'send $ECC x to other party'))
 				self.append_message(0, '%-8s - %s' % ('/txid', 'display TxID of last send'))
+
+			elif text.startswith('/version'):
+
+				self.footerT.set_edit_text(u'')
+
+				self.append_message(1, text)
+
+				self.append_message(0, self.version)
+
+			elif text.startswith('/blocks'):
+
+				self.footerT.set_edit_text(u'')
+
+				self.append_message(1, text)
+
+				balance = eccoin.getblockcount()
+
+				self.append_message(0, '{:d}'.format(balance))
 
 			elif text.startswith('/balance'):
 
@@ -313,14 +332,6 @@ class ChatApp:
 				balance = eccoin.getbalance()
 
 				self.append_message(0, '{:f}'.format(balance))
-
-			elif text.startswith('/version'):
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
-
-				self.append_message(0, self.version)
 
 			elif text.startswith('/send'):
 
