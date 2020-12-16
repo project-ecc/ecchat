@@ -140,6 +140,22 @@ class MessageListBox(urwid.ListBox):
 		super().keypress(self.last_render_size, key)
 
 ################################################################################
+
+class FrameFocus(urwid.Frame):
+
+	def __init__(self, body, header=None, footer=None, focus_part='body'):
+
+		self.focus_part = focus_part
+
+		super().__init__(body, header, footer, focus_part)
+
+	############################################################################
+
+	def mouse_event(self, size, event, button, col, row, focus):
+
+		self.set_focus(self.focus_part)
+
+################################################################################
 ## eccPacket class #############################################################
 ################################################################################
 
@@ -244,7 +260,7 @@ class ChatApp:
 
 	def build_ui(self):
 
-		self.walker = urwid.SimpleListWalker([])
+		self.walker  = urwid.SimpleListWalker([])
 
 		self.headerT = urwid.Text    (u'ecchat {} : {} > {}'.format(self.version, self.party_name[1], self.party_name[2]))
 		self.headerA = urwid.AttrMap (self.headerT, 'header')
@@ -258,9 +274,9 @@ class ChatApp:
 		self.footerT = urwid.Edit    ('> ')
 		self.footerA = urwid.AttrMap (self.footerT, 'footer')
 
-		self.frame  = urwid.Frame(body = self.scrollA, header = self.headerA, footer = self.statusA)
+		self.frame   = urwid.Frame   (body = self.scrollA, header = self.headerA, footer = self.statusA)
 
-		self.window = urwid.Frame(body = self.frame, footer = self.footerA, focus_part = 'footer')
+		self.window  = FrameFocus    (body = self.frame, footer = self.footerA, focus_part = 'footer')
 
 	############################################################################
 
@@ -298,14 +314,14 @@ class ChatApp:
 
 				self.append_message(1, text)
 
-				self.append_message(0, '%-8s - %s' % ('/help', 'display help information'))
-				self.append_message(0, '%-8s - %s' % ('/exit', 'exit - also /quit and ESC'))
+				self.append_message(0, '%-8s - %s' % ('/help'   , 'display help information'))
+				self.append_message(0, '%-8s - %s' % ('/exit'   , 'exit - also /quit and ESC'))
 				self.append_message(0, '%-8s - %s' % ('/version', 'display ecchat version info'))
-				self.append_message(0, '%-8s - %s' % ('/blocks', 'display eccoin block count'))
-				self.append_message(0, '%-8s - %s' % ('/tag', 'display routing tag public key'))
+				self.append_message(0, '%-8s - %s' % ('/blocks' , 'display eccoin block count'))
+				self.append_message(0, '%-8s - %s' % ('/tag'    , 'display routing tag public key'))
 				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
-				self.append_message(0, '%-8s - %s' % ('/send x', 'send $ECC x to other party'))
-				self.append_message(0, '%-8s - %s' % ('/txid', 'display TxID of last send'))
+				self.append_message(0, '%-8s - %s' % ('/send x' , 'send $ECC x to other party'))
+				self.append_message(0, '%-8s - %s' % ('/txid'   , 'display TxID of last send'))
 
 			elif text.startswith('/version'):
 
@@ -475,6 +491,10 @@ class ChatApp:
 
 					pass
 
+				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
+
+					pass
+
 				else:
 
 					pass
@@ -538,6 +558,8 @@ class ChatApp:
 			bufferSig = eccoin.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
 
 			eccoin.releasebuffer(settings.protocol_id, bufferSig)
+
+			self.bufferKey = ""
 
 	############################################################################
 
