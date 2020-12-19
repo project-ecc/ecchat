@@ -254,7 +254,9 @@ class ChatApp:
 
 		self.otherTag = tag
 
-		self.send_phase = 0
+		self.send_pending = False
+
+		self.send_amount = 0.0
 
 		self.TxID = ''
 
@@ -302,7 +304,7 @@ class ChatApp:
 
 		# Check 1 - Is a send currently incomplete ?
 
-		if self.send_phase:
+		if self.send_pending:
 
 			self.append_message(0, 'Prior send incomplete - try again later')
 
@@ -332,7 +334,7 @@ class ChatApp:
 
 		balance = eccoin.getbalance()
 
-		if float_amount > balance:
+		if float_amount >= balance:
 
 			self.append_message(0, 'Invalid send amount - must be less than current balance = {:f}'.format(balance))
 
@@ -344,11 +346,31 @@ class ChatApp:
 
 		ecc_packet.send()
 
-		self.send_phase = 1
+		self.send_pending = True
 
-		#self.append_message(0, '$ECC %s sent ' % amount)
+		self.send_amount = float_amount
 
-		#self.send_phase = ''
+	############################################################################
+
+	def complete_send_ecc(self, address):
+
+		if self.send_pending:
+
+			try:
+
+				self.TxID = eccoin.sendtoaddress(address, str(self.send_amount), "faucet")
+
+			except exc.RpcWalletUnlockNeeded:
+
+				self.append_message(0, 'Wallet locked - please unlock')
+
+			else:
+
+				self.append_message(0, '$ECC {:f} sent to {}'.format(self.send_amount, address))
+
+			self.send_pending = False
+
+			self.send_amount = 0.0
 
 	############################################################################
 
@@ -376,6 +398,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/blocks' , 'display eccoin block count'))
 				self.append_message(0, '%-8s - %s' % ('/tag'    , 'display routing tag public key'))
 				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
+				self.append_message(0, '%-8s - %s' % ('/address', 'generate a new address'))
 				self.append_message(0, '%-8s - %s' % ('/send x' , 'send $ECC x to other party'))
 				self.append_message(0, '%-8s - %s' % ('/txid'   , 'display TxID of last send'))
 
@@ -414,6 +437,16 @@ class ChatApp:
 				balance = eccoin.getbalance()
 
 				self.append_message(0, '{:f}'.format(balance))
+
+			elif text.startswith('/address'):
+
+				self.footerT.set_edit_text(u'')
+
+				self.append_message(1, text)
+
+				address = eccoin.getnewaddress()
+
+				self.append_message(0, '{}'.format(address))
 
 			elif text.startswith('/send'):
 
@@ -547,9 +580,7 @@ class ChatApp:
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrRes:
 
-					# TODO
-
-					self.append_message(0, ecc_packet.get_data())
+					self.complete_send_ecc(ecc_packet.get_data())
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
