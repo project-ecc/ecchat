@@ -254,6 +254,8 @@ class ChatApp:
 
 		self.otherTag = tag
 
+		self.send_phase = 0
+
 		self.TxID = ''
 
 	############################################################################
@@ -293,6 +295,60 @@ class ChatApp:
 		self.statusT.set_text(time.strftime(self._clock_fmt))
 
 		loop.set_alarm_in(1, self.clock_refresh)
+
+	############################################################################
+
+	def start_send_ecc(self, amount):
+
+		# Check 1 - Is a send currently incomplete ?
+
+		if self.send_phase:
+
+			self.append_message(0, 'Prior send incomplete - try again later')
+
+			return
+
+		# Check 2 - Can the send amount be converted to a float correctly ?
+
+		try:
+
+			float_amount = float(amount)
+
+		except ValueError:
+
+			self.append_message(0, 'Invalid send amount - number expected')
+
+			return
+
+		# Check 3 - Is the send amount in a sensible range ?
+
+		if float_amount < 0:
+
+			self.append_message(0, 'Invalid send amount - must be greater than zero')
+
+			return
+
+		# Check 4 - Does the user's wallet hold an adequate balance ?
+
+		balance = eccoin.getbalance()
+
+		if float_amount > balance:
+
+			self.append_message(0, 'Invalid send amount - must be less than current balance = {:f}'.format(balance))
+
+			return
+
+		# Request address from peer
+
+		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrReq, '')
+
+		ecc_packet.send()
+
+		self.send_phase = 1
+
+		#self.append_message(0, '$ECC %s sent ' % amount)
+
+		#self.send_phase = ''
 
 	############################################################################
 
@@ -361,17 +417,15 @@ class ChatApp:
 
 			elif text.startswith('/send'):
 
-				match = re.match('/send ', text)
-
-				amount = text[match.end():]
-
-				self.TxID = 'b6046cf6223ad5f5d9f5656ed428b7cc14d007f334105e693a0e2d1699d2dc92'
-
 				self.footerT.set_edit_text(u'')
 
 				self.append_message(1, text)
 
-				self.append_message(0, '$ECC %s sent ' % amount)
+				match = re.match('/send ', text)
+
+				amount = text[match.end():]
+
+				self.start_send_ecc(amount)
 
 			elif text.startswith('/txid'):
 
@@ -485,11 +539,17 @@ class ChatApp:
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
 
-					pass
+					address = eccoin.getnewaddress()
 
-				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
+					ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrRes, address)
 
-					pass
+					ecc_packet.send()
+
+				elif ecc_packet.get_type() == eccPacket.TYPE_addrRes:
+
+					# TODO
+
+					self.append_message(0, ecc_packet.get_data())
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
