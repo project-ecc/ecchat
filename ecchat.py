@@ -611,7 +611,7 @@ class ChatApp:
 
 					data = json.loads(ecc_packet.get_data())
 
-					if data.has_key('amnt') and data.has_key('addr') and data.has_key('txid'):
+					if 'amnt' in data and 'addr' in data and 'txid' in data:
 
 						self.append_message(0, '$ECC {} received to {} [/txid available]'.format(data['amnt'], data['addr']))
 
