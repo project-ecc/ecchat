@@ -258,7 +258,7 @@ class ChatApp:
 
 		self.send_amount = 0.0
 
-		self.TxID = ''
+		self.txid = ''
 
 	############################################################################
 
@@ -483,9 +483,9 @@ class ChatApp:
 
 				self.append_message(1, text)
 
-				if self.TxID:
+				if self.txid:
 
-					self.append_message(0, 'TxID = %s' % self.TxID)
+					self.append_message(0, 'TxID = %s' % self.txid)
 
 				else:
 
