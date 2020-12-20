@@ -368,7 +368,15 @@ class ChatApp:
 
 				self.append_message(0, '$ECC {:f} sent to {}'.format(self.send_amount, address))
 
-			# Send the TYPE_txidInf message - (amount, address, TxID)
+			# Send the TYPE_txidInf message - (amount, address, txid)
+
+			data = {'amnt' : str(self.send_amount), 'addr' : address, 'txid' : self.txid}
+
+			ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_txidInf, json.dumps(data))
+
+			ecc_packet.send()
+
+			# /send command complete - reset state variables
 
 			self.send_pending = False
 
@@ -601,7 +609,7 @@ class ChatApp:
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
-					pass
+					self.append_message(0, ecc_packet,get_data())
 
 				else:
 
