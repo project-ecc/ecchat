@@ -368,6 +368,8 @@ class ChatApp:
 
 				self.append_message(0, '$ECC {:f} sent to {}'.format(self.send_amount, address))
 
+			# Send the TYPE_txidInf message - (amount, address, TxID)
+
 			self.send_pending = False
 
 			self.send_amount = 0.0
@@ -480,6 +482,14 @@ class ChatApp:
 				else:
 
 					self.append_message(0, 'TxID = %s' % 'none')
+
+			elif text.startswith('/'):
+
+				self.footerT.set_edit_text(u'')
+
+				self.append_message(1, text)
+
+				self.append_message(0, 'Unknown command - try /help for a list of commands')
 
 			else:
 
