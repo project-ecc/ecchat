@@ -358,7 +358,7 @@ class ChatApp:
 
 			try:
 
-				self.TxID = eccoin.sendtoaddress(address, str(self.send_amount), "ecchat")
+				self.txid = eccoin.sendtoaddress(address, str(self.send_amount), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded:
 
@@ -410,7 +410,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
 				self.append_message(0, '%-8s - %s' % ('/address', 'generate a new address'))
 				self.append_message(0, '%-8s - %s' % ('/send x' , 'send $ECC x to other party'))
-				self.append_message(0, '%-8s - %s' % ('/txid'   , 'display TxID of last transaction'))
+				self.append_message(0, '%-8s - %s' % ('/txid'   , 'display txid of last transaction'))
 
 			elif text.startswith('/version'):
 
@@ -485,11 +485,11 @@ class ChatApp:
 
 				if self.txid:
 
-					self.append_message(0, 'TxID = %s' % self.txid)
+					self.append_message(0, 'txid = %s' % self.txid)
 
 				else:
 
-					self.append_message(0, 'TxID = %s' % 'none')
+					self.append_message(0, 'txid = %s' % 'none')
 
 			elif text.startswith('/'):
 
