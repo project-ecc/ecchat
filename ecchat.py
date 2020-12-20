@@ -366,7 +366,7 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '$ECC {:f} sent to {}'.format(self.send_amount, address))
+				self.append_message(0, '$ECC {:f} sent to {} [/txid available]'.format(self.send_amount, address))
 
 			# Send the TYPE_txidInf message - (amount, address, txid)
 
@@ -609,7 +609,13 @@ class ChatApp:
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
-					self.append_message(0, ecc_packet.get_data())
+					data = json.loads(ecc_packet.get_data())
+
+					if data.has_key('amnt') and data.has_key('addr') and data.has_key('txid'):
+
+						self.append_message(0, '$ECC {} received to {} [/txid available]'.format(data['amnt'], data['addr']))
+
+						self.txid = data['txid']
 
 				else:
 
