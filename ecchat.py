@@ -609,7 +609,7 @@ class ChatApp:
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
-					self.append_message(0, ecc_packet,get_data())
+					self.append_message(0, ecc_packet.get_data())
 
 				else:
 
