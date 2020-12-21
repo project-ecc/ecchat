@@ -370,7 +370,7 @@ class ChatApp:
 
 			# Send the TYPE_txidInf message - (amount, address, txid)
 
-			data = {'amnt' : str(self.send_amount), 'addr' : address, 'txid' : self.txid}
+			data = {'amnt' : '{:f}'.format(self.send_amount), 'addr' : address, 'txid' : self.txid}
 
 			ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_txidInf, json.dumps(data))
 
@@ -613,7 +613,7 @@ class ChatApp:
 
 					if 'amnt' in data and 'addr' in data and 'txid' in data:
 
-						self.append_message(0, '$ECC {} received to {} [/txid available]'.format(data['amnt'], data['addr']))
+						self.append_message(0, '$ECC {} received at{} [/txid available]'.format(data['amnt'], data['addr']))
 
 						self.txid = data['txid']
 
