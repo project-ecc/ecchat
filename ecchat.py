@@ -236,13 +236,13 @@ class ChatApp:
 				('btn_nm', 'black'           , 'brown'      , 'default' ),
 				('btn_hl', 'black'           , 'yellow'     , 'standout')]
 
-	def __init__(self, name, tag):
+	def __init__(self, name, other, tag):
 
 		urwid.set_encoding('utf-8')
 
 		self.version = '1.1'
 
-		self.party_name = ['ecchat', name, '[other]']
+		self.party_name = ['ecchat', name, other]
 
 		self.party_separator  = ['|', '>', '<']
 
@@ -613,7 +613,7 @@ class ChatApp:
 
 					if 'amnt' in data and 'addr' in data and 'txid' in data:
 
-						self.append_message(0, '$ECC {} received at{} [/txid available]'.format(data['amnt'], data['addr']))
+						self.append_message(0, '$ECC {} received at {} [/txid available]'.format(data['amnt'], data['addr']))
 
 						self.txid = data['txid']
 
@@ -740,14 +740,15 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Simple command line chat for ECC')
 
-	argparser.add_argument('-n', '--name', action='store', help='nickname    (local)' , type=str, default = '', required=True)
-	argparser.add_argument('-t', '--tag' , action='store', help='routing tag (remote)', type=str, default = '', required=True)
+	argparser.add_argument('-n', '--name'  , action='store', help='nickname    (local)' , type=str, default = ''       , required=True)
+	argparser.add_argument('-o', '--other' , action='store', help='nickname    (remote)', type=str, default = '[other]', required=False)
+	argparser.add_argument('-t', '--tag'   , action='store', help='routing tag (remote)', type=str, default = ''       , required=True)
 
 	command_line_args = argparser.parse_args()
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	app = ChatApp(command_line_args.name, command_line_args.tag)
+	app = ChatApp(command_line_args.name, command_line_args.other, command_line_args.tag)
 
 	app.run()
 
