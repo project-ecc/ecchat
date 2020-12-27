@@ -260,6 +260,8 @@ class ChatApp:
 
 		self.txid = ''
 
+		self.ecc_blocks = 0
+
 	############################################################################
 
 	def build_ui(self):
@@ -294,9 +296,15 @@ class ChatApp:
 
 	def clock_refresh(self, loop = None, data = None):
 
-		self.statusT.set_text(time.strftime(self._clock_fmt))
+		self.statusT.set_text('{} ecc # {:d}'.format(time.strftime(self._clock_fmt), self.ecc_blocks))
 
 		loop.set_alarm_in(1, self.clock_refresh)
+
+	############################################################################
+
+	def block_refresh(self):
+
+		self.ecc_blocks = eccoin.getblockcount()
 
 	############################################################################
 
@@ -406,6 +414,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/exit'   , 'exit - also /quit and ESC'))
 				self.append_message(0, '%-8s - %s' % ('/version', 'display ecchat version info'))
 				self.append_message(0, '%-8s - %s' % ('/blocks' , 'display eccoin block count'))
+				self.append_message(0, '%-8s - %s' % ('/peers'  , 'display eccoin peer count'))
 				self.append_message(0, '%-8s - %s' % ('/tag'    , 'display routing tag public key'))
 				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
 				self.append_message(0, '%-8s - %s' % ('/address', 'generate a new address'))
@@ -426,9 +435,15 @@ class ChatApp:
 
 				self.append_message(1, text)
 
-				blocks = eccoin.getblockcount()
+				self.append_message(0, '{:d}'.format(eccoin.getblockcount()))
 
-				self.append_message(0, '{:d}'.format(blocks))
+			elif text.startswith('/peers'):
+
+				self.footerT.set_edit_text(u'')
+
+				self.append_message(1, text)
+
+				self.append_message(0, '{:d}'.format(eccoin.getconnectioncount()))
 
 			elif text.startswith('/tag'):
 
@@ -575,6 +590,10 @@ class ChatApp:
 
 		[address, contents] = self.subscriber.recv_multipart(zmq.DONTWAIT)
 		
+		if address.decode() == 'hashblock':
+
+			self.block_refresh()
+
 		if address.decode() == 'packet':
 
 			protocolID = contents.decode()[1:]
@@ -591,7 +610,7 @@ class ChatApp:
 
 				ecc_packet = eccPacket.from_json(message)
 
-				if   ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
+				if ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
 
 					self.append_message(2, ecc_packet.get_data())
 
@@ -668,6 +687,8 @@ class ChatApp:
 		if not isRoute:
 
 			print('No route available to : %s' % self.otherTag)
+
+		self.ecc_blocks = eccoin.getblockcount()
 
 		return isRoute
 
