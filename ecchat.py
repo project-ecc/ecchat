@@ -219,12 +219,23 @@ class eccPacket():
 
 		# TOTO: Add some validation checks here
 
-		self.packet = {	'id'	: _id,
-						'ver'	: _ver,
-						'to'	: _to,
-						'from'	: _from,
-						'type'	: _type,
-						'data'	: _data}
+		if isinstance(_data, dict):
+
+			self.packet = {	'id'	: _id,
+							'ver'	: _ver,
+							'to'	: _to,
+							'from'	: _from,
+							'type'	: _type,
+							'data'	: json.dumps(_data)}
+
+		else:
+
+			self.packet = {	'id'	: _id,
+							'ver'	: _ver,
+							'to'	: _to,
+							'from'	: _from,
+							'type'	: _type,
+							'data'	: _data}
 
 	############################################################################
 
@@ -254,7 +265,13 @@ class eccPacket():
 
 	def get_data(self):
 
-		return self.packet['data']
+		if self.packet['data'].startswith('{"'):
+
+			return json.loads(self.packet['data'])
+
+		else:
+
+			return self.packet['data']
 
 	############################################################################
 
@@ -429,7 +446,7 @@ class ChatApp:
 
 			data = {'amnt' : '{:f}'.format(self.send_amount), 'addr' : address, 'txid' : self.txid}
 
-			ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_txidInf, json.dumps(data))
+			ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_txidInf, data)
 
 			ecc_packet.send()
 
@@ -635,7 +652,7 @@ class ChatApp:
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
-					data = json.loads(ecc_packet.get_data())
+					data = ecc_packet.get_data()
 
 					if 'amnt' in data and 'addr' in data and 'txid' in data:
 
