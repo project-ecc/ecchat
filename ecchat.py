@@ -117,6 +117,55 @@ class YesNoDialog(urwid.WidgetWrap):
 
 ################################################################################
 
+class PasswordDialog(urwid.WidgetWrap):
+
+	signals = ['commit']
+
+	def __init__(self, text, loop):
+
+		self.loop = loop
+
+		self.parent = self.loop.widget
+
+		#self.body = urwid.Filler(urwid.Text(text))
+
+		#self.frame = urwid.Frame(self.body, focus_part = 'body')
+
+		#self.view = urwid.Padding(self.frame, ('fixed left', 2), ('fixed right' , 2))
+		#self.view = urwid.Filler (self.view,  ('fixed top' , 1), ('fixed bottom', 1))
+		#self.view = urwid.LineBox(self.view)
+		#self.view = urwid.Overlay(self.view, self.parent, 'center', len(text) + 6, 'middle', 7)
+
+		#self.frame.footer = GridFlowPlus([urwid.AttrMap(urwid.Button('OK', self.on_ok), 'btn_nm', 'btn_hl'),
+		#	                              urwid.AttrMap(urwid.Button('Cancel' , self.on_cancel) , 'btn_nm', 'btn_hl')],
+		#	                             7, 3, 1, 'center')
+
+		#self.frame.focus_position = 'footer'
+
+		super().__init__(self.view)
+
+	############################################################################
+
+	def on_ok(self, *args, **kwargs):
+
+		self.loop.widget = self.parent
+
+		urwid.emit_signal(self, 'commit')
+
+	############################################################################
+
+	def on_cancel(self, *args, **kwargs):
+
+		self.loop.widget = self.parent
+
+	############################################################################
+
+	def show(self):
+
+		self.loop.widget = self.view
+
+################################################################################
+
 class MessageListBox(urwid.ListBox):
 
 	def __init__(self, body):
@@ -396,6 +445,10 @@ class ChatApp:
 
 		if len(text) > 0:
 
+			self.footerT.set_edit_text(u'')
+
+			self.append_message(1, text)
+
 			if text.startswith('/exit'):
 
 				self.check_quit('exit')
@@ -405,10 +458,6 @@ class ChatApp:
 				self.check_quit('quit')
 
 			elif text.startswith('/help'):
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
 
 				self.append_message(0, '%-8s - %s' % ('/help'   , 'display help information'))
 				self.append_message(0, '%-8s - %s' % ('/exit'   , 'exit - also /quit and ESC'))
@@ -423,41 +472,21 @@ class ChatApp:
 
 			elif text.startswith('/version'):
 
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
-
 				self.append_message(0, self.version)
 
 			elif text.startswith('/blocks'):
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
 
 				self.append_message(0, '{:d}'.format(eccoin.getblockcount()))
 
 			elif text.startswith('/peers'):
 
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
-
 				self.append_message(0, '{:d}'.format(eccoin.getconnectioncount()))
 
 			elif text.startswith('/tag'):
 
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
-
 				self.append_message(0, '{}'.format(self.selfTag))
 
 			elif text.startswith('/balance'):
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
 
 				balance_con = eccoin.getbalance()
 				balance_unc = eccoin.getunconfirmedbalance()
@@ -472,19 +501,11 @@ class ChatApp:
 
 			elif text.startswith('/address'):
 
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
-
 				address = eccoin.getnewaddress()
 
 				self.append_message(0, '{}'.format(address))
 
 			elif text.startswith('/send'):
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
 
 				match = re.match('/send ', text)
 
@@ -493,10 +514,6 @@ class ChatApp:
 				self.start_send_ecc(amount)
 
 			elif text.startswith('/txid'):
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
 
 				if self.txid:
 
@@ -508,17 +525,9 @@ class ChatApp:
 
 			elif text.startswith('/'):
 
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
-
 				self.append_message(0, 'Unknown command - try /help for a list of commands')
 
 			else:
-
-				self.footerT.set_edit_text(u'')
-
-				self.append_message(1, text)
 
 				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_chatMsg, text)
 
@@ -545,8 +554,6 @@ class ChatApp:
 	############################################################################
 
 	def check_quit(self, command = 'quit'):
-
-		self.footerT.set_edit_text(u'')
 
 		dialog = YesNoDialog(text = u'Do you want to %s ?' % command, loop = self.loop)
 
