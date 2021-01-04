@@ -24,10 +24,8 @@ This protocol uses a top level JSON structure as follows:
 The following values for `type` are defined:
 
 |type|Purpose|
+|:--|:--|
 |chatMsg|Chat message content|
 |addrReq|Request new receive address|
 |addrRes|Respond with receive address|
 |txidInf|Send transaction information|
-
-
-
