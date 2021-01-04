@@ -217,9 +217,11 @@ class eccPacket():
 
 	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
 
-		# TOTO: Add some validation checks here
-
 		if isinstance(_data, dict):
+
+			assert _type in [self.TYPE_txidInf]
+
+			assert 'amnt' in _data and 'addr' in _data and 'txid' in _data
 
 			self.packet = {	'id'	: _id,
 							'ver'	: _ver,
@@ -229,6 +231,8 @@ class eccPacket():
 							'data'	: json.dumps(_data)}
 
 		else:
+
+			# Do not assert _type because _data with nested JSON can be created from a Python dict or JSON string
 
 			self.packet = {	'id'	: _id,
 							'ver'	: _ver,
@@ -244,8 +248,6 @@ class eccPacket():
 	def from_json(cls, json_string = ''):
 
 		d = json.loads(json_string)
-
-		# TOTO: Add some validation checks here
 
 		return cls(d['id'], d['ver'], d['to'], d['from'], d['type'], d['data'])
 
@@ -267,9 +269,13 @@ class eccPacket():
 
 		if self.packet['data'].startswith('{"'):
 
+			assert self.packet['type'] in [self.TYPE_txidInf]
+
 			return json.loads(self.packet['data'])
 
 		else:
+
+			assert self.packet['type'] in [self.TYPE_chatMsg, self.TYPE_addrReq, self.TYPE_addrRes]
 
 			return self.packet['data']
 
