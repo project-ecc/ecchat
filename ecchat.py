@@ -283,7 +283,11 @@ class eccPacket():
 
 	def get_data(self):
 
-		return self.packet['data']
+		data = self.packet['data']
+
+		### Do a bunch of checks here - asserts
+
+		return data
 
 	############################################################################
 
@@ -430,7 +434,9 @@ class ChatApp:
 
 		# Request address from peer
 
-		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrReq, '')
+		data = {'coin' : 'ECC'}
+
+		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrReq, data)
 
 		ecc_packet.send()
 
@@ -563,7 +569,11 @@ class ChatApp:
 
 			else:
 
-				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_chatMsg, text)
+				data = {'uuid' : uuid.uuid4(),
+						'cmmd' : 'add',
+						'text' : text}
+
+				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_chatMsg, data)
 
 				ecc_packet.send()
 
@@ -653,19 +663,32 @@ class ChatApp:
 
 				if ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
 
-					self.append_message(2, ecc_packet.get_data())
+					data = ecc_packet.get_data()
+
+					if data['cmmd'] == 'add':
+
+						self.append_message(2, data['text'])
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
 
-					address = eccoin.getnewaddress()
+					data = ecc_packet.get_data()
 
-					ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrRes, address)
+					if data['coin'] == 'ECC':
 
-					ecc_packet.send()
+						address = eccoin.getnewaddress()
+
+						data = {'coin' : 'ECC',
+								'addr' : address}
+
+						ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrRes, data)
+
+						ecc_packet.send()
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrRes:
 
-					self.complete_send_ecc(ecc_packet.get_data())
+					data = ecc_packet.get_data()
+
+					self.complete_send_ecc(data['addr'])
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
 
