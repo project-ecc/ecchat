@@ -569,7 +569,7 @@ class ChatApp:
 
 			else:
 
-				data = {'uuid' : uuid.uuid4(),
+				data = {'uuid' : str(uuid.uuid4()),
 						'cmmd' : 'add',
 						'text' : text}
 
