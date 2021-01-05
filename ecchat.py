@@ -13,6 +13,7 @@ import codecs
 import urwid
 import time
 import json
+import uuid
 import zmq
 import sys
 import re
@@ -215,15 +216,39 @@ class eccPacket():
 	TYPE_addrRes = 'addrRes'
 	TYPE_txidInf = 'txidInf'
 
+	TYPE_SET = [TYPE_chatMsg,
+				TYPE_addrReq,
+				TYPE_addrRes,
+				TYPE_txidInf]
+
+	KEY_LIST = {TYPE_chatMsg : ('uuid', 'cmmd', 'text'),
+				TYPE_addrReq : ('coin'),
+				TYPE_addrRes : ('coin', 'addr'),
+				TYPE_txidInf : ('coin', 'amnt', 'addr', 'txid')}
+
+	############################################################################
+
 	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
 
-		if isinstance(_data, dict):
+		#assert isinstance(_data, dict)
 
-			assert _type in [self.TYPE_txidInf]
+		assert _type in self.TYPE_SET
 
-			if _type == self.TYPE_txidInf:
+		#if _type == self.TYPE_chatMsg:
 
-				assert 'amnt' in _data and 'addr' in _data and 'txid' in _data
+		#	assert 'uuid' in _data and 'cmmd' in _data and 'text' in _data
+
+		#if _type == self.TYPE_addrReq:
+
+		#	assert 'coin' in _data
+
+		#if _type == self.TYPE_addrRes:
+
+		#	assert 'coin' in _data and 'addr' in _data
+
+		if _type == self.TYPE_txidInf:
+
+			assert all(key in _data for key in self.KEY_LIST[self.TYPE_txidInf])
 
 		self.packet = {	'id'	: _id,
 						'ver'	: _ver,
@@ -258,18 +283,7 @@ class eccPacket():
 
 	def get_data(self):
 
-		if isinstance(self.packet['data'], dict):
-
-#			assert self.packet['type'] in [self.TYPE_txidInf]
-
-#--			return json.loads(self.packet['data'])
-			return self.packet['data']
-
-		else:
-
-#			assert self.packet['type'] in [self.TYPE_chatMsg, self.TYPE_addrReq, self.TYPE_addrRes]
-
-			return self.packet['data']
+		return self.packet['data']
 
 	############################################################################
 
@@ -442,9 +456,12 @@ class ChatApp:
 
 				self.append_message(0, '$ECC {:f} sent to {} [/txid available]'.format(self.send_amount, address))
 
-			# Send the TYPE_txidInf message - (amount, address, txid)
+			# Send the TYPE_txidInf message - (coin, amount, address, txid)
 
-			data = {'amnt' : '{:f}'.format(self.send_amount), 'addr' : address, 'txid' : self.txid}
+			data = {'coin' : 'ECC',
+					'amnt' : '{:f}'.format(self.send_amount),
+					'addr' : address,
+					'txid' : self.txid}
 
 			ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_txidInf, data)
 
@@ -654,11 +671,9 @@ class ChatApp:
 
 					data = ecc_packet.get_data()
 
-					if 'amnt' in data and 'addr' in data and 'txid' in data:
+					self.append_message(0, '${} {} received at {} [/txid available]'.format(data['coin'],data['amnt'], data['addr']))
 
-						self.append_message(0, '$ECC {} received at {} [/txid available]'.format(data['amnt'], data['addr']))
-
-						self.txid = data['txid']
+					self.txid = data['txid']
 
 				else:
 
