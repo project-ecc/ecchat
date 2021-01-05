@@ -260,13 +260,14 @@ class eccPacket():
 
 		if isinstance(self.packet['data'], dict):
 
-			assert self.packet['type'] in [self.TYPE_txidInf]
+#			assert self.packet['type'] in [self.TYPE_txidInf]
 
-			return json.loads(self.packet['data'])
+#--			return json.loads(self.packet['data'])
+			return self.packet['data']
 
 		else:
 
-			assert self.packet['type'] in [self.TYPE_chatMsg, self.TYPE_addrReq, self.TYPE_addrRes]
+#			assert self.packet['type'] in [self.TYPE_chatMsg, self.TYPE_addrReq, self.TYPE_addrRes]
 
 			return self.packet['data']
 
