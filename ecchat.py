@@ -221,25 +221,16 @@ class eccPacket():
 
 			assert _type in [self.TYPE_txidInf]
 
-			assert 'amnt' in _data and 'addr' in _data and 'txid' in _data
+			if _type == self.TYPE_txidInf:
 
-			self.packet = {	'id'	: _id,
-							'ver'	: _ver,
-							'to'	: _to,
-							'from'	: _from,
-							'type'	: _type,
-							'data'	: json.dumps(_data)}
+				assert 'amnt' in _data and 'addr' in _data and 'txid' in _data
 
-		else:
-
-			# Do not assert _type because _data with nested JSON can be created from a Python dict or JSON string
-
-			self.packet = {	'id'	: _id,
-							'ver'	: _ver,
-							'to'	: _to,
-							'from'	: _from,
-							'type'	: _type,
-							'data'	: _data}
+		self.packet = {	'id'	: _id,
+						'ver'	: _ver,
+						'to'	: _to,
+						'from'	: _from,
+						'type'	: _type,
+						'data'	: _data}
 
 	############################################################################
 
@@ -267,7 +258,7 @@ class eccPacket():
 
 	def get_data(self):
 
-		if self.packet['data'].startswith('{"'):
+		if isinstance(self.packet['data'], dict):
 
 			assert self.packet['type'] in [self.TYPE_txidInf]
 
@@ -282,6 +273,8 @@ class eccPacket():
 	############################################################################
 
 	def send(self):
+
+		logging.info(json.dumps(self.packet))
 
 		eccoin.sendpacket(self.packet['to'], self.packet['id'], json.dumps(self.packet))
 
