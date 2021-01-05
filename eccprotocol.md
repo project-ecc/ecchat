@@ -14,8 +14,8 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : "1"
-		"ver"  : "1"
+		"id"   : 1
+		"ver"  : 1
 		"to"   : "<routing tag of destination>"
 		"from" : "<routing tag of source>"
 		"type" : "<message type>"
@@ -49,6 +49,7 @@ The `addrReq` message type is used to request a new receive address from the oth
 
 	{
 		"coin" : "<ticker symbol>"
+		"type" : "P2PKH|P2SH|bech32"
 	}
 
 ### addrRes
