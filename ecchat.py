@@ -222,7 +222,7 @@ class eccPacket():
 				TYPE_txidInf]
 
 	KEY_LIST = {TYPE_chatMsg : ('uuid', 'cmmd', 'text'),
-				TYPE_addrReq : ('coin'),
+				TYPE_addrReq : ('coin', 'type'),
 				TYPE_addrRes : ('coin', 'addr'),
 				TYPE_txidInf : ('coin', 'amnt', 'addr', 'txid')}
 
@@ -234,23 +234,7 @@ class eccPacket():
 
 		assert _type in self.TYPE_SET
 
-		#assert all(key in _data for key in self.KEY_LIST[_type])
-
-		if _type == self.TYPE_chatMsg:
-
-			assert all(key in _data for key in self.KEY_LIST[self.TYPE_chatMsg])
-
-		if _type == self.TYPE_addrReq:
-
-			assert all(key in _data for key in self.KEY_LIST[self.TYPE_addrReq])
-
-		if _type == self.TYPE_addrRes:
-
-			assert all(key in _data for key in self.KEY_LIST[self.TYPE_addrRes])
-
-		if _type == self.TYPE_txidInf:
-
-			assert all(key in _data for key in self.KEY_LIST[self.TYPE_txidInf])
+		assert all(key in _data for key in self.KEY_LIST[_type])
 
 		self.packet = {	'id'	: _id,
 						'ver'	: _ver,
@@ -287,7 +271,11 @@ class eccPacket():
 
 		data = self.packet['data']
 
-		### Do a bunch of checks here - asserts
+		assert isinstance(data, dict)
+
+		assert self.packet['type'] in self.TYPE_SET
+
+		assert all(key in _data for key in self.KEY_LIST[self.packet['type']])
 
 		return data
 
@@ -436,7 +424,8 @@ class ChatApp:
 
 		# Request address from peer
 
-		data = {'coin' : 'ECC'}
+		data = {'coin' : 'ECC',
+				'type' : 'P2PKH'}
 
 		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrReq, data)
 
