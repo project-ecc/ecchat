@@ -230,21 +230,23 @@ class eccPacket():
 
 	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
 
-		#assert isinstance(_data, dict)
+		assert isinstance(_data, dict)
 
 		assert _type in self.TYPE_SET
 
-		#if _type == self.TYPE_chatMsg:
+		#assert all(key in _data for key in self.KEY_LIST[_type])
 
-		#	assert 'uuid' in _data and 'cmmd' in _data and 'text' in _data
+		if _type == self.TYPE_chatMsg:
 
-		#if _type == self.TYPE_addrReq:
+			assert all(key in _data for key in self.KEY_LIST[self.TYPE_chatMsg])
 
-		#	assert 'coin' in _data
+		if _type == self.TYPE_addrReq:
 
-		#if _type == self.TYPE_addrRes:
+			assert all(key in _data for key in self.KEY_LIST[self.TYPE_addrReq])
 
-		#	assert 'coin' in _data and 'addr' in _data
+		if _type == self.TYPE_addrRes:
+
+			assert all(key in _data for key in self.KEY_LIST[self.TYPE_addrRes])
 
 		if _type == self.TYPE_txidInf:
 
