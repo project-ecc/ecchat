@@ -275,7 +275,7 @@ class eccPacket():
 
 		assert self.packet['type'] in self.TYPE_SET
 
-		assert all(key in _data for key in self.KEY_LIST[self.packet['type']])
+		assert all(key in data for key in self.KEY_LIST[self.packet['type']])
 
 		return data
 
@@ -360,6 +360,14 @@ class ChatApp:
 
 	############################################################################
 
+	def send_ecc_packet(self, msg_type, data):
+
+		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, msg_type, data)
+
+		ecc_packet.send()
+
+	############################################################################
+
 	def append_message(self, party, text):
 
 		self.walker.append(urwid.Text([('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (self.party_text_style[party], text)]))
@@ -427,9 +435,7 @@ class ChatApp:
 		data = {'coin' : 'ECC',
 				'type' : 'P2PKH'}
 
-		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrReq, data)
-
-		ecc_packet.send()
+		self.send_ecc_packet(eccPacket.TYPE_addrReq, data)
 
 		self.send_pending = True
 
@@ -460,9 +466,7 @@ class ChatApp:
 					'addr' : address,
 					'txid' : self.txid}
 
-			ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_txidInf, data)
-
-			ecc_packet.send()
+			self.send_ecc_packet(eccPacket.TYPE_txidInf, data)
 
 			# /send command complete - reset state variables
 
@@ -564,9 +568,7 @@ class ChatApp:
 						'cmmd' : 'add',
 						'text' : text}
 
-				ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_chatMsg, data)
-
-				ecc_packet.send()
+				self.send_ecc_packet(eccPacket.TYPE_chatMsg, data)
 
 	############################################################################
 
@@ -671,9 +673,7 @@ class ChatApp:
 						data = {'coin' : 'ECC',
 								'addr' : address}
 
-						ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, eccPacket.TYPE_addrRes, data)
-
-						ecc_packet.send()
+						self.send_ecc_packet(eccPacket.TYPE_addrRes, data)
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrRes:
 
