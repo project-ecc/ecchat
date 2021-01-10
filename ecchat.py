@@ -721,7 +721,7 @@ class ChatApp:
 
 		except exc.RpcInternalError:
 
-			print('API Buffer was not correctly unregistered previously - restart local eccoin daemon to fix')
+			print('API Buffer was not correctly unregistered - try again after 60 seconds')
 
 			return False
 
@@ -744,6 +744,18 @@ class ChatApp:
 		self.ecc_blocks = eccoin.getblockcount()
 
 		return isRoute
+
+	############################################################################
+
+	def reset_buffer_timeout(self, loop = None, data = None):
+
+		if self.bufferKey:
+
+			bufferSig = eccoin.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
+
+			eccoin.resetbuffertimeout(settings.protocol_id, bufferSig)
+
+			loop.set_alarm_in(10, self.reset_buffer_timeout)
 
 	############################################################################
 
@@ -774,6 +786,8 @@ class ChatApp:
 			                           event_loop      = self.event_loop)
 
 			self.loop.set_alarm_in(1, self.clock_refresh)
+
+			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
 
 			self.loop.run()
 
