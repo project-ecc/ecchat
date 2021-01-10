@@ -335,6 +335,7 @@ class ChatApp:
 		self.txid = ''
 
 		self.ecc_blocks = 0
+		self.ecc_peers  = 0
 
 	############################################################################
 
@@ -378,7 +379,7 @@ class ChatApp:
 
 	def clock_refresh(self, loop = None, data = None):
 
-		self.statusT.set_text('{} ecc # {:d}'.format(time.strftime(self._clock_fmt), self.ecc_blocks))
+		self.statusT.set_text('{} ecc # {:d}/{:d}'.format(time.strftime(self._clock_fmt), self.ecc_blocks, self.ecc_peers))
 
 		loop.set_alarm_in(1, self.clock_refresh)
 
@@ -387,6 +388,7 @@ class ChatApp:
 	def block_refresh(self):
 
 		self.ecc_blocks = eccoin.getblockcount()
+		self.ecc_peers  = eccoin.getconnectioncount()
 
 	############################################################################
 
@@ -489,7 +491,7 @@ class ChatApp:
 			self.send_pending = False
 
 			self.send_amount = 0.0
-			
+
 	############################################################################
 
 	def process_user_entry(self, text):
@@ -531,7 +533,9 @@ class ChatApp:
 
 			elif text.startswith('/peers'):
 
-				self.append_message(0, '{:d}'.format(eccoin.getconnectioncount()))
+				self.ecc_peers = eccoin.getconnectioncount()
+
+				self.append_message(0, '{:d}'.format(self.ecc_peers))
 
 			elif text.startswith('/tag'):
 
@@ -758,6 +762,7 @@ class ChatApp:
 			print('No route available to : %s' % self.otherTag)
 
 		self.ecc_blocks = eccoin.getblockcount()
+		self.ecc_peers  = eccoin.getconnectioncount()
 
 		return isRoute
 
