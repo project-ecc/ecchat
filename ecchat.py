@@ -437,6 +437,8 @@ class ChatApp:
 
 		self.send_ecc_packet(eccPacket.TYPE_addrReq, data)
 
+		self.loop.set_alarm_in(10, self.timeout_send_ecc)
+
 		self.send_pending = True
 
 		self.send_amount = float_amount
@@ -474,6 +476,20 @@ class ChatApp:
 
 			self.send_amount = 0.0
 
+	############################################################################
+
+	def timeout_send_ecc(self, loop = None, data = None):
+
+		if self.send_pending:
+
+			self.append_message(0, 'No response from other party - /send cancelled')
+
+			# /send command cancelled - reset state variables
+
+			self.send_pending = False
+
+			self.send_amount = 0.0
+			
 	############################################################################
 
 	def process_user_entry(self, text):
@@ -608,16 +624,16 @@ class ChatApp:
 
 	def zmqInitialise(self):
 
-		self.event_loop = zmqEventLoop()
-	
 		self.context    = zmq.Context()
-	
+
+		self.event_loop = zmqEventLoop()
+
 		self.subscriber = self.context.socket(zmq.SUB)
-	
+
 		self.subscriber.connect('tcp://%s'%settings.zmq_address)
-	
+
 		self.subscriber.setsockopt(zmq.SUBSCRIBE, b'')
-	
+
 		self.event_loop.watch_queue(self.subscriber, self.zmqHandler, zmq.POLLIN)
 
 	############################################################################
