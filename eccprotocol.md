@@ -52,7 +52,10 @@ The `chatAck` message type is used to acknowledge a `chatMsg` type message.
 	{
 		"uuid" : "<uuid value>"
 		"cmmd" : "add|replace|delete"
+		"able" : "true|false"
 	}
+
+If the value `false` is returned in the `able` field it indicates that the application does not support the command defined in a prior `chatMsg` type message.
 
 ### addrReq
 
