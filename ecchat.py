@@ -212,16 +212,19 @@ class FrameFocus(urwid.Frame):
 class eccPacket():
 
 	TYPE_chatMsg = 'chatMsg'
+	TYPE_chatAck = 'chatAck'
 	TYPE_addrReq = 'addrReq'
 	TYPE_addrRes = 'addrRes'
 	TYPE_txidInf = 'txidInf'
 
 	TYPE_SET = [TYPE_chatMsg,
+				TYPE_chatAck,
 				TYPE_addrReq,
 				TYPE_addrRes,
 				TYPE_txidInf]
 
 	KEY_LIST = {TYPE_chatMsg : ('uuid', 'cmmd', 'text'),
+				TYPE_chatAck : ('uuid', 'cmmd'),
 				TYPE_addrReq : ('coin', 'type'),
 				TYPE_addrRes : ('coin', 'addr'),
 				TYPE_txidInf : ('coin', 'amnt', 'addr', 'txid')}
@@ -682,6 +685,24 @@ class ChatApp:
 
 						self.append_message(2, data['text'])
 
+						rData = {'uuid' : data['uuid'],
+								 'cmmd' : data['cmmd'],
+								 'able' : True}
+
+					else:
+
+						rData = {'uuid' : data['uuid'],
+								 'cmmd' : data['cmmd'],
+								 'able' : False}
+
+					self.send_ecc_packet(eccPacket.TYPE_chatAck, rData)
+
+				elif ecc_packet.get_type() == eccPacket.TYPE_chatAck:
+
+					data = ecc_packet.get_data()
+
+					# TODO : UI indication of ack
+
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
 
 					data = ecc_packet.get_data()
@@ -690,10 +711,10 @@ class ChatApp:
 
 						address = eccoin.getnewaddress()
 
-						data = {'coin' : 'ECC',
-								'addr' : address}
+						rData = {'coin' : 'ECC',
+								 'addr' : address}
 
-						self.send_ecc_packet(eccPacket.TYPE_addrRes, data)
+						self.send_ecc_packet(eccPacket.TYPE_addrRes, rData)
 
 				elif ecc_packet.get_type() == eccPacket.TYPE_addrRes:
 
