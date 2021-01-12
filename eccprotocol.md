@@ -6,6 +6,7 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 |:-:|:--|
 |1|ecchat|
 |2|eccvpn|
+|3|ectorrent|
 
 ----------
 
@@ -27,6 +28,7 @@ The following values for `type` are defined:
 |type|Purpose|
 |:--|:--|
 |chatMsg|Chat message content|
+|chatAck|Chat message acknowledge|
 |addrReq|Request new receive address|
 |addrRes|Respond with receive address|
 |txidInf|Send transaction information|
@@ -35,12 +37,21 @@ The `data` value for each `type` are as follows:
 
 ### chatMsg
 
-The `chatMsg` message type is used to add, replace and delete messages.
+The `chatMsg` message type is used to add, replace and delete chat messages.
 
 	{
 		"uuid" : "<uuid value>"
 		"cmmd" : "add|replace|delete"
 		"text" : "<message text>"
+	}
+
+### chatAck
+
+The `chatAck` message type is used to acknowledge a `chatMsg` type message.
+
+	{
+		"uuid" : "<uuid value>"
+		"cmmd" : "add|replace|delete"
 	}
 
 ### addrReq
