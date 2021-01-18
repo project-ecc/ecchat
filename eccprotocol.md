@@ -92,19 +92,7 @@ The `txidInf` method is used to send transaction information from the sending pa
 
 ----------
 
-## 2 : ecvpn
-
-----------
-
-## 3 : ectorrent
-
-----------
-
-## 4 : ectranslate
-
-----------
-
-## 5 : ecfaucet
+## 2 : ecfaucet
 
 This protocol uses a top level JSON structure as follows:
 
@@ -162,3 +150,16 @@ The following `errno` values are defined:
 |4|Faucet previously visited by node <tag>|
 |5|Faucet balance too low - payouts blocked|
 |6|Faucet wallet is currently locked|
+
+----------
+
+## 3 : ectranslate
+
+----------
+
+## 4 : ectorrent
+
+----------
+
+## 5 : ecvpn
+
