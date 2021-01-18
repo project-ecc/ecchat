@@ -211,39 +211,39 @@ class FrameFocus(urwid.Frame):
 
 class eccPacket():
 
-	TYPE_chatMsg = 'chatMsg'
-	TYPE_chatAck = 'chatAck'
-	TYPE_addrReq = 'addrReq'
-	TYPE_addrRes = 'addrRes'
-	TYPE_txidInf = 'txidInf'
+	METH_chatMsg = 'chatMsg'
+	METH_chatAck = 'chatAck'
+	METH_addrReq = 'addrReq'
+	METH_addrRes = 'addrRes'
+	METH_txidInf = 'txidInf'
 
-	TYPE_SET = [TYPE_chatMsg,
-				TYPE_chatAck,
-				TYPE_addrReq,
-				TYPE_addrRes,
-				TYPE_txidInf]
+	METH_SET = [METH_chatMsg,
+				METH_chatAck,
+				METH_addrReq,
+				METH_addrRes,
+				METH_txidInf]
 
-	KEY_LIST = {TYPE_chatMsg : ('uuid', 'cmmd', 'text'),
-				TYPE_chatAck : ('uuid', 'cmmd'),
-				TYPE_addrReq : ('coin', 'type'),
-				TYPE_addrRes : ('coin', 'addr'),
-				TYPE_txidInf : ('coin', 'amnt', 'addr', 'txid')}
+	KEY_LIST = {METH_chatMsg : ('uuid', 'cmmd', 'text'),
+				METH_chatAck : ('uuid', 'cmmd'),
+				METH_addrReq : ('coin', 'type'),
+				METH_addrRes : ('coin', 'addr'),
+				METH_txidInf : ('coin', 'amnt', 'addr', 'txid')}
 
 	############################################################################
 
-	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _type = '', _data = ''):
+	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _meth = '', _data = ''):
 
 		assert isinstance(_data, dict)
 
-		assert _type in self.TYPE_SET
+		assert _meth in self.METH_SET
 
-		assert all(key in _data for key in self.KEY_LIST[_type])
+		assert all(key in _data for key in self.KEY_LIST[_meth])
 
 		self.packet = {	'id'	: _id,
 						'ver'	: _ver,
 						'to'	: _to,
 						'from'	: _from,
-						'type'	: _type,
+						'meth'	: _meth,
 						'data'	: _data}
 
 	############################################################################
@@ -254,7 +254,7 @@ class eccPacket():
 
 		d = json.loads(json_string)
 
-		return cls(d['id'], d['ver'], d['to'], d['from'], d['type'], d['data'])
+		return cls(d['id'], d['ver'], d['to'], d['from'], d['meth'], d['data'])
 
 	############################################################################
 
@@ -264,9 +264,9 @@ class eccPacket():
 
 	############################################################################
 
-	def get_type(self):
+	def get_meth(self):
 
-		return self.packet['type']
+		return self.packet['meth']
 
 	############################################################################
 
@@ -276,9 +276,9 @@ class eccPacket():
 
 		assert isinstance(data, dict)
 
-		assert self.packet['type'] in self.TYPE_SET
+		assert self.packet['meth'] in self.METH_SET
 
-		assert all(key in data for key in self.KEY_LIST[self.packet['type']])
+		assert all(key in data for key in self.KEY_LIST[self.packet['meth']])
 
 		return data
 
@@ -364,9 +364,9 @@ class ChatApp:
 
 	############################################################################
 
-	def send_ecc_packet(self, msg_type, data):
+	def send_ecc_packet(self, meth, data):
 
-		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, msg_type, data)
+		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, meth, data)
 
 		ecc_packet.send()
 
@@ -440,7 +440,7 @@ class ChatApp:
 		data = {'coin' : 'ECC',
 				'type' : 'P2PKH'}
 
-		self.send_ecc_packet(eccPacket.TYPE_addrReq, data)
+		self.send_ecc_packet(eccPacket.METH_addrReq, data)
 
 		self.loop.set_alarm_in(10, self.timeout_send_ecc)
 
@@ -451,6 +451,9 @@ class ChatApp:
 	############################################################################
 
 	def complete_send_ecc(self, address):
+
+		#TODO : Check the address is not zero or handle the error condition
+		#If the value `0` is returned in the `addr` field it indicates that the other party is unable or unwilling to receive unsolicited sends at this time.
 
 		if self.send_pending:
 
@@ -466,14 +469,14 @@ class ChatApp:
 
 				self.append_message(0, '$ECC {:f} sent to {} [/txid available]'.format(self.send_amount, address))
 
-			# Send the TYPE_txidInf message - (coin, amount, address, txid)
+			# Send the METH_txidInf message - (coin, amount, address, txid)
 
 			data = {'coin' : 'ECC',
 					'amnt' : '{:f}'.format(self.send_amount),
 					'addr' : address,
 					'txid' : self.txid}
 
-			self.send_ecc_packet(eccPacket.TYPE_txidInf, data)
+			self.send_ecc_packet(eccPacket.METH_txidInf, data)
 
 			# /send command complete - reset state variables
 
@@ -591,7 +594,7 @@ class ChatApp:
 						'cmmd' : 'add',
 						'text' : text}
 
-				self.send_ecc_packet(eccPacket.TYPE_chatMsg, data)
+				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
 
 	############################################################################
 
@@ -677,7 +680,7 @@ class ChatApp:
 
 				ecc_packet = eccPacket.from_json(message)
 
-				if ecc_packet.get_type() == eccPacket.TYPE_chatMsg:
+				if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
 
 					data = ecc_packet.get_data()
 
@@ -695,15 +698,15 @@ class ChatApp:
 								 'cmmd' : data['cmmd'],
 								 'able' : False}
 
-					self.send_ecc_packet(eccPacket.TYPE_chatAck, rData)
+					self.send_ecc_packet(eccPacket.METH_chatAck, rData)
 
-				elif ecc_packet.get_type() == eccPacket.TYPE_chatAck:
+				elif ecc_packet.get_meth() == eccPacket.METH_chatAck:
 
 					data = ecc_packet.get_data()
 
 					# TODO : UI indication of ack
 
-				elif ecc_packet.get_type() == eccPacket.TYPE_addrReq:
+				elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
 
 					data = ecc_packet.get_data()
 
@@ -714,15 +717,15 @@ class ChatApp:
 						rData = {'coin' : 'ECC',
 								 'addr' : address}
 
-						self.send_ecc_packet(eccPacket.TYPE_addrRes, rData)
+						self.send_ecc_packet(eccPacket.METH_addrRes, rData)
 
-				elif ecc_packet.get_type() == eccPacket.TYPE_addrRes:
+				elif ecc_packet.get_meth() == eccPacket.METH_addrRes:
 
 					data = ecc_packet.get_data()
 
 					self.complete_send_ecc(data['addr'])
 
-				elif ecc_packet.get_type() == eccPacket.TYPE_txidInf:
+				elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
 
 					data = ecc_packet.get_data()
 
