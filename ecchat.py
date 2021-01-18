@@ -341,8 +341,8 @@ class ChatApp:
 
 		self.txid = ''
 
-		self.ecc_blocks = 0
-		self.ecc_peers  = 0
+		self.blocks = []
+		self.peers  = []
 
 		self.zmq_address = []
 
@@ -388,7 +388,15 @@ class ChatApp:
 
 	def clock_refresh(self, loop = None, data = None):
 
-		self.statusT.set_text('{} ecc # {:d}/{:d}'.format(time.strftime(self._clock_fmt), self.ecc_blocks, self.ecc_peers))
+		text = time.strftime(self._clock_fmt)
+
+		for i, coin in enumerate(coins):
+
+			text += ' {} # {:d}/{:d} '.format(settings.chains[i]['coin_symbol'], self.blocks[i], self.peers[i])
+
+		self.statusT.set_text(text)
+
+		#self.statusT.set_text('{} ecc # {:d}/{:d}'.format(time.strftime(self._clock_fmt), self.blocks[0], self.peers[0]))
 
 		loop.set_alarm_in(1, self.clock_refresh)
 
@@ -396,8 +404,8 @@ class ChatApp:
 
 	def block_refresh(self):
 
-		self.ecc_blocks = coins[0].getblockcount()
-		self.ecc_peers  = coins[0].getconnectioncount()
+		self.blocks[0] = coins[0].getblockcount()
+		self.peers [0] = coins[0].getconnectioncount()
 
 	############################################################################
 
@@ -545,9 +553,9 @@ class ChatApp:
 
 			elif text.startswith('/peers'):
 
-				self.ecc_peers = coins[0].getconnectioncount()
+				self.peers[0] = coins[0].getconnectioncount()
 
-				self.append_message(0, '{:d}'.format(self.ecc_peers))
+				self.append_message(0, '{:d}'.format(self.peers[0]))
 
 			elif text.startswith('/tag'):
 
@@ -815,8 +823,10 @@ class ChatApp:
 
 			print('No route available to : %s' % self.otherTag)
 
-		self.ecc_blocks = coins[0].getblockcount()
-		self.ecc_peers  = coins[0].getconnectioncount()
+		for coin in coins:
+
+			self.blocks.append(coin.getblockcount())
+			self.peers.append (coin.getconnectioncount())
 
 		return isRoute
 
