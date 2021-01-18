@@ -1,6 +1,12 @@
-zmq_address  = '127.0.0.1:28001'
-rpc_address  = '127.0.0.1:19119'
-rpc_user     = 'eccoinrpc'
-rpc_pass     = 'ecc123-OK-Maybeitneedstobemorecomplex'
 protocol_id  = 1
 protocol_ver = 1
+
+chains  = [{'coin_symbol' : 'ecc',
+			'rpc_address' : '127.0.0.1:19119',
+			'rpc_user'    : 'eccoinrpc',
+			'rpc_pass'    : 'ecc123-OK-Maybeitneedstobemorecomplex'},
+			
+		   {'coin_symbol' : 'ltc',
+			'rpc_address' : '127.0.0.1:9332',
+			'rpc_user'    : 'litecoinrpc',
+			'rpc_pass'    : 'dowereallyneedpasswords123!!!'}]

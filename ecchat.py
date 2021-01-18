@@ -29,7 +29,11 @@ from zmqeventloop import zmqEventLoop
 from slickrpc import Proxy
 from slickrpc import exc
 
-eccoin = Proxy('http://%s:%s@%s' % (settings.rpc_user, settings.rpc_pass, settings.rpc_address))
+coins = []
+
+for chain in settings.chains:
+
+	coins.append(Proxy('http://%s:%s@%s' % (chain['rpc_user'], chain['rpc_pass'], chain['rpc_address'])))
 
 ################################################################################
 ## urwid related ###############################################################
@@ -288,7 +292,7 @@ class eccPacket():
 
 		logging.info(json.dumps(self.packet))
 
-		eccoin.sendpacket(self.packet['to'], self.packet['id'], json.dumps(self.packet))
+		coins[0].sendpacket(self.packet['to'], self.packet['id'], json.dumps(self.packet))
 
 ################################################################################
 ## ChatApp class ###############################################################
@@ -340,6 +344,8 @@ class ChatApp:
 		self.ecc_blocks = 0
 		self.ecc_peers  = 0
 
+		self.zmq_address = []
+
 	############################################################################
 
 	def build_ui(self):
@@ -390,8 +396,8 @@ class ChatApp:
 
 	def block_refresh(self):
 
-		self.ecc_blocks = eccoin.getblockcount()
-		self.ecc_peers  = eccoin.getconnectioncount()
+		self.ecc_blocks = coins[0].getblockcount()
+		self.ecc_peers  = coins[0].getconnectioncount()
 
 	############################################################################
 
@@ -427,7 +433,7 @@ class ChatApp:
 
 		# Check 4 - Does the user's wallet hold an adequate balance ?
 
-		balance = eccoin.getbalance()
+		balance = coins[0].getbalance()
 
 		if float_amount >= balance:
 
@@ -459,7 +465,7 @@ class ChatApp:
 
 			try:
 
-				self.txid = eccoin.sendtoaddress(address, str(self.send_amount), "ecchat")
+				self.txid = coins[0].sendtoaddress(address, str(self.send_amount), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded:
 
@@ -535,11 +541,11 @@ class ChatApp:
 
 			elif text.startswith('/blocks'):
 
-				self.append_message(0, '{:d}'.format(eccoin.getblockcount()))
+				self.append_message(0, '{:d}'.format(coins[0].getblockcount()))
 
 			elif text.startswith('/peers'):
 
-				self.ecc_peers = eccoin.getconnectioncount()
+				self.ecc_peers = coins[0].getconnectioncount()
 
 				self.append_message(0, '{:d}'.format(self.ecc_peers))
 
@@ -549,8 +555,8 @@ class ChatApp:
 
 			elif text.startswith('/balance'):
 
-				balance_con = eccoin.getbalance()
-				balance_unc = eccoin.getunconfirmedbalance()
+				balance_con = coins[0].getbalance()
+				balance_unc = coins[0].getunconfirmedbalance()
 
 				if balance_unc > 0:
 
@@ -562,7 +568,7 @@ class ChatApp:
 
 			elif text.startswith('/address'):
 
-				address = eccoin.getnewaddress()
+				address = coins[0].getnewaddress()
 
 				self.append_message(0, '{}'.format(address))
 
@@ -640,7 +646,7 @@ class ChatApp:
 
 		self.subscriber = self.context.socket(zmq.SUB)
 
-		self.subscriber.connect('tcp://%s'%settings.zmq_address)
+		self.subscriber.connect(self.zmq_address[0])
 
 		self.subscriber.setsockopt(zmq.SUBSCRIBE, b'')
 
@@ -670,9 +676,9 @@ class ChatApp:
 
 			bufferCmd = 'GetBufferRequest:' + protocolID + str(next(self._bufferIdx))
 
-			bufferSig = eccoin.buffersignmessage(self.bufferKey, bufferCmd)
+			bufferSig = coins[0].buffersignmessage(self.bufferKey, bufferCmd)
 
-			eccbuffer = eccoin.getbuffer(int(protocolID), bufferSig)
+			eccbuffer = coins[0].getbuffer(int(protocolID), bufferSig)
 
 			for packet in eccbuffer.values():
 
@@ -712,7 +718,7 @@ class ChatApp:
 
 					if data['coin'] == 'ECC':
 
-						address = eccoin.getnewaddress()
+						address = coins[0].getnewaddress()
 
 						rData = {'coin' : 'ECC',
 								 'addr' : address}
@@ -745,7 +751,7 @@ class ChatApp:
 
 		try:
 
-			self.selfTag = eccoin.getroutingpubkey()
+			self.selfTag = coins[0].getroutingpubkey()
 
 		except pycurl.error:
 
@@ -761,7 +767,7 @@ class ChatApp:
 
 		try:
 
-			self.bufferKey = eccoin.registerbuffer(settings.protocol_id)
+			self.bufferKey = coins[0].registerbuffer(settings.protocol_id)
 
 		except exc.RpcInternalError:
 
@@ -771,9 +777,33 @@ class ChatApp:
 
 		try:
 
-			eccoin.findroute(self.otherTag)
+			zmqnotifications = coins[0].getzmqnotifications()
 
-			isRoute = eccoin.haveroute(self.otherTag)
+		except exc.RpcMethodNotFound:
+
+			print('Blockchain node does not support ZMQ notifications')
+
+			return False
+
+		self.zmq_address.append('')
+
+		for zmqnotification in zmqnotifications:
+
+			if zmqnotification['type'] == 'pubhashblock':
+
+				self.zmq_address[0] = zmqnotification['address']
+
+		if self.zmq_address[0] == '' :
+
+			print('zmqpubhashblock notification not configured')
+
+			return False
+
+		try:
+
+			coins[0].findroute(self.otherTag)
+
+			isRoute = coins[0].haveroute(self.otherTag)
 
 		except exc.RpcInvalidAddressOrKey:
 
@@ -785,8 +815,8 @@ class ChatApp:
 
 			print('No route available to : %s' % self.otherTag)
 
-		self.ecc_blocks = eccoin.getblockcount()
-		self.ecc_peers  = eccoin.getconnectioncount()
+		self.ecc_blocks = coins[0].getblockcount()
+		self.ecc_peers  = coins[0].getconnectioncount()
 
 		return isRoute
 
@@ -796,9 +826,9 @@ class ChatApp:
 
 		if self.bufferKey:
 
-			bufferSig = eccoin.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
+			bufferSig = coins[0].buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
 
-			eccoin.resetbuffertimeout(settings.protocol_id, bufferSig)
+			coins[0].resetbuffertimeout(settings.protocol_id, bufferSig)
 
 			loop.set_alarm_in(10, self.reset_buffer_timeout)
 
@@ -808,9 +838,9 @@ class ChatApp:
 
 		if self.bufferKey:
 
-			bufferSig = eccoin.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
+			bufferSig = coins[0].buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
 
-			eccoin.releasebuffer(settings.protocol_id, bufferSig)
+			coins[0].releasebuffer(settings.protocol_id, bufferSig)
 
 			self.bufferKey = ""
 
