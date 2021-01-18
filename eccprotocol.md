@@ -97,7 +97,7 @@ The `txidInf` method is used to send transaction information from the sending pa
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 5
+		"id"   : 2
 		"ver"  : 1
 		"to"   : "<routing tag of destination>"
 		"from" : "<routing tag of source>"
@@ -139,9 +139,9 @@ The `faucetRes` method is used to reply to a `faucetReq` message. It is used to 
 
 In the event of an error preventing a faucet from making a payout, the `amnt`, `addr` and `txid` fields will all be set to `0` with the `erno` field nonzero and the `errr` field containing an error message.
 
-The following `errno` values are defined:
+The following `erno` values are defined:
 
-|value|Meaning|
+|erno|Meaning|
 |:--|:--|
 |0|Request completed normally|
 |1|Coin identified in request unavailable at this faucet|
