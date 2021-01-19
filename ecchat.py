@@ -295,6 +295,21 @@ class eccPacket():
 		coins[0].sendpacket(self.packet['to'], self.packet['id'], json.dumps(self.packet))
 
 ################################################################################
+## chain class #################################################################
+################################################################################
+
+class blockChain():
+
+	############################################################################
+
+	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
+
+		self.symbol			= symbol
+		self.rpc_address	= rpc_address
+		self.rpc_user		= rpc_user
+		self.rpc_pass		= rpc_pass
+
+################################################################################
 ## ChatApp class ###############################################################
 ################################################################################
 
@@ -345,6 +360,8 @@ class ChatApp:
 		self.peers  = []
 
 		self.zmq_address = []
+
+		self.subscribers = []
 
 	############################################################################
 
@@ -402,10 +419,10 @@ class ChatApp:
 
 	############################################################################
 
-	def block_refresh(self):
+	def block_refresh(self, index):
 
-		self.blocks[0] = coins[0].getblockcount()
-		self.peers [0] = coins[0].getconnectioncount()
+		self.blocks[index] = coins[index].getblockcount()
+		self.peers [index] = coins[index].getconnectioncount()
 
 	############################################################################
 
@@ -652,31 +669,43 @@ class ChatApp:
 
 		self.event_loop = zmqEventLoop()
 
-		self.subscriber = self.context.socket(zmq.SUB)
+		for index, address in enumerate(self.zmq_address):
 
-		self.subscriber.connect(self.zmq_address[0])
+			self.subscribers.append(self.context.socket(zmq.SUB))
 
-		self.subscriber.setsockopt(zmq.SUBSCRIBE, b'')
+			self.subscribers[index].connect(address)
 
-		self.event_loop.watch_queue(self.subscriber, self.zmqHandler, zmq.POLLIN)
+			self.subscribers[index].setsockopt(zmq.SUBSCRIBE, b'')
+
+			self.event_loop.watch_queue(self.subscribers[index], self.zmqHandler, zmq.POLLIN, index)
 
 	############################################################################
 
 	def zmqShutdown(self):
 
-		self.subscriber.close()
+		for subscriber in self.subscribers:
+
+			subscriber.close()
 
 		self.context.term()
 
 	############################################################################
 
-	def zmqHandler(self):
+	def zmqHandler(self, index):
 
-		[address, contents] = self.subscriber.recv_multipart(zmq.DONTWAIT)
+		if index > 0: # various chains return differing numbers of list values (ltc = 3)
+
+			slashdevslashnull = self.subscribers[index].recv_multipart(zmq.DONTWAIT)
+
+			self.block_refresh(index)
+
+			return
+
+		[address, contents] = self.subscribers[index].recv_multipart(zmq.DONTWAIT)
 		
 		if address.decode() == 'hashblock':
 
-			self.block_refresh()
+			self.block_refresh(0)
 
 		if address.decode() == 'packet':
 
@@ -783,29 +812,31 @@ class ChatApp:
 
 			return False
 
-		try:
+		for index, coin in enumerate(coins):
 
-			zmqnotifications = coins[0].getzmqnotifications()
+			try:
 
-		except exc.RpcMethodNotFound:
+				zmqnotifications = coins[index].getzmqnotifications()
 
-			print('Blockchain node does not support ZMQ notifications')
+			except exc.RpcMethodNotFound:
 
-			return False
+				print('Blockchain node for {} does not support ZMQ notifications'.format(settings.chains[index]['coin_symbol']))
 
-		self.zmq_address.append('')
+				return False
 
-		for zmqnotification in zmqnotifications:
+			self.zmq_address.append('')
 
-			if zmqnotification['type'] == 'pubhashblock':
+			for zmqnotification in zmqnotifications:
 
-				self.zmq_address[0] = zmqnotification['address']
+				if zmqnotification['type'] == 'pubhashblock':
 
-		if self.zmq_address[0] == '' :
+					self.zmq_address[index] = zmqnotification['address']
 
-			print('zmqpubhashblock notification not configured')
+			if self.zmq_address[index] == '':
 
-			return False
+				print('zmqpubhashblock notification not configured for {}'.format(settings.chains[index]['coin_symbol']))
+
+				return False
 
 		try:
 

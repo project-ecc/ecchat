@@ -11,6 +11,8 @@ from itertools import count
 
 from urwid.main_loop import EventLoop
 
+zmq_magic = 99999
+
 ################################################################################
 
 class zmqEventLoop(EventLoop):
@@ -24,7 +26,8 @@ class zmqEventLoop(EventLoop):
 		self._did_something   = True
 		self._alarms          = []
 		self._poller          = zmq.Poller()
-		self._queue_callbacks = {}
+		self._queue_callbacks = {}				# Callback functions
+		self._queue_callbacki = {}				# Index to pass to callback function
 		self._idle_handle     = 0
 		self._idle_callbacks  = {}
 
@@ -56,7 +59,7 @@ class zmqEventLoop(EventLoop):
 
 	#############################################################################
 
-	def watch_queue(self, queue, callback, flags=1):
+	def watch_queue(self, queue, callback, flags=1, index=zmq_magic):
 
 		if queue in self._queue_callbacks:
 
@@ -65,6 +68,7 @@ class zmqEventLoop(EventLoop):
 		self._poller.register(queue, flags)
 
 		self._queue_callbacks[queue] = callback
+		self._queue_callbacki[queue] = index
 
 		return queue
 
@@ -81,6 +85,7 @@ class zmqEventLoop(EventLoop):
 			finally:
 
 				self._queue_callbacks.pop(handle, None)
+				self._queue_callbacki.pop(handle, None)
 
 			return True
 
@@ -99,6 +104,7 @@ class zmqEventLoop(EventLoop):
 		self._poller.register(fd, flags)
 
 		self._queue_callbacks[fd.fileno()] = callback
+		self._queue_callbacki[fd.fileno()] = zmq_magic
 
 		return fd
 
@@ -115,6 +121,7 @@ class zmqEventLoop(EventLoop):
 			finally:
 
 				self._queue_callbacks.pop(handle.fileno(), None)
+				self._queue_callbacki.pop(handle.fileno(), None)
 
 			return True
 
@@ -220,7 +227,13 @@ class zmqEventLoop(EventLoop):
 
 		for queue, _ in ready.items():
 
-			self._queue_callbacks[queue]()
+			if self._queue_callbacki[queue] == zmq_magic:						# Default value used for back compatibility
+
+				self._queue_callbacks[queue]()									# Call for urwid file descriptor
+
+			else:
+
+				self._queue_callbacks[queue](self._queue_callbacki[queue])		# Call for zmq queue
 
 			self._did_something = True
 
