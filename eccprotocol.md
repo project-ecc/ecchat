@@ -7,8 +7,9 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 |1|ecchat|
 |2|ecfaucet|
 |3|ectranslate|
-|4|ectorrent|
-|5|ecvpn|
+|4|ecchatgroup|
+|5|ectorrent|
+|6|ecvpn|
 
 ----------
 
@@ -157,9 +158,13 @@ The following `erno` values are defined:
 
 ----------
 
-## 4 : ectorrent
+## 4 : ecchatgroup
 
 ----------
 
-## 5 : ecvpn
+## 5 : ectorrent
+
+----------
+
+## 6 : ecvpn
 
