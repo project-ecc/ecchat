@@ -13,5 +13,5 @@ chains  = [{'coin_symbol' : 'ecc',
 
 #		   {'coin_symbol' : 'rdd',
 #			'rpc_address' : '127.0.0.1:45443',
-#			'rpc_user'    : 'rddcoinrpc',
+#			'rpc_user'    : 'reddcoinrpc',
 #			'rpc_pass'    : 'dowereallyneedpasswords123!!!'}]

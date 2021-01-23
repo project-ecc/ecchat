@@ -434,6 +434,19 @@ class ChatApp:
 
 	############################################################################
 
+	def block_refresh_timed(self):
+
+		for index, address in enumerate(self.zmq_address):
+
+			if not address:
+
+				self.blocks[index] = coins[index].getblockcount()
+				self.peers [index] = coins[index].getconnectioncount()
+
+		self.loop.set_alarm_in(10, self.block_refresh_timed)
+
+	############################################################################
+
 	def start_send_ecc(self, amount):
 
 		# Check 1 - Is a send currently incomplete ?
@@ -834,11 +847,7 @@ class ChatApp:
 
 				return False
 
-			except exc.RpcMethodNotFound:
-
-				zmqnotifications = []
-
-			except ValueError:
+			except (exc.RpcMethodNotFound, ValueError):
 
 				zmqnotifications = []
 
@@ -916,6 +925,14 @@ class ChatApp:
 			self.loop.set_alarm_in(1, self.clock_refresh)
 
 			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
+
+			for address in self.zmq_address:
+
+				if not address:
+
+					self.loop.set_alarm_in(10, self.block_refresh_timed)
+
+					break
 
 			self.loop.run()
 
