@@ -434,7 +434,7 @@ class ChatApp:
 
 	############################################################################
 
-	def block_refresh_timed(self):
+	def block_refresh_timed(self, loop = None, data = None):
 
 		for index, address in enumerate(self.zmq_address):
 
@@ -443,7 +443,7 @@ class ChatApp:
 				self.blocks[index] = coins[index].getblockcount()
 				self.peers [index] = coins[index].getconnectioncount()
 
-		self.loop.set_alarm_in(10, self.block_refresh_timed)
+		loop.set_alarm_in(10, self.block_refresh_timed)
 
 	############################################################################
 
