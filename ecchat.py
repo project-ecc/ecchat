@@ -681,11 +681,13 @@ class ChatApp:
 
 			self.subscribers.append(self.context.socket(zmq.SUB))
 
-			self.subscribers[index].connect(address)
+			if address:
 
-			self.subscribers[index].setsockopt(zmq.SUBSCRIBE, b'')
+				self.subscribers[index].connect(address)
 
-			self.event_loop.watch_queue(self.subscribers[index], self.zmqHandler, zmq.POLLIN, index)
+				self.subscribers[index].setsockopt(zmq.SUBSCRIBE, b'')
+
+				self.event_loop.watch_queue(self.subscribers[index], self.zmqHandler, zmq.POLLIN, index)
 
 	############################################################################
 
@@ -834,8 +836,6 @@ class ChatApp:
 
 			except (exc.RpcMethodNotFound, ValueError):
 
-				print('Blockchain node for {} does not support ZMQ notifications'.format(settings.chains[index]['coin_symbol']))
-
 				zmqnotifications = []
 
 			self.zmq_address.append('')
@@ -845,12 +845,6 @@ class ChatApp:
 				if zmqnotification['type'] == 'pubhashblock':
 
 					self.zmq_address[index] = zmqnotification['address']
-
-			if self.zmq_address[index] == '':
-
-				print('zmqpubhashblock notification not configured for {}'.format(settings.chains[index]['coin_symbol']))
-
-				return False
 
 		try:
 
