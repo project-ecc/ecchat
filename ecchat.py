@@ -838,6 +838,12 @@ class ChatApp:
 
 				return False
 
+			except ValueError:
+
+				print('Blockchain node for {} does not support ZMQ notifications'.format(settings.chains[index]['coin_symbol']))
+
+				return False
+
 			self.zmq_address.append('')
 
 			for zmqnotification in zmqnotifications:
