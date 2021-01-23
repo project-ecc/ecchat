@@ -832,17 +832,11 @@ class ChatApp:
 
 				return False
 
-			except exc.RpcMethodNotFound:
+			except (exc.RpcMethodNotFound, ValueError):
 
 				print('Blockchain node for {} does not support ZMQ notifications'.format(settings.chains[index]['coin_symbol']))
 
-				zmqnotifications = None
-
-			except ValueError:
-
-				print('Blockchain node for {} does not support ZMQ notifications'.format(settings.chains[index]['coin_symbol']))
-
-				zmqnotifications = None
+				zmqnotifications = []
 
 			self.zmq_address.append('')
 
