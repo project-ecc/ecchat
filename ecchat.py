@@ -834,7 +834,11 @@ class ChatApp:
 
 				return False
 
-			except (exc.RpcMethodNotFound, ValueError):
+			except exc.RpcMethodNotFound:
+
+				zmqnotifications = []
+
+			except ValueError:
 
 				zmqnotifications = []
 
