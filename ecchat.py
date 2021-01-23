@@ -31,7 +31,15 @@ from slickrpc import exc
 
 coins = []
 
-for chain in settings.chains:
+for index, chain in enumerate(settings.chains):
+
+	if index == 0:
+
+		if chain['coin_symbol'] != 'ecc':
+
+			print('ecc must be the first configured chain')
+
+			sys.exit()
 
 	coins.append(Proxy('http://%s:%s@%s' % (chain['rpc_user'], chain['rpc_pass'], chain['rpc_address'])))
 
@@ -817,6 +825,12 @@ class ChatApp:
 			try:
 
 				zmqnotifications = coins[index].getzmqnotifications()
+
+			except pycurl.error:
+
+				print('Blockchain node for {} not available or incorrectly configured'.format(settings.chains[index]['coin_symbol']))
+
+				return False
 
 			except exc.RpcMethodNotFound:
 
