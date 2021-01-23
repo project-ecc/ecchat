@@ -44,6 +44,22 @@ for index, chain in enumerate(settings.chains):
 	coins.append(Proxy('http://%s:%s@%s' % (chain['rpc_user'], chain['rpc_pass'], chain['rpc_address'])))
 
 ################################################################################
+
+def check_symbol(symbol):
+
+	return_valid = False
+	return_index = 0
+
+	for index, chain in enumerate(settings.chains):
+
+		if symbol == chain['coin_symbol']:
+
+			return_valid = True
+			return_index = index
+
+	return return_valid, return_index
+
+################################################################################
 ## urwid related ###############################################################
 ################################################################################
 
@@ -587,13 +603,47 @@ class ChatApp:
 
 			elif text.startswith('/blocks'):
 
-				self.append_message(0, '{:d}'.format(coins[0].getblockcount()))
+				match = re.match('/blocks (?P<symbol>\w+)', text)
+
+				if match:
+
+					valid, index = check_symbol(match.group('symbol'))
+
+					if valid:
+
+						self.append_message(0, '{:d}'.format(coins[index].getblockcount()))
+
+					else:
+
+						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+
+				else:
+
+					self.append_message(0, '{:d}'.format(coins[0].getblockcount()))
 
 			elif text.startswith('/peers'):
 
-				self.peers[0] = coins[0].getconnectioncount()
+				match = re.match('/peers (?P<symbol>\w+)', text)
 
-				self.append_message(0, '{:d}'.format(self.peers[0]))
+				if match:
+
+					valid, index = check_symbol(match.group('symbol'))
+
+					if valid:
+
+						self.peers[index] = coins[index].getconnectioncount()
+
+						self.append_message(0, '{:d}'.format(self.peers[index]))
+
+					else:
+
+						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+
+				else:
+
+					self.peers[0] = coins[0].getconnectioncount()
+
+					self.append_message(0, '{:d}'.format(self.peers[0]))
 
 			elif text.startswith('/tag'):
 
@@ -601,22 +651,65 @@ class ChatApp:
 
 			elif text.startswith('/balance'):
 
-				balance_con = coins[0].getbalance()
-				balance_unc = coins[0].getunconfirmedbalance()
+				match = re.match('/balance (?P<symbol>\w+)', text)
 
-				if balance_unc > 0:
+				if match:
 
-					self.append_message(0, '{:f} confirmed + {:f} unconfirmed'.format(balance_con, balance_unc))
+					valid, index = check_symbol(match.group('symbol'))
+
+					if valid:
+
+						balance_con = coins[index].getbalance()
+						balance_unc = coins[index].getunconfirmedbalance()
+
+						if balance_unc > 0:
+
+							self.append_message(0, '{:f} confirmed + {:f} unconfirmed'.format(balance_con, balance_unc))
+
+						else:
+
+							self.append_message(0, '{:f}'.format(balance_con))
+
+					else:
+
+						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
 
 				else:
 
-					self.append_message(0, '{:f}'.format(balance_con))
+					balance_con = coins[0].getbalance()
+					balance_unc = coins[0].getunconfirmedbalance()
+
+					if balance_unc > 0:
+
+						self.append_message(0, '{:f} confirmed + {:f} unconfirmed'.format(balance_con, balance_unc))
+
+					else:
+
+						self.append_message(0, '{:f}'.format(balance_con))
 
 			elif text.startswith('/address'):
 
-				address = coins[0].getnewaddress()
+				match = re.match('/address (?P<symbol>\w+)', text)
 
-				self.append_message(0, '{}'.format(address))
+				if match:
+
+					valid, index = check_symbol(match.group('symbol'))
+
+					if valid:
+
+						address = coins[index].getnewaddress()
+
+						self.append_message(0, '{}'.format(address))
+
+					else:
+
+						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+
+				else:
+
+					address = coins[0].getnewaddress()
+
+					self.append_message(0, '{}'.format(address))
 
 			elif text.startswith('/send'):
 
