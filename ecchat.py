@@ -499,9 +499,9 @@ class ChatApp:
 
 		balance = coins[index].getbalance()
 
-		if float_amount >= balance:
+		if float_amount > balance:
 
-			self.append_message(0, 'Invalid send amount - must be less than current balance = {:f}'.format(balance))
+			self.append_message(0, 'Invalid send amount - cannot be more than current balance = {:f}'.format(balance))
 
 			return
 
