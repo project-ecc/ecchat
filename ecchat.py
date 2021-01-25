@@ -902,7 +902,7 @@ class ChatApp:
 
 					if valid:
 
-						address = coins[indes].getnewaddress()
+						address = coins[index].getnewaddress()
 
 						rData = {'coin' : data['coin'],
 								 'addr' : 'address'}
