@@ -52,7 +52,7 @@ def check_symbol(symbol):
 
 	for index, chain in enumerate(settings.chains):
 
-		if symbol == chain['coin_symbol']:
+		if symbol.lower() == chain['coin_symbol']:
 
 			return_valid = True
 			return_index = index
@@ -378,6 +378,8 @@ class ChatApp:
 
 		self.send_amount = 0.0
 
+		self.send_index = 0
+
 		self.txid = ''
 
 		self.blocks = []
@@ -463,7 +465,7 @@ class ChatApp:
 
 	############################################################################
 
-	def start_send_ecc(self, amount):
+	def start_send_ecc(self, amount, index):
 
 		# Check 1 - Is a send currently incomplete ?
 
@@ -487,7 +489,7 @@ class ChatApp:
 
 		# Check 3 - Is the send amount in a sensible range ?
 
-		if float_amount < 0:
+		if float_amount <= 0:
 
 			self.append_message(0, 'Invalid send amount - must be greater than zero')
 
@@ -495,7 +497,7 @@ class ChatApp:
 
 		# Check 4 - Does the user's wallet hold an adequate balance ?
 
-		balance = coins[0].getbalance()
+		balance = coins[index].getbalance()
 
 		if float_amount >= balance:
 
@@ -505,7 +507,7 @@ class ChatApp:
 
 		# Request address from peer
 
-		data = {'coin' : 'ECC',
+		data = {'coin' : settings.chains[index]['coin_symbol'],
 				'type' : 'P2PKH'}
 
 		self.send_ecc_packet(eccPacket.METH_addrReq, data)
@@ -516,18 +518,23 @@ class ChatApp:
 
 		self.send_amount = float_amount
 
+		self.send_index = index
+
 	############################################################################
 
 	def complete_send_ecc(self, address):
 
-		#TODO : Check the address is not zero or handle the error condition
-		#If the value `0` is returned in the `addr` field it indicates that the other party is unable or unwilling to receive unsolicited sends at this time.
+		if address == '0':
+
+			self.append_message(0, 'Other party is unable or unwilling to receive unsolicited sends of {}'.format(settings.chains[self.send_index]['coin_symbol']))
+
+			#TODO : Test this !!!
 
 		if self.send_pending:
 
 			try:
 
-				self.txid = coins[0].sendtoaddress(address, str(self.send_amount), "ecchat")
+				self.txid = coins[self.send_index].sendtoaddress(address, str(self.send_amount), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded:
 
@@ -535,22 +542,24 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '$ECC {:f} sent to {} [/txid available]'.format(self.send_amount, address))
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.send_amount, settings.chains[self.send_index]['coin_symbol'],address))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : 'ECC',
+			data = {'coin' : settings.chains[self.send_index]['coin_symbol'],
 					'amnt' : '{:f}'.format(self.send_amount),
 					'addr' : address,
 					'txid' : self.txid}
 
 			self.send_ecc_packet(eccPacket.METH_txidInf, data)
 
-			# /send command complete - reset state variables
+		# /send command complete - reset state variables
 
-			self.send_pending = False
+		self.send_pending = False
 
-			self.send_amount = 0.0
+		self.send_amount = 0.0
+
+		self.send_index = 0
 
 	############################################################################
 
@@ -565,6 +574,8 @@ class ChatApp:
 			self.send_pending = False
 
 			self.send_amount = 0.0
+
+			self.send_index = 0
 
 	############################################################################
 
@@ -586,16 +597,17 @@ class ChatApp:
 
 			elif text.startswith('/help'):
 
-				self.append_message(0, '%-8s - %s' % ('/help'   , 'display help information'))
-				self.append_message(0, '%-8s - %s' % ('/exit'   , 'exit - also /quit and ESC'))
-				self.append_message(0, '%-8s - %s' % ('/version', 'display ecchat version info'))
-				self.append_message(0, '%-8s - %s' % ('/blocks' , 'display eccoin block count'))
-				self.append_message(0, '%-8s - %s' % ('/peers'  , 'display eccoin peer count'))
-				self.append_message(0, '%-8s - %s' % ('/tag'    , 'display routing tag public key'))
-				self.append_message(0, '%-8s - %s' % ('/balance', 'display $ECC wallet balance'))
-				self.append_message(0, '%-8s - %s' % ('/address', 'generate a new address'))
-				self.append_message(0, '%-8s - %s' % ('/send x' , 'send $ECC x to other party'))
-				self.append_message(0, '%-8s - %s' % ('/txid'   , 'display txid of last transaction'))
+				self.append_message(0, '%-8s - %s' % ('/help          ', 'display help information'))
+				self.append_message(0, '%-8s - %s' % ('/exit          ', 'exit - also /quit and ESC'))
+				self.append_message(0, '%-8s - %s' % ('/version       ', 'display ecchat version info'))
+				self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
+				self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
+				self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
+				self.append_message(0, '%-8s - %s' % ('/balance <coin>', 'display wallet balance'))
+				self.append_message(0, '%-8s - %s' % ('/address <coin>', 'generate a new address'))
+				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
+				self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
+				self.append_message(0, '%-8s - %s' % ('         <coin>', 'coin symbol - defaults to ecc'))
 
 			elif text.startswith('/version'):
 
@@ -615,7 +627,7 @@ class ChatApp:
 
 					else:
 
-						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+						self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbol')))
 
 				else:
 
@@ -637,7 +649,7 @@ class ChatApp:
 
 					else:
 
-						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+						self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbol')))
 
 				else:
 
@@ -672,7 +684,7 @@ class ChatApp:
 
 					else:
 
-						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+						self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbol')))
 
 				else:
 
@@ -703,7 +715,7 @@ class ChatApp:
 
 					else:
 
-						self.append_message(0, 'Unknown symbol: {}'.format(match.group('symbol')))
+						self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbol')))
 
 				else:
 
@@ -713,11 +725,28 @@ class ChatApp:
 
 			elif text.startswith('/send'):
 
-				match = re.match('/send ', text)
+				match_default = re.match('/send (?P<amount>([0-9]*\.)?[0-9]+)'                , text)
+				match_symbol  = re.match('/send (?P<amount>([0-9]*\.)?[0-9]+) (?P<symbol>\w+)', text)
 
-				amount = text[match.end():]
+				if match_symbol:
 
-				self.start_send_ecc(amount)
+					valid, index = check_symbol(match_symbol.group('symbol'))
+
+					if valid:
+
+						self.start_send_ecc(match_symbol.group('amount'), index)
+
+					else:
+
+						self.append_message(0, 'Unknown coin symbol: {}'.format(match_symbol.group('symbol')))
+
+				elif match_default:
+
+					self.start_send_ecc(match_default.group('amount'), 0)
+
+				else:
+
+					self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
 
 			elif text.startswith('/txid'):
 
@@ -731,7 +760,7 @@ class ChatApp:
 
 			elif text.startswith('/'):
 
-				self.append_message(0, 'Unknown command - try /help for a list of commands')
+				self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
 
 			else:
 
@@ -869,12 +898,14 @@ class ChatApp:
 
 					data = ecc_packet.get_data()
 
-					if data['coin'] == 'ECC':
+					valid, index = check_symbol(data['coin'])
 
-						address = coins[0].getnewaddress()
+					if valid:
 
-						rData = {'coin' : 'ECC',
-								 'addr' : address}
+						address = coins[indes].getnewaddress()
+
+						rData = {'coin' : data['coin'],
+								 'addr' : 'address'}
 
 						self.send_ecc_packet(eccPacket.METH_addrRes, rData)
 
@@ -888,7 +919,7 @@ class ChatApp:
 
 					data = ecc_packet.get_data()
 
-					self.append_message(0, '${} {} received at {} [/txid available]'.format(data['coin'],data['amnt'], data['addr']))
+					self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
 
 					self.txid = data['txid']
 
