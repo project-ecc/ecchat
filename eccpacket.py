@@ -22,7 +22,7 @@ class eccPacket():
 				METH_txidInf]
 
 	KEY_LIST = {METH_chatMsg : ('uuid', 'cmmd', 'text'),
-				METH_chatAck : ('uuid', 'cmmd'),
+				METH_chatAck : ('uuid', 'cmmd', 'able'),
 				METH_addrReq : ('coin', 'type'),
 				METH_addrRes : ('coin', 'addr'),
 				METH_txidInf : ('coin', 'amnt', 'addr', 'txid')}
