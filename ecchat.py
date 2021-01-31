@@ -551,7 +551,9 @@ class ChatApp:
 
 				else:
 
-					self.append_message(0, '{:d}'.format(coins[0].getblockcount()))
+					for index, coin in enumerate(coins):
+
+						self.append_message(0, '{} : {:d}'.format(settings.chains[index]['coin_symbol'], coin.getblockcount()))
 
 			elif text.startswith('/peers'):
 
@@ -573,9 +575,11 @@ class ChatApp:
 
 				else:
 
-					self.peers[0] = coins[0].getconnectioncount()
+					for index, coin in enumerate(coins):
 
-					self.append_message(0, '{:d}'.format(self.peers[0]))
+						self.peers[index] = coin.getconnectioncount()
+
+						self.append_message(0, '{} : {:d}'.format(settings.chains[index]['coin_symbol'], self.peers[index]))
 
 			elif text.startswith('/tag'):
 
@@ -608,16 +612,18 @@ class ChatApp:
 
 				else:
 
-					balance_con = coins[0].getbalance()
-					balance_unc = coins[0].getunconfirmedbalance()
+					for index, coin in enumerate(coins):
 
-					if balance_unc > 0:
+						balance_con = coin.getbalance()
+						balance_unc = coin.getunconfirmedbalance()
 
-						self.append_message(0, '{:f} confirmed + {:f} unconfirmed'.format(balance_con, balance_unc))
+						if balance_unc > 0:
 
-					else:
+							self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(settings.chains[index]['coin_symbol'], balance_con, balance_unc))
 
-						self.append_message(0, '{:f}'.format(balance_con))
+						else:
+
+							self.append_message(0, '{} : {:f}'.format(settings.chains[index]['coin_symbol'], balance_con))
 
 			elif text.startswith('/address'):
 
