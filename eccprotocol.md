@@ -5,11 +5,12 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 | Protocol ID | Protocol Name |
 |:-:|:--|
 |1|ecchat|
-|2|ecfaucet|
-|3|ectranslate|
-|4|ecchatgroup|
-|5|ectorrent|
-|6|ecvpn|
+|2|ececho|
+|3|ecfaucet|
+|4|ectranslate|
+|5|ecchatgroup|
+|6|ectorrent|
+|7|ecvpn|
 
 ----------
 
@@ -93,12 +94,38 @@ The `txidInf` method is used to send transaction information from the sending pa
 
 ----------
 
-## 2 : ecfaucet
+## 2 : ececho
 
 This protocol uses a top level JSON structure as follows:
 
    	{
 		"id"   : 2
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
+
+The following values for `meth` are defined:
+
+|meth|Purpose|
+|:--|:--|
+|echoReq|Echo request|
+|echoRes|Echo response|
+
+The `data` value sent in a `echoReq` message is returned identically in an `echoRes` message.
+
+The `data` value is not defined.
+
+----------
+
+## 3 : ecfaucet
+
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 3
 		"ver"  : 1
 		"to"   : "<routing tag of destination>"
 		"from" : "<routing tag of source>"
@@ -154,17 +181,17 @@ The following `erno` values are defined:
 
 ----------
 
-## 3 : ectranslate
+## 4 : ectranslate
 
 ----------
 
-## 4 : ecchatgroup
+## 5 : ecchatgroup
 
 ----------
 
-## 5 : ectorrent
+## 6 : ectorrent
 
 ----------
 
-## 6 : ecvpn
+## 7 : ecvpn
 
