@@ -92,6 +92,27 @@ The `txidInf` method is used to send transaction information from the sending pa
 		"txid" : "<transaction ID>"
 	}
 
+### ecchat `/send` command
+
+The `addrReq`, `addrRes` and `txidInf` methods are used together to support the ecchat /send command. The following UML sequence specification may be pasted into and UML sequence diagram generator such as websequencediagram.com to view the resulting sequence diagram:
+
+    title ecchat /send command
+    participant Bob's eccoind
+    participant Bob's ecchat
+    participant Alice's ecchat
+    participant Alice's eccoind
+    note over Bob's ecchat: /send 1000 ecc
+    Bob's ecchat->Alice's ecchat: ecchat:addrReq
+    Alice's ecchat->Alice's eccoind:RPC:getnewaddress
+    Alice's eccoind->Alice's ecchat:ecc address
+    Alice's ecchat->Bob's ecchat: ecchat:addrRes
+    Bob's ecchat->Bob's eccoind:RPC:sendtoaddress
+    Bob's eccoind->Bob's ecchat:ecc txid
+    Bob's ecchat->Alice's ecchat: ecchat:txidInf
+    note over Alice's ecchat:1000 ecc received ...
+
+[https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=magazine](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=magazine "ecchat /send command")
+
 ----------
 
 ## 2 : ececho
