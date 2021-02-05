@@ -116,6 +116,44 @@ The following UML sequence specification may be pasted into and UML sequence dia
     Bob's ecchat->Alice's ecchat: ecchat:txidInf
     note over Alice's ecchat:1000 ecc received ...
 
+### ecchat `/swap` command
+
+The `swapInf`, `swapReq`, `swapRes` and `txidInf` methods are used together to support the ecchat /swap command.
+
+![alt text](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zd2FwIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgeHl6Y29pAAYVZWMAARkAVwUAQQ1BbGljZQABGgAUBwBZEQAvCAB-CW5vdGUgb3ZlcgBeDToAgUEHMTAwMCBlY2MgZm9yIDEgeHl6CgCBBgwtPgB5DjoANwhzd2FwSW5mAB8OLT4AVQ50aW1lb3V0IDYwcwBnIDEAFnEAgUkQL2V4ZWN1dGUKAIJrDgCBdQ1vaW5kOlJQQzpnZXRuZXdhZGRyZXNzACYMb2luZACCJBFlY2MgABkTAIJbBQCDBw4AglMLUmVxAHsQAIJ8EgCCWggxMHMAgykPAIR_DjogAIEkEgCFIQ4AgywQeHl6AIErCQCDaSlSZQCBTxIAhQEQAII7BXNlbmR0bwCCMBAAgQIKAIRnD3h5eiB0eGlkAIIYJnR4aWRJbmYAhWIYAIVhBSByZWNlaXZlZCAuLi4AgiYVAINjDACBIQ4Ah0ANAIVlD2VjYwCBJAYAhiElAIEYEgCGYA8Ahg8JAIEiDQo&s=default)
+
+The following UML sequence specification may be pasted into and UML sequence diagram generator such as websequencediagram.com to view the resulting sequence diagram:
+
+    title ecchat /swap command
+    participant Bob's xyzcoind
+    participant Bob's eccoind
+    participant Bob's ecchat
+    participant Alice's ecchat
+    participant Alice's eccoind
+    participant Alice's xyzcoind
+    note over Bob's ecchat: /swap 1000 ecc for 1 xyz
+    Bob's ecchat->Alice's ecchat: ecchat:swapInf
+    Bob's ecchat-->Bob's ecchat: timeout 60s
+    note over Bob's ecchat: /swap 1100 ecc for 1 xyz
+    Bob's ecchat->Alice's ecchat: ecchat:swapInf
+    Bob's ecchat-->Bob's ecchat: timeout 60s
+    note over Alice's ecchat: /execute
+    Alice's ecchat->Alice's eccoind:RPC:getnewaddress
+    Alice's eccoind->Alice's ecchat:ecc address
+    Alice's ecchat->Bob's ecchat: ecchat:swapReq
+    Alice's ecchat-->Alice's ecchat: timeout 10s
+    Bob's ecchat->Bob's xyzcoind: RPC:getnewaddress
+    Bob's xyzcoind->Bob's ecchat: xyz address
+    Bob's ecchat->Alice's ecchat: ecchat:swapRes
+    Alice's ecchat->Alice's xyzcoind:RPC:sendtoaddress
+    Alice's xyzcoind->Alice's ecchat:xyz txid
+    Alice's ecchat->Bob's ecchat: ecchat:txidInf
+    note over Bob's ecchat:1 xyz received ...
+    Bob's ecchat->Bob's eccoind:RPC:sendtoaddress
+    Bob's eccoind->Bob's ecchat:ecc txid
+    Bob's ecchat->Alice's ecchat: ecchat:txidInf
+    note over Alice's ecchat:1100 ecc received ...
+
 ----------
 
 ## 2 : ececho
