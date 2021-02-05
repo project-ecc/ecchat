@@ -36,6 +36,9 @@ The following values for `meth` are defined:
 |addrReq|Request new receive address|
 |addrRes|Respond with receive address|
 |txidInf|Send transaction information|
+|swapInf|Swap proposal information|
+|swapReq|Swap execution request|
+|swapRes|Swap execution response|
 
 The `data` value for each `meth` are as follows:
 
@@ -92,13 +95,34 @@ The `txidInf` method is used to send transaction information from the sending pa
 		"txid" : "<transaction ID>"
 	}
 
+### swapInf
+
+The swapInf method is used to send swap proposal information.
+
+	{
+	}
+
+### swapReq
+
+The swapReq method is used to initiate execution of the prior swap proposal, including the executing party's address information.
+
+	{
+	}
+
+### swapRes
+
+The swapRes method is used to confirm execution of the swap, including proposing party's address information.
+
+	{
+	} 
+
 ### ecchat `/send` command
 
 The `addrReq`, `addrRes` and `txidInf` methods are used together to support the ecchat /send command.
 
 ![alt text](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=magazine](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=magazine "ecchat /send command")
 
-The following UML sequence specification may be pasted into and UML sequence diagram generator such as websequencediagram.com to view the resulting sequence diagram:
+The UML sequence specification for the above diagram follows:
 
     title ecchat /send command
     participant Bob's eccoind
@@ -122,7 +146,7 @@ The `swapInf`, `swapReq`, `swapRes` and `txidInf` methods are used together to s
 
 ![alt text](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zd2FwIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgeHl6Y29pAAYVZWMAARkAVwUAQQ1BbGljZQABGgAUBwBZEQAvCAB-CW5vdGUgb3ZlcgBeDToAgUEHMTAwMCBlY2MgZm9yIDEgeHl6CgCBBgwtPgB5DjoANwhzd2FwSW5mAB8OLT4AVQ50aW1lb3V0IDYwcwBnIDEAFnEAgUkQL2V4ZWN1dGUKAIJrDgCBdQ1vaW5kOlJQQzpnZXRuZXdhZGRyZXNzACYMb2luZACCJBFlY2MgABkTAIJbBQCDBw4AglMLUmVxAHsQAIJ8EgCCWggxMHMAgykPAIR_DjogAIEkEgCFIQ4AgywQeHl6AIErCQCDaSlSZQCBTxIAhQEQAII7BXNlbmR0bwCCMBAAgQIKAIRnD3h5eiB0eGlkAIIYJnR4aWRJbmYAhWIYAIVhBSByZWNlaXZlZCAuLi4AgiYVAINjDACBIQ4Ah0ANAIVlD2VjYwCBJAYAhiElAIEYEgCGYA8Ahg8JAIEiDQo&s=default)
 
-The following UML sequence specification may be pasted into and UML sequence diagram generator such as websequencediagram.com to view the resulting sequence diagram:
+The UML sequence specification for the above diagram follows:
 
     title ecchat /swap command
     participant Bob's xyzcoind
