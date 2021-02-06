@@ -63,6 +63,12 @@ def check_symbol(symbol):
 	return return_valid, return_index
 
 ################################################################################
+
+def coin_symbol(index):
+
+	return settings.chains[index]['coin_symbol']
+
+################################################################################
 ## urwid related ###############################################################
 ################################################################################
 
@@ -355,7 +361,7 @@ class ChatApp:
 
 		for i, coin in enumerate(coins):
 
-			text += ' {} # {:d}/{:d} '.format(settings.chains[i]['coin_symbol'], self.blocks[i], self.peers[i])
+			text += ' {} # {:d}/{:d} '.format(coin_symbol(i), self.blocks[i], self.peers[i])
 
 		self.statusT.set_text(text)
 
@@ -427,7 +433,7 @@ class ChatApp:
 
 		# Request address from peer
 
-		data = {'coin' : settings.chains[index]['coin_symbol'],
+		data = {'coin' : coin_symbol(index),
 				'type' : 'P2PKH'}
 
 		self.send_ecc_packet(eccPacket.METH_addrReq, data)
@@ -446,7 +452,7 @@ class ChatApp:
 
 		if address == '0':
 
-			self.append_message(0, 'Other party is unable or unwilling to receive unsolicited sends of {}'.format(settings.chains[self.send_index]['coin_symbol']))
+			self.append_message(0, 'Other party is unable or unwilling to receive unsolicited sends of {}'.format(coin_symbol(self.send_index)))
 
 			#TODO : Test this !!!
 
@@ -462,11 +468,11 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.send_amount, settings.chains[self.send_index]['coin_symbol'],address))
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.send_amount, coin_symbol(self.send_index),address))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : settings.chains[self.send_index]['coin_symbol'],
+			data = {'coin' : coin_symbol(self.send_index),
 					'amnt' : '{:f}'.format(self.send_amount),
 					'addr' : address,
 					'txid' : self.txid}
@@ -528,6 +534,8 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
 				self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
 				self.append_message(0, '%-8s - %s' % ('         <coin>', 'coin symbol - defaults to ecc'))
+				self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
+				self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
 
 			elif text.startswith('/version'):
 
@@ -553,7 +561,7 @@ class ChatApp:
 
 					for index, coin in enumerate(coins):
 
-						self.append_message(0, '{} : {:d}'.format(settings.chains[index]['coin_symbol'], coin.getblockcount()))
+						self.append_message(0, '{} : {:d}'.format(coin_symbol(index), coin.getblockcount()))
 
 			elif text.startswith('/peers'):
 
@@ -579,7 +587,7 @@ class ChatApp:
 
 						self.peers[index] = coin.getconnectioncount()
 
-						self.append_message(0, '{} : {:d}'.format(settings.chains[index]['coin_symbol'], self.peers[index]))
+						self.append_message(0, '{} : {:d}'.format(coin_symbol(index), self.peers[index]))
 
 			elif text.startswith('/tag'):
 
@@ -619,11 +627,11 @@ class ChatApp:
 
 						if balance_unc > 0:
 
-							self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(settings.chains[index]['coin_symbol'], balance_con, balance_unc))
+							self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coin_symbol(index), balance_con, balance_unc))
 
 						else:
 
-							self.append_message(0, '{} : {:f}'.format(settings.chains[index]['coin_symbol'], balance_con))
+							self.append_message(0, '{} : {:f}'.format(coin_symbol(index), balance_con))
 
 			elif text.startswith('/address'):
 
@@ -893,7 +901,7 @@ class ChatApp:
 
 			except pycurl.error:
 
-				print('Blockchain node for {} not available or incorrectly configured'.format(settings.chains[index]['coin_symbol']))
+				print('Blockchain node for {} not available or incorrectly configured'.format(coin_symbol(index)))
 
 				return False
 
