@@ -299,10 +299,14 @@ class ChatApp:
 		self.otherTag = tag
 
 		self.send_pending = False
+		self.send_amount  = 0.0
+		self.send_index   = 0
 
-		self.send_amount = 0.0
-
-		self.send_index = 0
+		self.swap_pending    = False
+		self.swap_amountGive = 0.0
+		self.swap_amountTake = 0.0
+		self.swap_indexGive  = 0
+		self.swap_indexTake  = 0
 
 		self.txid = ''
 
@@ -391,7 +395,7 @@ class ChatApp:
 
 	############################################################################
 
-	def start_send_ecc(self, amount, index):
+	def start_send(self, amount, index):
 
 		# Check 1 - Is a send currently incomplete ?
 
@@ -438,17 +442,15 @@ class ChatApp:
 
 		self.send_ecc_packet(eccPacket.METH_addrReq, data)
 
-		self.loop.set_alarm_in(10, self.timeout_send_ecc)
+		self.loop.set_alarm_in(10, self.timeout_send)
 
 		self.send_pending = True
-
-		self.send_amount = float_amount
-
-		self.send_index = index
+		self.send_amount  = float_amount
+		self.send_index   = index
 
 	############################################################################
 
-	def complete_send_ecc(self, address):
+	def complete_send(self, address):
 
 		if address == '0':
 
@@ -482,14 +484,12 @@ class ChatApp:
 		# /send command complete - reset state variables
 
 		self.send_pending = False
-
-		self.send_amount = 0.0
-
-		self.send_index = 0
+		self.send_amount  = 0.0
+		self.send_index   = 0
 
 	############################################################################
 
-	def timeout_send_ecc(self, loop = None, data = None):
+	def timeout_send(self, loop = None, data = None):
 
 		if self.send_pending:
 
@@ -498,10 +498,151 @@ class ChatApp:
 			# /send command cancelled - reset state variables
 
 			self.send_pending = False
+			self.send_amount  = 0.0
+			self.send_index   = 0
 
-			self.send_amount = 0.0
+	############################################################################
 
-			self.send_index = 0
+	def start_swap(self, amountGive, indexGive, amountTake, indexTake):
+
+		# Check 1 - Is a swap currently incomplete ?
+
+		if self.swap_pending:
+
+			self.append_message(0, 'Prior swap incomplete - try again later')
+
+			return
+
+		# Check 2 - Can the swap amount be converted to a float correctly ?
+
+		try:
+
+			float_amountGive = float(amountGive)
+			float_amountTake = float(amountTake)
+
+		except ValueError:
+
+			self.append_message(0, 'Invalid swap amount - number expected')
+
+			return
+
+		# Check 3 - Is the swap amount in a sensible range ?
+
+		if (float_amountGive <= 0) or (float_amountTake <= 0):
+
+			self.append_message(0, 'Invalid swap amount - must be greater than zero')
+
+			return
+
+		# Check 4 - Does the user's wallet hold an adequate balance ?
+
+		balance = coins[indexGive].getbalance()
+
+		if float_amountGive >= balance:
+
+			self.append_message(0, 'Invalid swap amount - must be less than current balance = {:f}'.format(balance))
+
+			return
+
+		# Send swap information
+
+		data = {'uuid' : str(uuid.uuid4()),
+				'cogv' : coin_symbol(indexGive),
+				'amgv' : float_amountGive,
+				'cotk' : coin_symbol(indexTake),
+				'amtk' : float_amountTake}
+
+		self.send_ecc_packet(eccPacket.METH_swapInf, data)
+
+		self.loop.set_alarm_in(60, self.timeout_swap)
+
+		self.swap_pending    = True
+		self.swap_amountGive = float_amountGive
+		self.swap_amountTake = float_amountTake
+		self.swap_indexGive  = indexGive
+		self.swap_indexTake  = indexTake
+
+	############################################################################
+
+	def swap_proposed(self, symbolGive, amountGive, symbolTake, amountTake):
+
+		# Notify user of swap proposal
+
+		self.append_message(0, 'Swap proposed : {} {} for {} {}'.format(amountGive, symbolGive, amountTake, symbolTake))
+
+		# Check 1 - Is a swap currently incomplete ?
+
+		if self.swap_pending:
+
+			self.append_message(0, 'Other swap is pending - swap proposal ignored')
+
+			return
+
+		# Check 2 - Are both the coins in the proposed swap available
+
+		validGive, indexGive = check_symbol(symbolGive)
+		validTake, indexTake = check_symbol(symbolTake)
+
+		if not validGive:
+
+			self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolGive')))
+
+			return
+
+		if not validTake:
+
+			self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolTake')))
+
+			return
+
+		# Check 3 - Can the swap amount be converted to a float correctly ?
+
+		try:
+
+			float_amountGive = float(amountGive)
+			float_amountTake = float(amountTake)
+
+		except ValueError:
+
+			self.append_message(0, 'Invalid swap amount - number expected')
+
+			return
+
+		# Check 4 - Is the swap amount in a sensible range ?
+
+		if (float_amountGive <= 0) or (float_amountTake <= 0):
+
+			self.append_message(0, 'Invalid swap amount - must be greater than zero')
+
+			return
+
+		# Check 5 - Does the user's wallet hold an adequate balance ?
+
+		balance = coins[indexTake].getbalance()
+
+		if float_amountTake >= balance:
+
+			self.append_message(0, 'Invalid swap amount - must be less than current balance = {:f}'.format(balance))
+
+			return
+
+		# TODO - Record stats and do the next thing
+
+	############################################################################
+
+	def timeout_swap(self, loop = None, data = None):
+
+		if self.swap_pending:
+
+			self.append_message(0, 'No /execute from other party - swap cancelled')
+
+			# /swap command cancelled - reset state variables
+
+			self.swap_pending    = False
+			self.swap_amountGive = 0.0
+			self.swap_amountTake = 0.0
+			self.swap_indexGive  = 0
+			self.swap_indexTake  = 0
 
 	############################################################################
 
@@ -668,7 +809,7 @@ class ChatApp:
 
 					if valid:
 
-						self.start_send_ecc(match_symbol.group('amount'), index)
+						self.start_send(match_symbol.group('amount'), index)
 
 					else:
 
@@ -676,7 +817,35 @@ class ChatApp:
 
 				elif match_default:
 
-					self.start_send_ecc(match_default.group('amount'), 0)
+					self.start_send(match_default.group('amount'), 0)
+
+				else:
+
+					self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
+
+			elif text.startswith('/swap'):
+
+				match = re.match('/swap (?P<amountGive>([0-9]*\.)?[0-9]+) (?P<symbolGive>\w+) for (?P<amountTake>([0-9]*\.)?[0-9]+) (?P<symbolTake>\w+)', text)
+
+				if match:
+
+					validGive, indexGive = check_symbol(match.group('symbolGive'))
+					validTake, indexTake = check_symbol(match.group('symbolTake'))
+
+					if validGive and validTake:
+
+						self.start_swap(match.group('amountGive'), indexGive,
+										match.group('amountTake'), indexTake)
+
+					else:
+
+						if not validGive:
+
+							self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolGive')))
+
+						if not validTake:
+
+							self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolTake')))
 
 				else:
 
@@ -847,7 +1016,7 @@ class ChatApp:
 
 					data = ecc_packet.get_data()
 
-					self.complete_send_ecc(data['addr'])
+					self.complete_send(data['addr'])
 
 				elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
 
@@ -856,6 +1025,12 @@ class ChatApp:
 					self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
 
 					self.txid = data['txid']
+
+				elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
+
+					data = ecc_packet.get_data()
+
+					self.swap_proposed(data['cogv'], data['amgv'], data['cotk'], data['amtk'])
 
 				else:
 

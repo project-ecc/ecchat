@@ -70,7 +70,7 @@ If the value `false` is returned in the `able` field it indicates that the appli
 The `addrReq` method is used to request a new receive address from the other party.
 
 	{
-		"coin" : "<ticker symbol>"
+		"coin" : "<coin symbol>"
 		"type" : "P2PKH|P2SH|bech32"
 	}
 
@@ -79,7 +79,7 @@ The `addrReq` method is used to request a new receive address from the other par
 The `addrRes` method is used to reply to a `addrReq` message.
 
 	{
-		"coin" : "<ticker symbol>"
+		"coin" : "<coin symbol>"
 		"addr" : "0|<address>"
 	}
 
@@ -90,7 +90,7 @@ If the value `0` is returned in the `addr` field it indicates that the other par
 The `txidInf` method is used to send transaction information from the sending party to the other party.
 
 	{
-		"coin" : "<ticker symbol>"
+		"coin" : "<coin symbol>"
 		"amnt" : "<coin amount>"
 		"addr" : "<receive address>"
 		"txid" : "<transaction ID>"
@@ -101,6 +101,11 @@ The `txidInf` method is used to send transaction information from the sending pa
 The swapInf method is used to send swap proposal information.
 
 	{
+		"uuid" : "<uuid value>"
+		"cogv" : "<coin symbol - give>"
+		"amgv" : "<coin amount - give>"
+		"cotk" : "<coin symbol - take>"
+		"amtk" : "<coin amount - take>"
 	}
 
 ### swapReq
@@ -108,6 +113,9 @@ The swapInf method is used to send swap proposal information.
 The swapReq method is used to initiate execution of the prior swap proposal, including the executing party's address information.
 
 	{
+		"uuid" : "<uuid value>"
+		"cotk" : "<coin symbol - take>"
+		"adtk" : "<address     - take>"
 	}
 
 ### swapRes
@@ -115,6 +123,9 @@ The swapReq method is used to initiate execution of the prior swap proposal, inc
 The swapRes method is used to confirm execution of the swap, including proposing party's address information.
 
 	{
+		"uuid" : "<uuid value>"
+		"cogv" : "<coin symbol - give>"
+		"adgv" : "<address     - give>"
 	} 
 
 ### ecchat `/send` command
@@ -125,21 +136,21 @@ The `addrReq`, `addrRes` and `txidInf` methods are used together to support the 
 
 The UML sequence specification for the above diagram follows:
 
-    title ecchat /send command
-    participant Bob's eccoind
-    participant Bob's ecchat
-    participant Alice's ecchat
-    participant Alice's eccoind
-    note over Bob's ecchat: /send 1000 ecc
-    Bob's ecchat->Alice's ecchat: ecchat:addrReq
-    Bob's ecchat-->Bob's ecchat: timeout 10s
-    Alice's ecchat->Alice's eccoind:RPC:getnewaddress
-    Alice's eccoind->Alice's ecchat:ecc address
-    Alice's ecchat->Bob's ecchat: ecchat:addrRes
-    Bob's ecchat->Bob's eccoind:RPC:sendtoaddress
-    Bob's eccoind->Bob's ecchat:ecc txid
-    Bob's ecchat->Alice's ecchat: ecchat:txidInf
-    note over Alice's ecchat:1000 ecc received ...
+	title ecchat /send command
+	participant Bob's eccoind
+	participant Bob's ecchat
+	participant Alice's ecchat
+	participant Alice's eccoind
+	note over Bob's ecchat: /send 1000 ecc
+	Bob's ecchat->Alice's ecchat: ecchat:addrReq
+	Bob's ecchat-->Bob's ecchat: timeout 10s
+	Alice's ecchat->Alice's eccoind:RPC:getnewaddress
+	Alice's eccoind->Alice's ecchat:ecc address
+	Alice's ecchat->Bob's ecchat: ecchat:addrRes
+	Bob's ecchat->Bob's eccoind:RPC:sendtoaddress
+	Bob's eccoind->Bob's ecchat:ecc txid
+	Bob's ecchat->Alice's ecchat: ecchat:txidInf
+	note over Alice's ecchat:1000 ecc received ...
 
 ### ecchat `/swap` command
 
@@ -149,35 +160,35 @@ The `swapInf`, `swapReq`, `swapRes` and `txidInf` methods are used together to s
 
 The UML sequence specification for the above diagram follows:
 
-    title ecchat /swap command
-    participant Bob's xyzcoind
-    participant Bob's eccoind
-    participant Bob's ecchat
-    participant Alice's ecchat
-    participant Alice's eccoind
-    participant Alice's xyzcoind
-    note over Bob's ecchat: /swap 1000 ecc for 1 xyz
-    Bob's ecchat->Alice's ecchat: ecchat:swapInf
-    Bob's ecchat-->Bob's ecchat: timeout 60s
-    note over Bob's ecchat: /swap 1100 ecc for 1 xyz
-    Bob's ecchat->Alice's ecchat: ecchat:swapInf
-    Bob's ecchat-->Bob's ecchat: timeout 60s
-    note over Alice's ecchat: /execute
-    Alice's ecchat->Alice's eccoind:RPC:getnewaddress
-    Alice's eccoind->Alice's ecchat:ecc address
-    Alice's ecchat->Bob's ecchat: ecchat:swapReq
-    Alice's ecchat-->Alice's ecchat: timeout 10s
-    Bob's ecchat->Bob's xyzcoind: RPC:getnewaddress
-    Bob's xyzcoind->Bob's ecchat: xyz address
-    Bob's ecchat->Alice's ecchat: ecchat:swapRes
-    Alice's ecchat->Alice's xyzcoind:RPC:sendtoaddress
-    Alice's xyzcoind->Alice's ecchat:xyz txid
-    Alice's ecchat->Bob's ecchat: ecchat:txidInf
-    note over Bob's ecchat:1 xyz received ...
-    Bob's ecchat->Bob's eccoind:RPC:sendtoaddress
-    Bob's eccoind->Bob's ecchat:ecc txid
-    Bob's ecchat->Alice's ecchat: ecchat:txidInf
-    note over Alice's ecchat:1100 ecc received ...
+	title ecchat /swap command
+	participant Bob's xyzcoind
+	participant Bob's eccoind
+	participant Bob's ecchat
+	participant Alice's ecchat
+	participant Alice's eccoind
+	participant Alice's xyzcoind
+	note over Bob's ecchat: /swap 1000 ecc for 1 xyz
+	Bob's ecchat->Alice's ecchat: ecchat:swapInf
+	Bob's ecchat-->Bob's ecchat: timeout 60s
+	note over Bob's ecchat: /swap 1100 ecc for 1 xyz
+	Bob's ecchat->Alice's ecchat: ecchat:swapInf
+	Bob's ecchat-->Bob's ecchat: timeout 60s
+	note over Alice's ecchat: /execute
+	Alice's ecchat->Alice's eccoind:RPC:getnewaddress
+	Alice's eccoind->Alice's ecchat:ecc address
+	Alice's ecchat->Bob's ecchat: ecchat:swapReq
+	Alice's ecchat-->Alice's ecchat: timeout 10s
+	Bob's ecchat->Bob's xyzcoind: RPC:getnewaddress
+	Bob's xyzcoind->Bob's ecchat: xyz address
+	Bob's ecchat->Alice's ecchat: ecchat:swapRes
+	Alice's ecchat->Alice's xyzcoind:RPC:sendtoaddress
+	Alice's xyzcoind->Alice's ecchat:xyz txid
+	Alice's ecchat->Bob's ecchat: ecchat:txidInf
+	note over Bob's ecchat:1 xyz received ...
+	Bob's ecchat->Bob's eccoind:RPC:sendtoaddress
+	Bob's eccoind->Bob's ecchat:ecc txid
+	Bob's ecchat->Alice's ecchat: ecchat:txidInf
+	note over Alice's ecchat:1100 ecc received ...
 
 ----------
 
@@ -234,7 +245,7 @@ The `data` value for each `meth` are as follows:
 The `faucetReq` method is used to request a payout from the faucet for coin `coin` to be sent to the address `addr`.
 
 	{
-		"coin" : "<ticker symbol>"
+		"coin" : "<coin symbol>"
 		"addr" : "<address>"
 	}
 
@@ -244,7 +255,7 @@ The `faucetRes` method is used to reply to a `faucetReq` message. It is used to 
 
 
 	{
-		"coin" : "<ticker symbol>"
+		"coin" : "<coin symbol>"
 		"amnt" : "<coin amount>"
 		"addr" : "<receive address>"
 		"txid" : "<transaction ID>"
@@ -270,19 +281,74 @@ The following `erno` values are defined:
 
 ## 4 : ectranslate
 
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 4
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
+
 ----------
 
 ## 5 : ecchatgroup
+
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 5
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
 
 ----------
 
 ## 6 : ecnodeproxy
 
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 6
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
+
 ----------
 
 ## 7 : ectorrent
 
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 7
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
+
 ----------
 
 ## 8 : ecvpn
+
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 8
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
 

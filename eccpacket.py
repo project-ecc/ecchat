@@ -14,18 +14,27 @@ class eccPacket():
 	METH_addrReq = 'addrReq'
 	METH_addrRes = 'addrRes'
 	METH_txidInf = 'txidInf'
+	METH_swapInf = 'swapInf'
+	METH_swapReq = 'swapReq'
+	METH_swapRes = 'swapRes'
 
 	METH_SET = [METH_chatMsg,
 				METH_chatAck,
 				METH_addrReq,
 				METH_addrRes,
-				METH_txidInf]
+				METH_txidInf,
+				METH_swapInf,
+				METH_swapReq,
+				METH_swapRes]
 
 	KEY_LIST = {METH_chatMsg : ('uuid', 'cmmd', 'text'),
 				METH_chatAck : ('uuid', 'cmmd', 'able'),
 				METH_addrReq : ('coin', 'type'),
 				METH_addrRes : ('coin', 'addr'),
-				METH_txidInf : ('coin', 'amnt', 'addr', 'txid')}
+				METH_txidInf : ('coin', 'amnt', 'addr', 'txid'),
+				METH_swapInf : ('uuid', 'cogv', 'amgv', 'cotk', 'amtk'),
+				METH_swapReq : ('uuid', 'cotk', 'adtk'),
+				METH_swapRes : ('uuid', 'cogv', 'adgv')}
 
 	############################################################################
 
