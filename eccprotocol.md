@@ -9,8 +9,9 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 |3|ecfaucet|
 |4|ectranslate|
 |5|ecchatgroup|
-|6|ectorrent|
-|7|ecvpn|
+|6|ecfullnodeproxy
+|7|ectorrent|
+|8|ecvpn|
 
 ----------
 
@@ -120,7 +121,7 @@ The swapRes method is used to confirm execution of the swap, including proposing
 
 The `addrReq`, `addrRes` and `txidInf` methods are used together to support the ecchat /send command.
 
-![alt text](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=magazine](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=magazine "ecchat /send command")
+![alt text](https://www.websequencediagrams.com/cgi-bin/cdraw?lz=dGl0bGUgZWNjaGF0IC9zZW5kIGNvbW1hbmQKcGFydGljaXBhbnQgQm9iJ3MgZWNjb2kAAhhoYXQAJg1BbGljZQABGgAUBwBLBW5vdGUgb3ZlcgBBDToAgQkHMTAwMCBlY2MKAF8MLT4AUg46AC0IYWRkclJlcQAfDi0-AEsOdGltZW91dCAxMHMKAIEaDgBLDW9pbmQ6UlBDOmdldG5ld2FkZHJlcwAlDW9pbmQAehFlY2MgABkTAIExBQCBUw4AgScNcwCBUg8AgmcNAIECBXNlbmR0bwCAfwgAgwcNAIFTD2VjYyB0eGlkAIIOJnR4aWRJbmYAgn0LAIJODwCCewggcmVjZWl2ZWQgLi4uCg&s=default)
 
 The UML sequence specification for the above diagram follows:
 
@@ -275,9 +276,13 @@ The following `erno` values are defined:
 
 ----------
 
-## 6 : ectorrent
+## 6 : ecfullnodeproxy
 
 ----------
 
-## 7 : ecvpn
+## 7 : ectorrent
+
+----------
+
+## 8 : ecvpn
 
