@@ -9,7 +9,7 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 |3|ecfaucet|
 |4|ectranslate|
 |5|ecchatgroup|
-|6|ecfullnodeproxy
+|6|ecnodeproxy
 |7|ectorrent|
 |8|ecvpn|
 
@@ -276,7 +276,7 @@ The following `erno` values are defined:
 
 ----------
 
-## 6 : ecfullnodeproxy
+## 6 : ecnodeproxy
 
 ----------
 
