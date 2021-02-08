@@ -743,6 +743,29 @@ class ChatApp:
 
 	def complete_swap(self):
 
+		if self.swap_pending:
+
+			try:
+
+				self.txid = coins[self.swap_indexGive].sendtoaddress(self.swap_addressGive, str(self.swap_amountGive), "ecchat")
+
+			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
+
+				self.append_message(0, 'Wallet locked - please unlock')
+
+			else:
+
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, self.swap_symbolgive, self.swap_addressGive))
+
+			# Send the METH_txidInf message - (coin, amount, address, txid)
+
+			data = {'coin' : coin_symbol(self.swap_indexGive),
+					'amnt' : '{:f}'.format(self.swap_amountGive),
+					'addr' : self.swap_addressGive,
+					'txid' : self.txid}
+
+			self.send_ecc_packet(eccPacket.METH_txidInf, data)
+
 		# /swap command complete - reset state variables
 
 		self.swap_pending    = False
@@ -1174,6 +1197,10 @@ class ChatApp:
 					self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
 
 					self.txid = data['txid']
+
+					if self.swap_pending:
+
+						complete_swap()
 
 				elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
 
