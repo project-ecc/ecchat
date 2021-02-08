@@ -584,9 +584,13 @@ class ChatApp:
 
 		if self.swap_pending:
 
-			self.append_message(0, 'Other swap is pending - swap proposal ignored')
-
-			return
+			self.swap_pending    = False
+			self.swap_uuid       = ''
+			self.swap_timeout_h  = 0
+			self.swap_amountGive = 0.0
+			self.swap_amountTake = 0.0
+			self.swap_indexGive  = 0
+			self.swap_indexTake  = 0
 
 		# Check 2 - Are both the coins in the proposed swap available
 
