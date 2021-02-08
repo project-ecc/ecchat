@@ -1200,7 +1200,7 @@ class ChatApp:
 
 					if self.swap_pending:
 
-						complete_swap()
+						self.complete_swap()
 
 				elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
 
