@@ -466,7 +466,7 @@ class ChatApp:
 
 				self.txid = coins[self.send_index].sendtoaddress(address, str(self.send_amount), "ecchat")
 
-			except exc.RpcWalletUnlockNeeded:
+			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
 				self.append_message(0, 'Wallet locked - please unlock')
 
@@ -654,11 +654,11 @@ class ChatApp:
 
 			return
 
-		address = coins[self.swap_indexTake].getnewaddress()
+		address = coins[self.swap_indexGive].getnewaddress()
 
 		data = {'uuid' : self.swap_uuid,
-				'cotk' : coin_symbol(self.swap_indexTake),
-				'adtk' : address}
+				'cogv' : coin_symbol(self.swap_indexGive),
+				'adgv' : address}
 
 		self.send_ecc_packet(eccPacket.METH_swapReq, data)
 
@@ -666,74 +666,88 @@ class ChatApp:
 
 	############################################################################
 
-	def swap_request(self, symbolTake, addressTake):
+	def swap_request(self, symbolGive, addressGive):
 
 		if self.swap_pending:
 
-			assert symbolTake == coin_symbol(self.swap_indexTake)
+			assert symbolGive == coin_symbol(self.swap_indexGive)
 
-			self.swap_addressTake = addressTake
+			self.swap_addressGive = addressGive
 
-			address = coins[self.swap_indexGive].getnewaddress()
+			address = coins[self.swap_indexTake].getnewaddress()
 
 			data = {'uuid' : self.swap_uuid,
-					'cogv' : coin_symbol(self.swap_indexGive),
-					'adgv' : address}
+					'cotk' : coin_symbol(self.swap_indexTake),
+					'adtk' : address}
 
 			self.send_ecc_packet(eccPacket.METH_swapRes, data)
 
 		else:
 
 			data = {'uuid' : '',
-					'cogv' : '',
-					'adgv' : '0'}
+					'cotk' : '',
+					'adtk' : '0'}
 
 			self.send_ecc_packet(eccPacket.METH_swapRes, data)
 
 	############################################################################
 
-	def swap_response(self, symbolGive, addressGive):
+	def swap_response(self, symbolTake, addressTake):
 
-		if addressGive == '0':
+		if addressTake == '0':
 
-			self.append_message(0, 'Other party is unable or unwilling to receive swaped {}'.format(symbolGive))
+			self.append_message(0, 'Other party is unable or unwilling to receive swaped {}'.format(symbolTake))
 
 			#TODO : Test this !!!
 
-		if self.swap_pending and addressGive != '0':
+		if self.swap_pending and addressTake != '0':
 
-			assert symbolGive == coin_symbol(self.swap_indexGive)
+			assert symbolTake == coin_symbol(self.swap_indexTake)
 
 			try:
 
-				self.txid = coins[self.swap_indexGive].sendtoaddress(addressGive, str(self.swap_amountGive), "ecchat")
+				self.txid = coins[self.swap_indexTake].sendtoaddress(addressGive, str(self.swap_amountTake), "ecchat")
 
-			except exc.RpcWalletUnlockNeeded:
+			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
 				self.append_message(0, 'Wallet locked - please unlock')
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, symbolGive, addressGive))
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountTake, symbolTake, addressTake))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : coin_symbol(self.swap_indexGive),
-					'amnt' : '{:f}'.format(self.swap_amountGive),
-					'addr' : addressGive,
+			data = {'coin' : coin_symbol(self.swap_indexTake),
+					'amnt' : '{:f}'.format(self.swap_amountTake),
+					'addr' : addressTake,
 					'txid' : self.txid}
 
 			self.send_ecc_packet(eccPacket.METH_txidInf, data)
 
 		# /execute command complete - reset state variables
 
-			self.swap_pending    = False
-			self.swap_uuid       = ''
-			self.swap_timeout_h  = 0
-			self.swap_amountGive = 0.0
-			self.swap_amountTake = 0.0
-			self.swap_indexGive  = 0
-			self.swap_indexTake  = 0
+		self.swap_pending    = False
+		self.swap_uuid       = ''
+		self.swap_timeout_h  = 0
+		self.swap_amountGive = 0.0
+		self.swap_amountTake = 0.0
+		self.swap_indexGive  = 0
+		self.swap_indexTake  = 0
+
+	############################################################################
+
+	def complete_swap(self):
+
+		# /swap command complete - reset state variables
+
+		self.swap_pending    = False
+		self.swap_uuid       = ''
+		self.swap_timeout_h  = 0
+		self.swap_amountGive = 0.0
+		self.swap_amountTake = 0.0
+		self.swap_indexGive  = 0
+		self.swap_indexTake  = 0
 
 	############################################################################
 
@@ -1167,13 +1181,13 @@ class ChatApp:
 
 					data = ecc_packet.get_data()
 
-					self.swap_request(data['cotk'], data['adtk'])
+					self.swap_request(data['cogv'], data['adgv'])
 
 				elif ecc_packet.get_meth() == eccPacket.METH_swapRes:
 
 					data = ecc_packet.get_data()
 
-					self.swap_response(data['cogv'], data['adgv'])
+					self.swap_response(data['cotk'], data['adtk'])
 
 				else:
 

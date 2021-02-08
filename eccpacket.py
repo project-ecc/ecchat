@@ -33,8 +33,8 @@ class eccPacket():
 				METH_addrRes : ('coin', 'addr'),
 				METH_txidInf : ('coin', 'amnt', 'addr', 'txid'),
 				METH_swapInf : ('uuid', 'cogv', 'amgv', 'cotk', 'amtk'),
-				METH_swapReq : ('uuid', 'cotk', 'adtk'),
-				METH_swapRes : ('uuid', 'cogv', 'adgv')}
+				METH_swapReq : ('uuid', 'cogv', 'adgv'),
+				METH_swapRes : ('uuid', 'cotk', 'adtk')}
 
 	############################################################################
 

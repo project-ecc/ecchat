@@ -98,7 +98,7 @@ The `txidInf` method is used to send transaction information from the sending pa
 
 ### swapInf
 
-The swapInf method is used to send swap proposal information.
+The `swapInf` method is used to send swap proposal information.
 
 	{
 		"uuid" : "<uuid value>"
@@ -110,23 +110,25 @@ The swapInf method is used to send swap proposal information.
 
 ### swapReq
 
-The swapReq method is used to initiate execution of the prior swap proposal, including the executing party's address information.
-
-	{
-		"uuid" : "<uuid value>"
-		"cotk" : "<coin symbol - take>"
-		"adtk" : "<address     - take>"
-	}
-
-### swapRes
-
-The swapRes method is used to confirm execution of the swap, including proposing party's address information.
+The `swapReq` method is used to initiate execution of the prior swap proposal, including the executing party's address information.
 
 	{
 		"uuid" : "<uuid value>"
 		"cogv" : "<coin symbol - give>"
 		"adgv" : "<address     - give>"
+	}
+
+### swapRes
+
+The `swapRe`s method is used to confirm execution of the swap, including proposing party's address information.
+
+	{
+		"uuid" : "<uuid value>"
+		"cotk" : "<coin symbol - take>"
+		"adtk" : "0|<address   - take>"
 	} 
+
+If the value `0` is returned in the `addr` field it indicates that the other party is unable or unwilling to proceed with swap execution.
 
 ### ecchat `/send` command
 
