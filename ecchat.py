@@ -710,7 +710,7 @@ class ChatApp:
 
 			try:
 
-				self.txid = coins[self.swap_indexTake].sendtoaddress(addressGive, str(self.swap_amountTake), "ecchat")
+				self.txid = coins[self.swap_indexTake].sendtoaddress(addressTake, str(self.swap_amountTake), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
