@@ -755,7 +755,7 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, self.swap_symbolgive, self.swap_addressGive))
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, self.swap_symbolGive, self.swap_addressGive))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
