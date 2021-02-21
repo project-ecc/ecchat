@@ -25,12 +25,13 @@ from zmqeventloop import zmqEventLoop
 
 # Full node RPC interface
 
-from slickrpc import Proxy
+#from slickrpc import Proxy
 from slickrpc import exc
 
-# eccPacket class
+# eccPacket & cryptoNode classes
 
-from eccpacket import eccPacket
+from eccpacket  import eccPacket
+from cryptonode import cryptoNode, eccoinNode
 
 coins = []
 
@@ -44,7 +45,7 @@ for index, chain in enumerate(settings.chains):
 
 			sys.exit()
 
-	coins.append(Proxy('http://%s:%s@%s' % (chain['rpc_user'], chain['rpc_pass'], chain['rpc_address'])))
+	coins.append(eccoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
 
 ################################################################################
 
@@ -241,21 +242,6 @@ class FrameFocus(urwid.Frame):
 	def mouse_event(self, size, event, button, col, row, focus):
 
 		self.set_focus(self.focus_part)
-
-################################################################################
-## chain class #################################################################
-################################################################################
-
-class blockChain():
-
-	############################################################################
-
-	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
-
-		self.symbol			= symbol
-		self.rpc_address	= rpc_address
-		self.rpc_user		= rpc_user
-		self.rpc_pass		= rpc_pass
 
 ################################################################################
 ## ChatApp class ###############################################################
@@ -1228,11 +1214,13 @@ class ChatApp:
 
 	def eccoinInitialise(self):
 
-		self.bufferKey = ""
+#		for coin in coins:
+
+#			coin.initialise()
 
 		try:
 
-			self.selfTag = coins[0].getroutingpubkey()
+			info = coins[0].getinfo()
 
 		except pycurl.error:
 
@@ -1246,7 +1234,13 @@ class ChatApp:
 
 			return False
 
+		#TODO : check version information.
+
+		self.bufferKey = ""
+
 		try:
+
+			self.selfTag   = coins[0].getroutingpubkey()
 
 			self.bufferKey = coins[0].registerbuffer(settings.protocol_id)
 
@@ -1296,10 +1290,17 @@ class ChatApp:
 
 			print('No route available to : %s' % self.otherTag)
 
-		for coin in coins:
+		for index, coin in enumerate(coins):
 
-			self.blocks.append(coin.getblockcount())
-			self.peers.append (coin.getconnectioncount())
+			if coin_symbol(index) == 'xmr':
+
+				self.blocks.append(coin.get_height())
+				self.peers.append (0)
+
+			else:
+
+				self.blocks.append(coin.getblockcount())
+				self.peers.append (coin.getconnectioncount())
 
 		return isRoute
 
