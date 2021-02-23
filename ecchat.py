@@ -331,7 +331,7 @@ class ChatApp:
 
 	def send_ecc_packet(self, meth, data):
 
-		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.selfTag, meth, data)
+		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, coins[0].routingTag, meth, data)
 
 		logging.info(ecc_packet.to_json())
 
@@ -886,7 +886,7 @@ class ChatApp:
 
 			elif text.startswith('/tag'):
 
-				self.append_message(0, '{}'.format(self.selfTag))
+				self.append_message(0, '{}'.format(coins[0].routingTag))
 
 			elif text.startswith('/balance'):
 
@@ -1119,7 +1119,7 @@ class ChatApp:
 
 			bufferCmd = 'GetBufferRequest:' + protocolID + str(next(self._bufferIdx))
 
-			bufferSig = coins[0].buffersignmessage(self.bufferKey, bufferCmd)
+			bufferSig = coins[0].buffersignmessage(coins[0].bufferKey, bufferCmd)
 
 			eccbuffer = coins[0].getbuffer(int(protocolID), bufferSig)
 
@@ -1214,41 +1214,19 @@ class ChatApp:
 
 	def eccoinInitialise(self):
 
+#		self.bufferKey = ""
+
+		if coins[0].initialise():
+
+			pass
+
+		else:
+
+			return False
+
 #		for coin in coins:
 
 #			coin.initialise()
-
-		try:
-
-			info = coins[0].getinfo()
-
-		except pycurl.error:
-
-			print('Failed to connect - check that local eccoin daemon is running')
-
-			return False
-
-		except exc.RpcInWarmUp:
-
-			print('Failed to connect - local eccoin daemon is starting but not ready - try again after 60 seconds')
-
-			return False
-
-		#TODO : check version information.
-
-		self.bufferKey = ""
-
-		try:
-
-			self.selfTag   = coins[0].getroutingpubkey()
-
-			self.bufferKey = coins[0].registerbuffer(settings.protocol_id)
-
-		except exc.RpcInternalError:
-
-			print('API Buffer was not correctly unregistered - try again after 60 seconds')
-
-			return False
 
 		for index, coin in enumerate(coins):
 
@@ -1292,15 +1270,8 @@ class ChatApp:
 
 		for index, coin in enumerate(coins):
 
-			if coin_symbol(index) == 'xmr':
-
-				self.blocks.append(coin.get_height())
-				self.peers.append (0)
-
-			else:
-
-				self.blocks.append(coin.getblockcount())
-				self.peers.append (coin.getconnectioncount())
+			self.blocks.append(coin.getblockcount())
+			self.peers.append (coin.getconnectioncount())
 
 		return isRoute
 
@@ -1308,11 +1279,7 @@ class ChatApp:
 
 	def reset_buffer_timeout(self, loop = None, data = None):
 
-		if self.bufferKey:
-
-			bufferSig = coins[0].buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
-
-			coins[0].resetbuffertimeout(settings.protocol_id, bufferSig)
+		if coins[0].reset_buffer_timeout():
 
 			loop.set_alarm_in(10, self.reset_buffer_timeout)
 
@@ -1320,13 +1287,9 @@ class ChatApp:
 
 	def eccoinShutdown(self):
 
-		if self.bufferKey:
+		for coin in coins:
 
-			bufferSig = coins[0].buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
-
-			coins[0].releasebuffer(settings.protocol_id, bufferSig)
-
-			self.bufferKey = ""
+			coin.shutdown()
 
 	############################################################################
 
