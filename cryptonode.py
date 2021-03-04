@@ -4,6 +4,8 @@
 import settings
 import pycurl
 
+from itertools import count
+
 from slickrpc import Proxy
 from slickrpc import exc
 
@@ -67,6 +69,8 @@ class eccoinNode(cryptoNode):
 	version_min = 30000
 	version_max = 30000
 
+	bufferIdx = count(start=1)
+
 	############################################################################
 
 	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
@@ -77,6 +81,12 @@ class eccoinNode(cryptoNode):
 
 		self.routingTag = ''
 		self.bufferKey  = ''
+
+	############################################################################
+
+	def routingTag(self):
+
+		return self.routingTag
 
 	############################################################################
 
@@ -129,6 +139,44 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
+	def setup_route(self, targetRoute):
+
+		try:
+
+			self.proxy.findroute(targetRoute)
+
+			isRoute = self.proxy.haveroute(targetRoute)
+
+		except exc.RpcInvalidAddressOrKey:
+
+			raise cryptoNodeException('Routing tag has invalid base64 encoding : {}'.format(targetRoute))
+
+		if not isRoute:
+
+			raise cryptoNodeException('No route available to : {}'.format(targetRoute))
+
+	############################################################################
+
+	def get_buffer(self, protocol_id = 1):
+
+		assert protocol_id == settings.protocol_id
+
+		if self.bufferKey:
+
+			bufferCmd = 'GetBufferRequest:' + str(protocol_id) + str(next(self.bufferIdx))
+
+			bufferSig = self.proxy.buffersignmessage(self.bufferKey, bufferCmd)
+
+			eccbuffer = self.proxy.getbuffer(protocol_id, bufferSig)
+
+			return eccbuffer
+
+		else:
+
+			return None
+
+	############################################################################
+
 	def shutdown(self):
 
 		if self.bufferKey:
@@ -138,18 +186,6 @@ class eccoinNode(cryptoNode):
 			self.proxy.releasebuffer(settings.protocol_id, bufferSig)
 
 			self.bufferKey = ''
-
-	#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY
-
-	def routingTag(self):
-
-		return self.routingTag
-
-	#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY
-
-	def bufferKey(self):
-
-		return self.bufferKey
 
 ################################################################################
 ## bitcoinNode class ############################################################

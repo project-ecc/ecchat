@@ -17,8 +17,6 @@ import zmq
 import sys
 import re
 
-from itertools import count
-
 # ZMQ event loop adapter for urwid
 
 from zmqeventloop import zmqEventLoop
@@ -248,8 +246,6 @@ class FrameFocus(urwid.Frame):
 ################################################################################
 
 class ChatApp:
-
-	_bufferIdx = count(start=1)
 
 	_clock_fmt = '[%H:%M:%S] '
 
@@ -1117,11 +1113,7 @@ class ChatApp:
 
 			protocolID = contents.decode()[1:]
 
-			bufferCmd = 'GetBufferRequest:' + protocolID + str(next(self._bufferIdx))
-
-			bufferSig = coins[0].buffersignmessage(coins[0].bufferKey, bufferCmd)
-
-			eccbuffer = coins[0].getbuffer(int(protocolID), bufferSig)
+			eccbuffer = coins[0].get_buffer(int(protocolID))
 
 			for packet in eccbuffer.values():
 
@@ -1254,26 +1246,20 @@ class ChatApp:
 
 		try:
 
-			coins[0].findroute(self.otherTag)
+			coins[0].setup_route(self.otherTag)
 
-			isRoute = coins[0].haveroute(self.otherTag)
+		except cryptoNodeException as error:
 
-		except exc.RpcInvalidAddressOrKey:
-
-			print('Routing tag has invalid base64 encoding : %s' % self.otherTag)
+			print(error)
 
 			return False
-
-		if not isRoute:
-
-			print('No route available to : %s' % self.otherTag)
 
 		for index, coin in enumerate(coins):
 
 			self.blocks.append(coin.getblockcount())
 			self.peers.append (coin.getconnectioncount())
 
-		return isRoute
+		return True
 
 	############################################################################
 
