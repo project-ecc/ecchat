@@ -31,7 +31,7 @@ from slickrpc import exc
 # eccPacket & cryptoNode classes
 
 from eccpacket  import eccPacket
-from cryptonode import cryptoNode, eccoinNode
+from cryptonode import cryptoNode, eccoinNode, cryptoNodeException
 
 coins = []
 
@@ -1214,13 +1214,13 @@ class ChatApp:
 
 	def eccoinInitialise(self):
 
-#		self.bufferKey = ""
+		try:
 
-		if coins[0].initialise():
+			coins[0].initialise()
 
-			pass
+		except cryptoNodeException as error:
 
-		else:
+			print(error)
 
 			return False
 

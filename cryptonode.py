@@ -8,6 +8,18 @@ from slickrpc import Proxy
 from slickrpc import exc
 
 ################################################################################
+## cryptoNodeException class ###################################################
+################################################################################
+
+class cryptoNodeException(Exception):
+
+	############################################################################
+
+	def __init__(self, message):
+
+		super().__init__(message)
+
+################################################################################
 ## cryptoNode class ############################################################
 ################################################################################
 
@@ -82,21 +94,15 @@ class eccoinNode(cryptoNode):
 
 		except pycurl.error:
 
-			print('Failed to connect - check that local eccoin daemon is running')
-
-			return False
+			raise cryptoNodeException('Failed to connect - check that eccoin daemon is running')
 
 		except exc.RpcInWarmUp:
 
-			print('Failed to connect - local eccoin daemon is starting but not ready - try again after 60 seconds')
-
-			return False
+			raise cryptoNodeException('Failed to connect -  eccoin daemon is starting but not ready - try again after 60 seconds')
 
 		if not self.version_min <= info['version'] <= self.version_max:
 
-			print('eccoind version {} not supported - please run a version in the range {}-{}'.format(info['version'], self.version_min, self.version_max))
-
-			return False
+			raise cryptoNodeException('eccoind version {} not supported - please run a version in the range {}-{}'.format(info['version'], self.version_min, self.version_max))
 
 		try:
 
@@ -105,23 +111,7 @@ class eccoinNode(cryptoNode):
 
 		except exc.RpcInternalError:
 
-			print('API Buffer was not correctly unregistered - try again after 60 seconds')
-
-			return False
-
-		return True
-
-	############################################################################
-
-	def shutdown(self):
-
-		if self.bufferKey:
-
-			bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
-
-			self.proxy.releasebuffer(settings.protocol_id, bufferSig)
-
-			self.bufferKey = ''
+			raise cryptoNodeException('API Buffer was not correctly unregistered - try again after 60 seconds')
 
 	############################################################################
 
@@ -136,6 +126,18 @@ class eccoinNode(cryptoNode):
 			return True
 
 		return False
+
+	############################################################################
+
+	def shutdown(self):
+
+		if self.bufferKey:
+
+			bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
+
+			self.proxy.releasebuffer(settings.protocol_id, bufferSig)
+
+			self.bufferKey = ''
 
 	#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY#TEMPORARY
 
