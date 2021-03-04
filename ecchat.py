@@ -6,7 +6,6 @@ import settings
 import argparse
 import pathlib
 import logging
-import socket
 import pycurl
 import signal
 import codecs
@@ -1297,13 +1296,7 @@ class ChatApp:
 
 			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
 
-			for address in self.zmq_address:
-
-				if not address:
-
-					self.loop.set_alarm_in(10, self.block_refresh_timed)
-
-					break
+			self.loop.set_alarm_in(10, self.block_refresh_timed)
 
 			self.loop.run()
 
