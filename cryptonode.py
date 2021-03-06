@@ -211,7 +211,61 @@ class bitcoinNode(cryptoNode):
 
 	def initialise(self):
 
+		try:
+
+			info = self.proxy.getinfo()
+
+		except pycurl.error:
+
+			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
+
+		except exc.RpcInWarmUp:
+
+			raise cryptoNodeException('Failed to connect -  {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
+
+
+	############################################################################
+
+	def shutdown(self):
+
 		pass
+
+################################################################################
+## litecoinNode class ##########################################################
+################################################################################
+
+class litecoinNode(cryptoNode):
+
+	############################################################################
+
+	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
+
+		super().__init__(symbol, rpc_address, rpc_user, rpc_pass)
+
+		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address))
+
+	############################################################################
+
+	def __getattr__(self, method):
+
+		return getattr(self.proxy, method)
+
+	############################################################################
+
+	def initialise(self):
+
+		try:
+
+			info = self.proxy.getnetworkinfo()
+
+		except pycurl.error:
+
+			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
+
+		except exc.RpcInWarmUp:
+
+			raise cryptoNodeException('Failed to connect -  {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
+
 
 	############################################################################
 

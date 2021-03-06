@@ -28,7 +28,7 @@ from slickrpc import exc
 # eccPacket & cryptoNode classes
 
 from eccpacket  import eccPacket
-from cryptonode import cryptoNode, eccoinNode, cryptoNodeException
+from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
 
 coins = []
 
@@ -42,7 +42,21 @@ for index, chain in enumerate(settings.chains):
 
 			sys.exit()
 
-	coins.append(eccoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
+	if chain['coin_symbol'] == 'ecc':
+
+		coins.append(eccoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
+
+	elif chain['coin_symbol'] == 'ltc':
+
+		coins.append(litecoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
+
+	elif chain['coin_symbol'] == 'xmr':
+
+		coins.append(moneroNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
+
+	else:
+
+		coins.append(bitcoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
 
 ################################################################################
 
@@ -1205,6 +1219,8 @@ class ChatApp:
 
 	def eccoinInitialise(self):
 
+		#for coin in coins:
+
 		try:
 
 			coins[0].initialise()
@@ -1214,10 +1230,6 @@ class ChatApp:
 			print(error)
 
 			return False
-
-#		for coin in coins:
-
-#			coin.initialise()
 
 		for index, coin in enumerate(coins):
 
