@@ -36,6 +36,11 @@ class cryptoNode():
 		self.rpc_user    = rpc_user
 		self.rpc_pass    = rpc_pass
 
+		self.blocks      = 0
+		self.peers       = 0
+
+		self.zmqAddress  = ''
+
 	############################################################################
 
 	def __getattr__(self, method):
@@ -44,13 +49,13 @@ class cryptoNode():
 
 	############################################################################
 
-	def symbol(self):
+	def initialise(self):
 
-		return self.symbol
+		raise NotImplementedError
 
 	############################################################################
 
-	def initialise(self):
+	def refresh(self):
 
 		raise NotImplementedError
 
@@ -81,12 +86,6 @@ class eccoinNode(cryptoNode):
 
 		self.routingTag = ''
 		self.bufferKey  = ''
-
-	############################################################################
-
-	def routingTag(self):
-
-		return self.routingTag
 
 	############################################################################
 
@@ -122,6 +121,31 @@ class eccoinNode(cryptoNode):
 		except exc.RpcInternalError:
 
 			raise cryptoNodeException('API Buffer was not correctly unregistered - try again after 60 seconds')
+
+		try:
+
+			zmqnotifications = self.proxy.getzmqnotifications()
+
+		except pycurl.error:
+
+			raise cryptoNodeException('Blockchain node for {} not available or incorrectly configured'.format(self.symbol))
+
+		except (exc.RpcMethodNotFound, ValueError):
+
+			zmqnotifications = []
+
+		for zmqnotification in zmqnotifications:
+
+			if zmqnotification['type'] == 'pubhashblock':
+
+				self.zmqAddress = zmqnotification['address']
+
+	############################################################################
+
+	def refresh(self):
+
+		self.blocks = self.proxy.getblockcount()
+		self.peers  = self.proxy.getconnectioncount()
 
 	############################################################################
 
@@ -223,6 +247,30 @@ class bitcoinNode(cryptoNode):
 
 			raise cryptoNodeException('Failed to connect -  {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
 
+		try:
+
+			zmqnotifications = self.proxy.getzmqnotifications()
+
+		except pycurl.error:
+
+			raise cryptoNodeException('Blockchain node for {} not available or incorrectly configured'.format(self.symbol))
+
+		except (exc.RpcMethodNotFound, ValueError):
+
+			zmqnotifications = []
+
+		for zmqnotification in zmqnotifications:
+
+			if zmqnotification['type'] == 'pubhashblock':
+
+				self.zmqAddress = zmqnotification['address']
+
+	############################################################################
+
+	def refresh(self):
+		
+		self.blocks = self.proxy.getblockcount()
+		self.peers  = self.proxy.getconnectioncount()
 
 	############################################################################
 
@@ -266,6 +314,30 @@ class litecoinNode(cryptoNode):
 
 			raise cryptoNodeException('Failed to connect -  {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
 
+		try:
+
+			zmqnotifications = self.proxy.getzmqnotifications()
+
+		except pycurl.error:
+
+			raise cryptoNodeException('Blockchain node for {} not available or incorrectly configured'.format(self.symbol))
+
+		except (exc.RpcMethodNotFound, ValueError):
+
+			zmqnotifications = []
+
+		for zmqnotification in zmqnotifications:
+
+			if zmqnotification['type'] == 'pubhashblock':
+
+				self.zmqAddress = zmqnotification['address']
+
+	############################################################################
+
+	def refresh(self):
+		
+		self.blocks = self.proxy.getblockcount()
+		self.peers  = self.proxy.getconnectioncount()
 
 	############################################################################
 
@@ -299,6 +371,12 @@ class moneroNode(cryptoNode):
 
 	def initialise(self):
 
+		pass
+
+	############################################################################
+
+	def refresh(self):
+		
 		pass
 
 	############################################################################

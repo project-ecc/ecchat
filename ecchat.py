@@ -6,7 +6,6 @@ import settings
 import argparse
 import pathlib
 import logging
-import pycurl
 import signal
 import codecs
 import urwid
@@ -23,7 +22,7 @@ from zmqeventloop import zmqEventLoop
 # Full node RPC interface
 
 #from slickrpc import Proxy
-from slickrpc import exc
+from slickrpc import exc # RpcWalletUnlockNeeded only
 
 # eccPacket & cryptoNode classes
 
@@ -65,20 +64,14 @@ def check_symbol(symbol):
 	return_valid = False
 	return_index = 0
 
-	for index, chain in enumerate(settings.chains):
+	for index, coin in enumerate(coins):
 
-		if symbol.lower() == chain['coin_symbol']:
+		if symbol.lower() == coin.symbol:
 
 			return_valid = True
 			return_index = index
 
 	return return_valid, return_index
-
-################################################################################
-
-def coin_symbol(index):
-
-	return settings.chains[index]['coin_symbol']
 
 ################################################################################
 ## urwid related ###############################################################
@@ -307,11 +300,6 @@ class ChatApp:
 
 		self.txid = ''
 
-		self.blocks = []
-		self.peers  = []
-
-		self.zmq_address = []
-
 		self.subscribers = []
 
 	############################################################################
@@ -360,13 +348,11 @@ class ChatApp:
 
 		text = time.strftime(self._clock_fmt)
 
-		for i, coin in enumerate(coins):
+		for coin in coins:
 
-			text += ' {} # {:d}/{:d} '.format(coin_symbol(i), self.blocks[i], self.peers[i])
+			text += ' {} # {:d}/{:d} '.format(coin.symbol, coin.blocks, coin.peers)
 
 		self.statusT.set_text(text)
-
-		#self.statusT.set_text('{} ecc # {:d}/{:d}'.format(time.strftime(self._clock_fmt), self.blocks[0], self.peers[0]))
 
 		loop.set_alarm_in(1, self.clock_refresh)
 
@@ -374,19 +360,17 @@ class ChatApp:
 
 	def block_refresh(self, index):
 
-		self.blocks[index] = coins[index].getblockcount()
-		self.peers [index] = coins[index].getconnectioncount()
+		coins[index].refresh()
 
 	############################################################################
 
 	def block_refresh_timed(self, loop = None, data = None):
 
-		for index, address in enumerate(self.zmq_address):
+		for coin in coins:
 
-			if not address:
+			if not coin.zmqAddress:
 
-				self.blocks[index] = coins[index].getblockcount()
-				self.peers [index] = coins[index].getconnectioncount()
+				coin.refresh()
 
 		loop.set_alarm_in(10, self.block_refresh_timed)
 
@@ -434,7 +418,7 @@ class ChatApp:
 
 		# Request address from peer
 
-		data = {'coin' : coin_symbol(index),
+		data = {'coin' : coins[index].symbol,
 				'type' : 'P2PKH'}
 
 		self.send_ecc_packet(eccPacket.METH_addrReq, data)
@@ -451,7 +435,7 @@ class ChatApp:
 
 		if address == '0':
 
-			self.append_message(0, 'Other party is unable or unwilling to receive unsolicited sends of {}'.format(coin_symbol(self.send_index)))
+			self.append_message(0, 'Other party is unable or unwilling to receive unsolicited sends of {}'.format(coins[self.send_index].symbol))
 
 			#TODO : Test this !!!
 
@@ -467,11 +451,11 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.send_amount, coin_symbol(self.send_index),address))
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.send_amount, coins[self.send_index].symbol,address))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : coin_symbol(self.send_index),
+			data = {'coin' : coins[self.send_index].symbol,
 					'amnt' : '{:f}'.format(self.send_amount),
 					'addr' : address,
 					'txid' : self.txid}
@@ -550,9 +534,9 @@ class ChatApp:
 		# Send swap information
 
 		data = {'uuid' : str(uuid.uuid4()),
-				'cogv' : coin_symbol(indexGive),
+				'cogv' : coins[indexGive].symbol,
 				'amgv' : float_amountGive,
-				'cotk' : coin_symbol(indexTake),
+				'cotk' : coins[indexTake].symbol,
 				'amtk' : float_amountTake}
 
 		self.send_ecc_packet(eccPacket.METH_swapInf, data)
@@ -656,7 +640,7 @@ class ChatApp:
 		address = coins[self.swap_indexGive].getnewaddress()
 
 		data = {'uuid' : self.swap_uuid,
-				'cogv' : coin_symbol(self.swap_indexGive),
+				'cogv' : coins[self.swap_indexGive].symbol,
 				'adgv' : address}
 
 		self.send_ecc_packet(eccPacket.METH_swapReq, data)
@@ -669,14 +653,14 @@ class ChatApp:
 
 		if self.swap_pending:
 
-			assert symbolGive == coin_symbol(self.swap_indexGive)
+			assert symbolGive == coins[self.swap_indexGive].symbol
 
 			self.swap_addressGive = addressGive
 
 			address = coins[self.swap_indexTake].getnewaddress()
 
 			data = {'uuid' : self.swap_uuid,
-					'cotk' : coin_symbol(self.swap_indexTake),
+					'cotk' : coins[self.swap_indexTake].symbol,
 					'adtk' : address}
 
 			self.send_ecc_packet(eccPacket.METH_swapRes, data)
@@ -701,7 +685,7 @@ class ChatApp:
 
 		if self.swap_pending and addressTake != '0':
 
-			assert symbolTake == coin_symbol(self.swap_indexTake)
+			assert symbolTake == coins[self.swap_indexTake].symbol
 
 			try:
 
@@ -717,7 +701,7 @@ class ChatApp:
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : coin_symbol(self.swap_indexTake),
+			data = {'coin' : coins[self.swap_indexTake].symbol,
 					'amnt' : '{:f}'.format(self.swap_amountTake),
 					'addr' : addressTake,
 					'txid' : self.txid}
@@ -750,11 +734,11 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, coin_symbol(self.swap_indexGive), self.swap_addressGive))
+				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, coins[self.swap_indexGive].symbol, self.swap_addressGive))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : coin_symbol(self.swap_indexGive),
+			data = {'coin' : coins[self.swap_indexGive].symbol,
 					'amnt' : '{:f}'.format(self.swap_amountGive),
 					'addr' : self.swap_addressGive,
 					'txid' : self.txid}
@@ -855,7 +839,7 @@ class ChatApp:
 
 					if valid:
 
-						self.append_message(0, '{:d}'.format(coins[index].getblockcount()))
+						self.append_message(0, '{:d}'.format(coins[index].blocks))
 
 					else:
 
@@ -863,9 +847,9 @@ class ChatApp:
 
 				else:
 
-					for index, coin in enumerate(coins):
+					for coin in coins:
 
-						self.append_message(0, '{} : {:d}'.format(coin_symbol(index), coin.getblockcount()))
+						self.append_message(0, '{} : {:d}'.format(coin.symbol, coin.blocks))
 
 			elif text.startswith('/peers'):
 
@@ -877,9 +861,7 @@ class ChatApp:
 
 					if valid:
 
-						self.peers[index] = coins[index].getconnectioncount()
-
-						self.append_message(0, '{:d}'.format(self.peers[index]))
+						self.append_message(0, '{:d}'.format(coins[index].peers))
 
 					else:
 
@@ -887,11 +869,9 @@ class ChatApp:
 
 				else:
 
-					for index, coin in enumerate(coins):
+					for coin in coins:
 
-						self.peers[index] = coin.getconnectioncount()
-
-						self.append_message(0, '{} : {:d}'.format(coin_symbol(index), self.peers[index]))
+						self.append_message(0, '{} : {:d}'.format(coin.symbol, coin.peers))
 
 			elif text.startswith('/tag'):
 
@@ -931,11 +911,11 @@ class ChatApp:
 
 						if balance_unc > 0:
 
-							self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coin_symbol(index), balance_con, balance_unc))
+							self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coins[index].symbol, balance_con, balance_unc))
 
 						else:
 
-							self.append_message(0, '{} : {:f}'.format(coin_symbol(index), balance_con))
+							self.append_message(0, '{} : {:f}'.format(coins[index].symbol, balance_con))
 
 			elif text.startswith('/address'):
 
@@ -1082,13 +1062,13 @@ class ChatApp:
 
 		self.event_loop = zmqEventLoop()
 
-		for index, address in enumerate(self.zmq_address):
+		for index, coin in enumerate(coins):
 
 			self.subscribers.append(self.context.socket(zmq.SUB))
 
-			if address:
+			if coin.zmqAddress:
 
-				self.subscribers[index].connect(address)
+				self.subscribers[index].connect(coin.zmqAddress)
 
 				self.subscribers[index].setsockopt(zmq.SUBSCRIBE, b'')
 
@@ -1219,56 +1199,22 @@ class ChatApp:
 
 	def eccoinInitialise(self):
 
-		#for coin in coins:
-
-		try:
-
-			coins[0].initialise()
-
-		except cryptoNodeException as error:
-
-			print(error)
-
-			return False
-
-		for index, coin in enumerate(coins):
+		for coin in coins:
 
 			try:
 
-				zmqnotifications = coins[index].getzmqnotifications()
+				coin.initialise()
+				coin.refresh()
 
-			except pycurl.error:
+				if coin == coins[0]:
 
-				print('Blockchain node for {} not available or incorrectly configured'.format(coin_symbol(index)))
+					coin.setup_route(self.otherTag)
+
+			except cryptoNodeException as error:
+
+				print(error)
 
 				return False
-
-			except (exc.RpcMethodNotFound, ValueError):
-
-				zmqnotifications = []
-
-			self.zmq_address.append('')
-
-			for zmqnotification in zmqnotifications:
-
-				if zmqnotification['type'] == 'pubhashblock':
-
-					self.zmq_address[index] = zmqnotification['address']
-
-		try:
-
-			coins[0].setup_route(self.otherTag)
-
-		except cryptoNodeException as error:
-
-			print(error)
-
-			return False
-
-		for index, coin in enumerate(coins):
-
-			self.blocks.append(coin.getblockcount())
-			self.peers.append (coin.getconnectioncount())
 
 		return True
 
