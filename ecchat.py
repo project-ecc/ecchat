@@ -51,7 +51,7 @@ for index, chain in enumerate(settings.chains):
 
 	elif chain['coin_symbol'] == 'xmr':
 
-		coins.append(moneroNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
+		coins.append(moneroNode(chain['coin_symbol'], chain['rpc_address'],chain['rpc_daemon'], chain['rpc_user'], chain['rpc_pass']))
 
 	else:
 
@@ -1059,7 +1059,6 @@ class ChatApp:
 	def zmqInitialise(self):
 
 		self.context    = zmq.Context()
-
 		self.event_loop = zmqEventLoop()
 
 		for index, coin in enumerate(coins):
@@ -1069,7 +1068,6 @@ class ChatApp:
 			if coin.zmqAddress:
 
 				self.subscribers[index].connect(coin.zmqAddress)
-
 				self.subscribers[index].setsockopt(zmq.SUBSCRIBE, b'')
 
 				self.event_loop.watch_queue(self.subscribers[index], self.zmqHandler, zmq.POLLIN, index)
@@ -1108,92 +1106,94 @@ class ChatApp:
 
 			eccbuffer = coins[0].get_buffer(int(protocolID))
 
-			for packet in eccbuffer.values():
+			if eccbuffer:
 
-				message = codecs.decode(packet, 'hex').decode()
+				for packet in eccbuffer.values():
 
-				ecc_packet = eccPacket.from_json(message)
+					message = codecs.decode(packet, 'hex').decode()
 
-				if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
+					ecc_packet = eccPacket.from_json(message)
 
-					data = ecc_packet.get_data()
+					if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
 
-					if data['cmmd'] == 'add':
+						data = ecc_packet.get_data()
 
-						self.append_message(2, data['text'])
+						if data['cmmd'] == 'add':
 
-						rData = {'uuid' : data['uuid'],
-								 'cmmd' : data['cmmd'],
-								 'able' : True}
+							self.append_message(2, data['text'])
+
+							rData = {'uuid' : data['uuid'],
+									 'cmmd' : data['cmmd'],
+									 'able' : True}
+
+						else:
+
+							rData = {'uuid' : data['uuid'],
+									 'cmmd' : data['cmmd'],
+									 'able' : False}
+
+						self.send_ecc_packet(eccPacket.METH_chatAck, rData)
+
+					elif ecc_packet.get_meth() == eccPacket.METH_chatAck:
+
+						data = ecc_packet.get_data()
+
+						# TODO : UI indication of ack
+
+					elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
+
+						data = ecc_packet.get_data()
+
+						valid, index = check_symbol(data['coin'])
+
+						if valid:
+
+							address = coins[index].getnewaddress()
+
+							rData = {'coin' : data['coin'],
+									 'addr' : address}
+
+							self.send_ecc_packet(eccPacket.METH_addrRes, rData)
+
+					elif ecc_packet.get_meth() == eccPacket.METH_addrRes:
+
+						data = ecc_packet.get_data()
+
+						self.complete_send(data['addr'])
+
+					elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
+
+						data = ecc_packet.get_data()
+
+						self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
+
+						self.txid = data['txid']
+
+						if self.swap_pending:
+
+							self.complete_swap()
+
+					elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
+
+						data = ecc_packet.get_data()
+
+						self.swap_proposed(data['cogv'], data['amgv'], data['cotk'], data['amtk'])
+
+					elif ecc_packet.get_meth() == eccPacket.METH_swapReq:
+
+						data = ecc_packet.get_data()
+
+						self.swap_request(data['cogv'], data['adgv'])
+
+					elif ecc_packet.get_meth() == eccPacket.METH_swapRes:
+
+						data = ecc_packet.get_data()
+
+						self.swap_response(data['cotk'], data['adtk'])
 
 					else:
 
-						rData = {'uuid' : data['uuid'],
-								 'cmmd' : data['cmmd'],
-								 'able' : False}
-
-					self.send_ecc_packet(eccPacket.METH_chatAck, rData)
-
-				elif ecc_packet.get_meth() == eccPacket.METH_chatAck:
-
-					data = ecc_packet.get_data()
-
-					# TODO : UI indication of ack
-
-				elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
-
-					data = ecc_packet.get_data()
-
-					valid, index = check_symbol(data['coin'])
-
-					if valid:
-
-						address = coins[index].getnewaddress()
-
-						rData = {'coin' : data['coin'],
-								 'addr' : address}
-
-						self.send_ecc_packet(eccPacket.METH_addrRes, rData)
-
-				elif ecc_packet.get_meth() == eccPacket.METH_addrRes:
-
-					data = ecc_packet.get_data()
-
-					self.complete_send(data['addr'])
-
-				elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
-
-					data = ecc_packet.get_data()
-
-					self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
-
-					self.txid = data['txid']
-
-					if self.swap_pending:
-
-						self.complete_swap()
-
-				elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
-
-					data = ecc_packet.get_data()
-
-					self.swap_proposed(data['cogv'], data['amgv'], data['cotk'], data['amtk'])
-
-				elif ecc_packet.get_meth() == eccPacket.METH_swapReq:
-
-					data = ecc_packet.get_data()
-
-					self.swap_request(data['cogv'], data['adgv'])
-
-				elif ecc_packet.get_meth() == eccPacket.METH_swapRes:
-
-					data = ecc_packet.get_data()
-
-					self.swap_response(data['cotk'], data['adtk'])
-
-				else:
-
-					pass
+						pass
 
 	############################################################################
 
@@ -1206,7 +1206,7 @@ class ChatApp:
 				coin.initialise()
 				coin.refresh()
 
-				if coin == coins[0]:
+				if coin == coins[0]: # coins[0].symbol == 'ecc'
 
 					coin.setup_route(self.otherTag)
 

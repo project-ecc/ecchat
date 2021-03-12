@@ -9,6 +9,9 @@ from itertools import count
 from slickrpc import Proxy
 from slickrpc import exc
 
+from monero.wallet import Wallet
+from monero.daemon import Daemon
+
 ################################################################################
 ## cryptoNodeException class ###################################################
 ################################################################################
@@ -353,13 +356,19 @@ class moneroNode(cryptoNode):
 
 	############################################################################
 
-	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
+	def __init__(self, symbol, rpc_address, rpc_daemon, rpc_user, rpc_pass):
 
 		super().__init__(symbol, rpc_address, rpc_user, rpc_pass)
 
-#		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address))
+		(host, port) = tuple(rpc_address.split(':'))
 
-	############################################################################
+		self.wallet = Wallet(host=host, port=port, user=rpc_user, password=rpc_pass)
+
+		(host, port) = tuple(rpc_daemon.split(':'))
+
+		self.daemon = Daemon(host=host, port=port)
+
+############################################################################
 
 	def __getattr__(self, method):
 
@@ -377,7 +386,11 @@ class moneroNode(cryptoNode):
 
 	def refresh(self):
 		
-		pass
+		self.blocks = self.wallet.height()
+
+		info = self.daemon.info()
+
+		self.peers = info['incoming_connections_count'] + info['outgoing_connections_count']
 
 	############################################################################
 
