@@ -464,7 +464,7 @@ class moneroNode(cryptoNode):
 
 		self.daemon = Daemon(host=host, port=port)
 
-############################################################################
+	############################################################################
 
 	def __getattr__(self, method):
 
@@ -510,7 +510,7 @@ class moneroNode(cryptoNode):
 
 	def send_to_address(self, address, amount, comment):
 
-		return self.wallet.transfer(address, float(amount))
+		return self.wallet.transfer(address, float(amount))[0].hash
 
 	############################################################################
 
