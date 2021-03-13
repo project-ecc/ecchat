@@ -64,6 +64,30 @@ class cryptoNode():
 
 	############################################################################
 
+	def get_balance(self):
+
+		raise NotImplementedError
+
+	############################################################################
+
+	def get_unconfirmed_balance(self):
+
+		raise NotImplementedError
+
+	############################################################################
+
+	def get_new_address(self):
+
+		raise NotImplementedError
+
+	############################################################################
+
+	def send_to_address(self):
+
+		raise NotImplementedError
+
+	############################################################################
+
 	def shutdown(self):
 
 		raise NotImplementedError
@@ -149,6 +173,30 @@ class eccoinNode(cryptoNode):
 
 		self.blocks = self.proxy.getblockcount()
 		self.peers  = self.proxy.getconnectioncount()
+
+	############################################################################
+
+	def get_balance(self):
+
+		return self.proxy.getbalance()
+
+	############################################################################
+
+	def get_unconfirmed_balance(self):
+
+		return self.proxy.getunconfirmedbalance()
+
+	############################################################################
+
+	def get_new_address(self):
+
+		return self.proxy.getnewaddress()
+
+	############################################################################
+
+	def send_to_address(self, address, amount, comment):
+
+		return self.proxy.sendtoaddress(address, amount, comment)
 
 	############################################################################
 
@@ -277,6 +325,30 @@ class bitcoinNode(cryptoNode):
 
 	############################################################################
 
+	def get_balance(self):
+
+		return self.proxy.getbalance()
+
+	############################################################################
+
+	def get_unconfirmed_balance(self):
+
+		return self.proxy.getunconfirmedbalance()
+
+	############################################################################
+
+	def get_new_address(self):
+
+		return self.proxy.getnewaddress()
+
+	############################################################################
+
+	def send_to_address(self, address, amount, comment):
+
+		return self.proxy.sendtoaddress(address, amount, comment)
+
+	############################################################################
+
 	def shutdown(self):
 
 		pass
@@ -344,6 +416,30 @@ class litecoinNode(cryptoNode):
 
 	############################################################################
 
+	def get_balance(self):
+
+		return self.proxy.getbalance()
+
+	############################################################################
+
+	def get_unconfirmed_balance(self):
+
+		return self.proxy.getunconfirmedbalance()
+
+	############################################################################
+
+	def get_new_address(self):
+
+		return self.proxy.getnewaddress()
+
+	############################################################################
+
+	def send_to_address(self, address, amount, comment):
+
+		return self.proxy.sendtoaddress(address, amount, comment)
+
+	############################################################################
+
 	def shutdown(self):
 
 		pass
@@ -372,7 +468,7 @@ class moneroNode(cryptoNode):
 
 	def __getattr__(self, method):
 
-#		return getattr(self.proxy, method)
+		return getattr(self.proxy, method)
 
 		pass
 
@@ -391,6 +487,30 @@ class moneroNode(cryptoNode):
 		info = self.daemon.info()
 
 		self.peers = info['incoming_connections_count'] + info['outgoing_connections_count']
+
+	############################################################################
+
+	def get_balance(self):
+
+		return self.wallet.balance()
+
+	############################################################################
+
+	def get_unconfirmed_balance(self):
+
+		return self.wallet.balance() - self.wallet.balance(unlocked=True)
+
+	############################################################################
+
+	def get_new_address(self):
+
+		return self.wallet.address()
+
+	############################################################################
+
+	def send_to_address(self, address, amount, comment):
+
+		return self.wallet.transfer(address, amount)
 
 	############################################################################
 
