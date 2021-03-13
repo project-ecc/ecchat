@@ -443,7 +443,7 @@ class ChatApp:
 
 			try:
 
-				self.txid = coins[self.send_index].sendtoaddress(address, str(self.send_amount), "ecchat")
+				self.txid = coins[self.send_index].send_to_address(address, str(self.send_amount), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
@@ -637,7 +637,7 @@ class ChatApp:
 
 			return
 
-		address = coins[self.swap_indexGive].getnewaddress()
+		address = coins[self.swap_indexGive].get_new_address()
 
 		data = {'uuid' : self.swap_uuid,
 				'cogv' : coins[self.swap_indexGive].symbol,
@@ -657,7 +657,7 @@ class ChatApp:
 
 			self.swap_addressGive = addressGive
 
-			address = coins[self.swap_indexTake].getnewaddress()
+			address = coins[self.swap_indexTake].get_new_address()
 
 			data = {'uuid' : self.swap_uuid,
 					'cotk' : coins[self.swap_indexTake].symbol,
@@ -689,7 +689,7 @@ class ChatApp:
 
 			try:
 
-				self.txid = coins[self.swap_indexTake].sendtoaddress(addressTake, str(self.swap_amountTake), "ecchat")
+				self.txid = coins[self.swap_indexTake].send_to_address(addressTake, str(self.swap_amountTake), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
@@ -726,7 +726,7 @@ class ChatApp:
 
 			try:
 
-				self.txid = coins[self.swap_indexGive].sendtoaddress(self.swap_addressGive, str(self.swap_amountGive), "ecchat")
+				self.txid = coins[self.swap_indexGive].send_to_address(self.swap_addressGive, str(self.swap_amountGive), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
@@ -927,7 +927,7 @@ class ChatApp:
 
 					if valid:
 
-						address = coins[index].getnewaddress()
+						address = coins[index].get_new_address()
 
 						self.append_message(0, '{}'.format(address))
 
@@ -937,7 +937,7 @@ class ChatApp:
 
 				else:
 
-					address = coins[0].getnewaddress()
+					address = coins[0].get_new_address()
 
 					self.append_message(0, '{}'.format(address))
 
@@ -1148,7 +1148,7 @@ class ChatApp:
 
 						if valid:
 
-							address = coins[index].getnewaddress()
+							address = coins[index].get_new_address()
 
 							rData = {'coin' : data['coin'],
 									 'addr' : address}
