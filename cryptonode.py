@@ -510,7 +510,7 @@ class moneroNode(cryptoNode):
 
 	def send_to_address(self, address, amount, comment):
 
-		return self.wallet.transfer(address, amount)
+		return self.wallet.transfer(address, float(amount))
 
 	############################################################################
 
