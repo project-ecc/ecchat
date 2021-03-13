@@ -504,7 +504,7 @@ class moneroNode(cryptoNode):
 
 	def get_new_address(self):
 
-		return self.wallet.address()
+		return str(self.wallet.address())
 
 	############################################################################
 
