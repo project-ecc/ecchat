@@ -11,6 +11,7 @@ from slickrpc import exc
 
 from monero.wallet import Wallet
 from monero.daemon import Daemon
+from monero.transaction import PaymentFilter
 
 ################################################################################
 ## cryptoNodeException class ###################################################
@@ -498,7 +499,15 @@ class moneroNode(cryptoNode):
 
 	def get_unconfirmed_balance(self):
 
-		return self.wallet.balance() - self.wallet.balance(unlocked=True)
+		amount = 0.0
+
+		transfers = self.wallet._backend.transfers_in(0, PaymentFilter(unconfirmed=True, confirmed=False))
+
+		for transfer in transfers:
+
+			amount += float(transfer.amount)
+
+		return amount
 
 	############################################################################
 
