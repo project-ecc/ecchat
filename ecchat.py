@@ -793,6 +793,34 @@ class ChatApp:
 
 	############################################################################
 
+	def echo_balance(self, coin):
+
+		balance_con = coin.get_balance()
+		balance_unl = coin.get_unlocked_balance()
+		balance_unc = coin.get_unconfirmed_balance()
+
+		if balance_con != balance_unl:
+
+			if balance_unc > 0:
+
+				self.append_message(0, '{} : {:f} confirmed ({:f} unlocked) + {:f} unconfirmed'.format(coin.symbol, balance_con, balance_unl, balance_unc))
+
+			else:
+
+				self.append_message(0, '{} : {:f} ({:f} unlocked)'.format(coin.symbol, balance_con, balance_unl))
+
+		else:
+
+			if balance_unc > 0:
+
+				self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coin.symbol, balance_con, balance_unc))
+
+			else:
+
+				self.append_message(0, '{} : {:f}'.format(coin.symbol, balance_con))
+
+	############################################################################
+
 	def process_user_entry(self, text):
 
 		if len(text) > 0:
@@ -887,16 +915,7 @@ class ChatApp:
 
 					if valid:
 
-						balance_con = coins[index].get_balance()
-						balance_unc = coins[index].get_unconfirmed_balance()
-
-						if balance_unc > 0:
-
-							self.append_message(0, '{:f} confirmed + {:f} unconfirmed'.format(balance_con, balance_unc))
-
-						else:
-
-							self.append_message(0, '{:f}'.format(balance_con))
+						self.echo_balance(coins[index])
 
 					else:
 
@@ -904,18 +923,9 @@ class ChatApp:
 
 				else:
 
-					for index, coin in enumerate(coins):
+					for coin in coins:
 
-						balance_con = coin.get_balance()
-						balance_unc = coin.get_unconfirmed_balance()
-
-						if balance_unc > 0:
-
-							self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coins[index].symbol, balance_con, balance_unc))
-
-						else:
-
-							self.append_message(0, '{} : {:f}'.format(coins[index].symbol, balance_con))
+						self.echo_balance(coin)
 
 			elif text.startswith('/address'):
 
@@ -1197,7 +1207,7 @@ class ChatApp:
 
 	############################################################################
 
-	def eccoinInitialise(self):
+	def cryptoInitialise(self):
 
 		for coin in coins:
 
@@ -1228,7 +1238,7 @@ class ChatApp:
 
 	############################################################################
 
-	def eccoinShutdown(self):
+	def cryptoShutdown(self):
 
 		for coin in coins:
 
@@ -1238,7 +1248,7 @@ class ChatApp:
 
 	def run(self):
 
-		if self.eccoinInitialise():
+		if self.cryptoInitialise():
 
 			self.zmqInitialise()
 
@@ -1260,7 +1270,7 @@ class ChatApp:
 
 			self.zmqShutdown()
 
-		self.eccoinShutdown()
+		self.cryptoShutdown()
 
 ################################################################################
 

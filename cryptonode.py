@@ -71,6 +71,12 @@ class cryptoNode():
 
 	############################################################################
 
+	def get_unlocked_balance(self):
+
+		raise NotImplementedError
+
+	############################################################################
+
 	def get_unconfirmed_balance(self):
 
 		raise NotImplementedError
@@ -178,6 +184,12 @@ class eccoinNode(cryptoNode):
 	############################################################################
 
 	def get_balance(self):
+
+		return self.proxy.getbalance()
+
+	############################################################################
+
+	def get_unlocked_balance(self):
 
 		return self.proxy.getbalance()
 
@@ -332,6 +344,12 @@ class bitcoinNode(cryptoNode):
 
 	############################################################################
 
+	def get_unlocked_balance(self):
+
+		return self.proxy.getbalance()
+
+	############################################################################
+
 	def get_unconfirmed_balance(self):
 
 		return self.proxy.getunconfirmedbalance()
@@ -423,6 +441,12 @@ class litecoinNode(cryptoNode):
 
 	############################################################################
 
+	def get_unlocked_balance(self):
+
+		return self.proxy.getbalance()
+
+	############################################################################
+
 	def get_unconfirmed_balance(self):
 
 		return self.proxy.getunconfirmedbalance()
@@ -494,6 +518,12 @@ class moneroNode(cryptoNode):
 	def get_balance(self):
 
 		return self.wallet.balance()
+
+	############################################################################
+
+	def get_unlocked_balance(self):
+
+		return self.wallet.balance(unlocked=True)
 
 	############################################################################
 
