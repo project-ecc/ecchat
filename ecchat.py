@@ -408,7 +408,7 @@ class ChatApp:
 
 		# Check 4 - Does the user's wallet hold an adequate balance ?
 
-		balance = coins[index].get_balance()
+		balance = coins[index].get_unlocked_balance()
 
 		if float_amount >= balance:
 
@@ -523,7 +523,7 @@ class ChatApp:
 
 		# Check 4 - Does the user's wallet hold an adequate balance ?
 
-		balance = coins[indexGive].get_balance()
+		balance = coins[indexGive].get_unlocked_balance()
 
 		if float_amountGive >= balance:
 
@@ -611,7 +611,7 @@ class ChatApp:
 
 		# Check 5 - Does the user's wallet hold an adequate balance ?
 
-		balance = coins[indexTake].get_balance()
+		balance = coins[indexTake].get_unlocked_balance()
 
 		if float_amountTake >= balance:
 
