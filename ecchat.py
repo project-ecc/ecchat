@@ -4,6 +4,7 @@
 import datetime
 import settings
 import argparse
+import pyqrcode
 import pathlib
 import logging
 import signal
@@ -821,6 +822,31 @@ class ChatApp:
 
 	############################################################################
 
+	def echo_qrcode(self, text):
+
+		qrdecode = [[' ', '\u2584'], ['\u2580', '\u2588']]
+
+		lines = text.splitlines()
+
+		lines_top = lines[::2]
+		lines_bot = lines[1::2]
+
+		if len(lines_bot) < len(lines_top):
+
+			lines_bot.append(lines_bot[0])
+
+		for i in range(0, len(lines_top)):
+
+			qrline = ''
+
+			for j in range(0, len(lines_top[i])):
+
+				qrline += qrdecode[int(lines_top[i][j])][int(lines_bot[i][j])]
+
+			self.append_message(0, qrline)
+
+	############################################################################
+
 	def process_user_entry(self, text):
 
 		if len(text) > 0:
@@ -845,6 +871,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
 				self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
 				self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
+				self.append_message(0, '%-8s - %s' % ('/qr            ', 'display routing tag public key as QR code'))
 				self.append_message(0, '%-8s - %s' % ('/balance <coin>', 'display wallet balance'))
 				self.append_message(0, '%-8s - %s' % ('/address <coin>', 'generate a new address'))
 				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
@@ -904,6 +931,10 @@ class ChatApp:
 			elif text.startswith('/tag'):
 
 				self.append_message(0, '{}'.format(coins[0].routingTag))
+
+			elif text.startswith('/qr'):
+
+				self.echo_qrcode(pyqrcode.create(coins[0].routingTag).text(quiet_zone=2))
 
 			elif text.startswith('/balance'):
 
