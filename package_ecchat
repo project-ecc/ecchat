@@ -1,0 +1,1 @@
+pyinstaller --hidden-import=pkg_resources.py2_warn --onefile ecchat.py
