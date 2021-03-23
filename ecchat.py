@@ -871,7 +871,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
 				self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
 				self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
-				self.append_message(0, '%-8s - %s' % ('/qr            ', 'display routing tag public key as QR code'))
+				self.append_message(0, '%-8s - %s' % ('/qr            ', 'display routing tag as QR code'))
 				self.append_message(0, '%-8s - %s' % ('/balance <coin>', 'display wallet balance'))
 				self.append_message(0, '%-8s - %s' % ('/address <coin>', 'generate a new address'))
 				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
