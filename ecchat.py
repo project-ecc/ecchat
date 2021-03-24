@@ -11,10 +11,11 @@ import signal
 import codecs
 import urwid
 import time
-import uuid
 import zmq
 import sys
 import re
+
+from uuid import uuid4
 
 # ZMQ event loop adapter for urwid
 
@@ -260,6 +261,8 @@ class ChatApp:
 				('header', 'black'           , 'brown'      , 'standout'),
 				('status', 'black'           , 'brown'      , 'standout'),
 				('text'  , 'light gray'      , 'black'      , 'default' ),
+				('tnak'  , 'dark gray'       , 'black'      , 'default' ),
+				('tack'  , 'light gray'      , 'black'      , 'default' ),
 				('time'  , 'brown'           , 'black'      , 'default' ),
 				('self'  , 'light cyan'      , 'black'      , 'default' ),
 				('other' , 'light green'     , 'black'      , 'default' ),
@@ -308,6 +311,8 @@ class ChatApp:
 	def build_ui(self):
 
 		self.walker  = urwid.SimpleListWalker([])
+		self.markups = []
+		self.uuids   = []
 
 		self.headerT = urwid.Text    (u'ecchat {} : {} > {}'.format(self.version, self.party_name[1], self.party_name[2]))
 		self.headerA = urwid.AttrMap (self.headerT, 'header')
@@ -337,11 +342,37 @@ class ChatApp:
 
 	############################################################################
 
-	def append_message(self, party, text):
+	def append_message(self, party, text, ack = True, uuid = ''):
 
-		self.walker.append(urwid.Text([('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (self.party_text_style[party], text)]))
+		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
+
+		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
+
+		self.walker.append(urwid.Text(markup))
+
+		self.markups.append(markup)
+
+		self.uuids.append(uuid)
 
 		self.scrollT.set_focus(len(self.scrollT.body) - 1)
+
+	############################################################################
+
+	def ack_message(self, _uuid):
+
+		for index, uuid in enumerate(self.uuids):
+
+			if uuid == _uuid:
+
+				markup = self.markups[index]
+
+				(style, text) = markup[2]
+
+				markup[2] = ('tack', text)
+
+				self.walker[index].set_text(markup)
+
+				break
 
 	############################################################################
 
@@ -534,7 +565,7 @@ class ChatApp:
 
 		# Send swap information
 
-		data = {'uuid' : str(uuid.uuid4()),
+		data = {'uuid' : str(uuid4()),
 				'cogv' : coins[indexGive].symbol,
 				'amgv' : float_amountGive,
 				'cotk' : coins[indexTake].symbol,
@@ -851,9 +882,11 @@ class ChatApp:
 
 		if len(text) > 0:
 
+			uuid = str(uuid4())
+
 			self.footerT.set_edit_text(u'')
 
-			self.append_message(1, text)
+			self.append_message(1, text, text.startswith('/'), uuid)
 
 			if text.startswith('/exit'):
 
@@ -1055,7 +1088,7 @@ class ChatApp:
 
 			else:
 
-				data = {'uuid' : str(uuid.uuid4()),
+				data = {'uuid' : uuid,
 						'cmmd' : 'add',
 						'text' : text}
 
@@ -1161,7 +1194,7 @@ class ChatApp:
 
 						if data['cmmd'] == 'add':
 
-							self.append_message(2, data['text'])
+							self.append_message(2, data['text'], data['uuid'])
 
 							rData = {'uuid' : data['uuid'],
 									 'cmmd' : data['cmmd'],
@@ -1179,7 +1212,9 @@ class ChatApp:
 
 						data = ecc_packet.get_data()
 
-						# TODO : UI indication of ack
+						if data['cmmd'] == 'add':
+
+							self.ack_message(data['uuid'])
 
 					elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
 
