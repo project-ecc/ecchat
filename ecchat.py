@@ -394,7 +394,7 @@ class ChatApp:
 
 	def ack_message(self, uuid):
 
-		self.walker.set_markup_style(uuid, 2, 'tak')
+		self.walker.set_markup_style(uuid, 2, 'tack')
 
 	############################################################################
 
