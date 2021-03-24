@@ -342,7 +342,7 @@ class ChatApp:
 
 	############################################################################
 
-	def append_message(self, party, text, ack = True, uuid = ''):
+	def append_message(self, party, text, uuid = '', ack = True):
 
 		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
 
@@ -886,7 +886,7 @@ class ChatApp:
 
 			self.footerT.set_edit_text(u'')
 
-			self.append_message(1, text, text.startswith('/'), uuid)
+			self.append_message(1, text, uuid, text.startswith('/'))
 
 			if text.startswith('/exit'):
 
