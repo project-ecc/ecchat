@@ -250,6 +250,46 @@ class FrameFocus(urwid.Frame):
 		self.set_focus(self.focus_part)
 
 ################################################################################
+
+class MessageWalker(urwid.SimpleListWalker):
+
+	def __init__(self):
+
+		self.text = []
+		self.uuid = []
+
+		super().__init__([])
+
+	############################################################################
+
+	def append(self, text, uuid):
+
+		self.text.append(text)
+		self.uuid.append(uuid)
+
+		super().append(urwid.Text(text))
+
+	############################################################################
+
+	def set_markup_style(self, uuid, element, style):
+
+		for index, _uuid in enumerate(self.uuid):
+
+			if uuid == _uuid:
+
+				markup = self.text[index]
+
+				(old_style, text) = markup[element]
+
+				markup[element] = (style, text)
+
+				self[index].set_text(markup)
+
+				self.text[index] = markup
+
+				break
+
+################################################################################
 ## ChatApp class ###############################################################
 ################################################################################
 
@@ -310,9 +350,7 @@ class ChatApp:
 
 	def build_ui(self):
 
-		self.walker  = urwid.SimpleListWalker([])
-		self.markups = []
-		self.uuids   = []
+		self.walker  = MessageWalker ()
 
 		self.headerT = urwid.Text    (u'ecchat {} : {} > {}'.format(self.version, self.party_name[1], self.party_name[2]))
 		self.headerA = urwid.AttrMap (self.headerT, 'header')
@@ -348,31 +386,15 @@ class ChatApp:
 
 		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
 
-		self.walker.append(urwid.Text(markup))
-
-		self.markups.append(markup)
-
-		self.uuids.append(uuid)
+		self.walker.append(markup, uuid)
 
 		self.scrollT.set_focus(len(self.scrollT.body) - 1)
 
 	############################################################################
 
-	def ack_message(self, _uuid):
+	def ack_message(self, uuid):
 
-		for index, uuid in enumerate(self.uuids):
-
-			if uuid == _uuid:
-
-				markup = self.markups[index]
-
-				(style, text) = markup[2]
-
-				markup[2] = ('tack', text)
-
-				self.walker[index].set_text(markup)
-
-				break
+		self.walker.set_markup_style(uuid, 2, 'tak')
 
 	############################################################################
 
