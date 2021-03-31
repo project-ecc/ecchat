@@ -45,7 +45,7 @@ for index, chain in enumerate(settings.chains):
 
 	if chain['coin_symbol'] == 'ecc':
 
-		coins.append(eccoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
+		coins.append(eccoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass'], settings.protocol_id))
 
 	elif chain['coin_symbol'] == 'ltc':
 
@@ -412,9 +412,11 @@ class ChatApp:
 
 	############################################################################
 
-	def block_refresh(self, index):
+	def reset_buffer_timeout(self, loop = None, data = None):
 
-		coins[index].refresh()
+		if coins[0].reset_buffer_timeout():
+
+			loop.set_alarm_in(10, self.reset_buffer_timeout)
 
 	############################################################################
 
@@ -428,7 +430,13 @@ class ChatApp:
 
 		loop.set_alarm_in(10, self.block_refresh_timed)
 
-	############################################################################
+		############################################################################
+
+	def block_refresh(self, index):
+
+		coins[index].refresh()
+
+############################################################################
 
 	def start_send(self, amount, index):
 
@@ -1318,14 +1326,6 @@ class ChatApp:
 
 	############################################################################
 
-	def reset_buffer_timeout(self, loop = None, data = None):
-
-		if coins[0].reset_buffer_timeout():
-
-			loop.set_alarm_in(10, self.reset_buffer_timeout)
-
-	############################################################################
-
 	def cryptoShutdown(self):
 
 		for coin in coins:
@@ -1348,7 +1348,7 @@ class ChatApp:
 			                           unhandled_input = self.unhandled_keypress,
 			                           event_loop      = self.event_loop)
 
-			self.loop.set_alarm_in(1, self.clock_refresh)
+			self.loop.set_alarm_in( 1, self.clock_refresh)
 
 			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
 

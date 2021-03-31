@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # coding: UTF-8
 
-import settings
 import pycurl
 
 from itertools import count
@@ -112,12 +111,13 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
-	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
+	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass, protocol_id):
 
 		super().__init__(symbol, rpc_address, rpc_user, rpc_pass)
 
 		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address))
 
+		self.protocolId = protocol_id
 		self.routingTag = ''
 		self.bufferKey  = ''
 
@@ -150,7 +150,7 @@ class eccoinNode(cryptoNode):
 		try:
 
 			self.routingTag = self.proxy.getroutingpubkey()
-			self.bufferKey  = self.proxy.registerbuffer(settings.protocol_id)
+			self.bufferKey  = self.proxy.registerbuffer(self.protocolId)
 
 		except exc.RpcInternalError:
 
@@ -219,7 +219,7 @@ class eccoinNode(cryptoNode):
 
 			bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
 
-			self.proxy.resetbuffertimeout(settings.protocol_id, bufferSig)
+			self.proxy.resetbuffertimeout(self.protocolId, bufferSig)
 
 			return True
 
@@ -247,7 +247,7 @@ class eccoinNode(cryptoNode):
 
 	def get_buffer(self, protocol_id = 1):
 
-		assert protocol_id == settings.protocol_id
+		assert protocol_id == self.protocolId
 
 		if self.bufferKey:
 
@@ -271,7 +271,7 @@ class eccoinNode(cryptoNode):
 
 			bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
 
-			self.proxy.releasebuffer(settings.protocol_id, bufferSig)
+			self.proxy.releasebuffer(self.protocolId, bufferSig)
 
 			self.bufferKey = ''
 
