@@ -5,8 +5,12 @@ import pycurl
 
 from itertools import count
 
+# RPC interface for Bitcoin type nodes
+
 from slickrpc import Proxy
 from slickrpc import exc
+
+# RPC interface for Monero type nodes
 
 from monero.wallet import Wallet
 from monero.daemon import Daemon
@@ -83,6 +87,12 @@ class cryptoNode():
 	############################################################################
 
 	def get_new_address(self):
+
+		raise NotImplementedError
+
+	############################################################################
+
+	def wallet_locked(self):
 
 		raise NotImplementedError
 
@@ -204,6 +214,18 @@ class eccoinNode(cryptoNode):
 	def get_new_address(self):
 
 		return self.proxy.getnewaddress()
+
+	############################################################################
+
+	def wallet_locked(self):
+
+		info = self.proxy.getwalletinfo()
+
+		if 'unlocked_until' in info:
+
+			return info['unlocked_until'] == 0
+
+		return False
 
 	############################################################################
 
@@ -362,6 +384,19 @@ class bitcoinNode(cryptoNode):
 
 	############################################################################
 
+	def wallet_locked(self):
+
+		info = self.proxy.getwalletinfo()
+
+		if 'unlocked_until' in info:
+
+			return info['unlocked_until'] == 0
+
+		return False
+
+
+	############################################################################
+
 	def send_to_address(self, address, amount, comment):
 
 		return self.proxy.sendtoaddress(address, amount, comment)
@@ -459,6 +494,19 @@ class litecoinNode(cryptoNode):
 
 	############################################################################
 
+	def wallet_locked(self):
+
+		info = self.proxy.getwalletinfo()
+
+		if 'unlocked_until' in info:
+
+			return info['unlocked_until'] == 0
+
+		return False
+
+
+	############################################################################
+
 	def send_to_address(self, address, amount, comment):
 
 		return self.proxy.sendtoaddress(address, amount, comment)
@@ -544,6 +592,14 @@ class moneroNode(cryptoNode):
 	def get_new_address(self):
 
 		return str(self.wallet.address())
+
+	############################################################################
+
+	def wallet_locked(self):
+
+		# Assume that wallet is unlocked when monero-wallet-rpc is started
+
+		return False
 
 	############################################################################
 
