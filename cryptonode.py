@@ -98,6 +98,12 @@ class cryptoNode():
 
 	############################################################################
 
+	def unlock_wallet(self, passphrase, seconds):
+
+		raise NotImplementedError
+
+	############################################################################
+
 	def send_to_address(self):
 
 		raise NotImplementedError
@@ -226,6 +232,12 @@ class eccoinNode(cryptoNode):
 			return info['unlocked_until'] == 0
 
 		return False
+
+	############################################################################
+
+	def unlock_wallet(self, passphrase, seconds):
+
+		self.proxy.walletpassphrase(passphrase, seconds)
 
 	############################################################################
 
@@ -394,6 +406,11 @@ class bitcoinNode(cryptoNode):
 
 		return False
 
+	############################################################################
+
+	def unlock_wallet(self, passphrase, seconds):
+
+		self.proxy.walletpassphrase(passphrase, seconds)
 
 	############################################################################
 
@@ -504,6 +521,11 @@ class litecoinNode(cryptoNode):
 
 		return False
 
+	############################################################################
+
+	def unlock_wallet(self, passphrase, seconds):
+
+		self.proxy.walletpassphrase(passphrase, seconds)
 
 	############################################################################
 
@@ -600,6 +622,12 @@ class moneroNode(cryptoNode):
 		# Assume that wallet is unlocked when monero-wallet-rpc is started
 
 		return False
+
+	############################################################################
+
+	def unlock_wallet(self, passphrase, seconds):
+
+		pass
 
 	############################################################################
 
