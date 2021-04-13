@@ -174,7 +174,7 @@ class ChatApp:
 
 		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
 
-		self.walker.append(markup, uuid)
+		self.walker.append(party, markup, uuid)
 
 		self.scrollT.set_focus(len(self.scrollT.body) - 1)
 
@@ -934,7 +934,23 @@ class ChatApp:
 
 		if isinstance(key, str):
 
-			if key in ('up', 'down', 'page up', 'page down'):
+			if key in ('up', 'down'):
+
+				#self.scrollT.key(key)
+
+				######################################################
+				self.scrollT.set_focus(max(0, self.walker.focus - 1))
+				######################################################
+
+				markup = self.walker.text[self.walker.focus]
+
+				(style, text) = markup[2]
+
+				self.footerT.set_edit_text(text)
+
+				######################################################
+
+			if key in ('page up', 'page down'):
 
 				self.scrollT.key(key)
 

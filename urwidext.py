@@ -183,6 +183,7 @@ class MessageWalker(urwid.SimpleListWalker):
 
 	def __init__(self):
 
+		self.qual = []
 		self.text = []
 		self.uuid = []
 
@@ -190,8 +191,9 @@ class MessageWalker(urwid.SimpleListWalker):
 
 	############################################################################
 
-	def append(self, text, uuid):
+	def append(self, qual, text, uuid):
 
+		self.qual.append(qual)
 		self.text.append(text)
 		self.uuid.append(uuid)
 
