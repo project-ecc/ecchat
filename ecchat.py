@@ -936,17 +936,11 @@ class ChatApp:
 
 			if key in ('up', 'down'):
 
-				#self.scrollT.key(key)
-
-				######################################################
-				self.scrollT.set_focus(max(0, self.walker.focus - 1))
-				######################################################
-
-				markup = self.walker.text[self.walker.focus]
-
-				(style, text) = markup[2]
+				text = self.walker.recall(1, 2, {'up' : -1, 'down' : 1} [key])
 
 				self.footerT.set_edit_text(text)
+
+				self.footerT.set_edit_pos(len(text))
 
 				######################################################
 

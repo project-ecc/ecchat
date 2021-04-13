@@ -187,6 +187,8 @@ class MessageWalker(urwid.SimpleListWalker):
 		self.text = []
 		self.uuid = []
 
+		self.recallOffset = 0
+
 		super().__init__([])
 
 	############################################################################
@@ -196,6 +198,8 @@ class MessageWalker(urwid.SimpleListWalker):
 		self.qual.append(qual)
 		self.text.append(text)
 		self.uuid.append(uuid)
+
+		self.recallOffset = 0
 
 		super().append(urwid.Text(text))
 
@@ -218,5 +222,43 @@ class MessageWalker(urwid.SimpleListWalker):
 				self.text[index] = markup
 
 				break
+
+	############################################################################
+
+	def recall(self, qual, element, direction):
+
+		text = ''
+
+		self.recallOffset = min(0, self.recallOffset + direction)
+
+		if self.recallOffset < 0:
+
+			scan_index = len(self) - 1
+
+			qual_found = 0
+
+			while scan_index >= 0:
+
+				if self.qual[scan_index] == qual:
+
+					markup = self.text[scan_index]
+
+					(style, text) = markup[element]
+
+					qual_found += 1
+
+					if qual_found + self.recallOffset == 0:
+
+						self.set_focus(scan_index)
+
+						break
+
+				scan_index -= 1
+
+			if qual_found + self.recallOffset < 0:
+
+				self.recallOffset += 1
+
+		return text
 
 ################################################################################
