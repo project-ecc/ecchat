@@ -121,7 +121,7 @@ class cryptoNode():
 class eccoinNode(cryptoNode):
 
 	version_min = 30000
-	version_max = 30200
+	version_max = 30201
 
 	bufferIdx = count(start=1)
 
