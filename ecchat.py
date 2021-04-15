@@ -934,7 +934,7 @@ class ChatApp:
 
 		if isinstance(key, str):
 
-			if key in ('up', 'down'):
+			if key in ('up', 'down'): # prev entry recall with scrolling
 
 				text = self.walker.recall(1, 2, {'up' : -1, 'down' : 1} [key])
 
@@ -942,11 +942,13 @@ class ChatApp:
 
 				self.footerT.set_edit_pos(len(text))
 
-				######################################################
-
-			if key in ('page up', 'page down'):
+			if key in ('page up', 'page down'): # scroll only
 
 				self.scrollT.key(key)
+
+			if key in ('meta up', 'meta down'): # scroll only
+
+				self.scrollT.key(key.split()[-1])
 
 			if key in ('enter', ):
 
