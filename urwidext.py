@@ -157,9 +157,15 @@ class MessageListBox(urwid.ListBox):
 
 	def key(self, key):
 
-		#TODO - check scrolling keypresses and pass back to footer edit control
-
 		super().keypress(self.last_render_size, key)
+
+	############################################################################
+
+	def mouse_event(self, size, event, button, col, row, focus):
+
+		if button in (4, 5): # mouse wheel
+
+			self.key({4 : 'up', 5 : 'down'} [button])
 
 ################################################################################
 
@@ -174,6 +180,10 @@ class FrameFocus(urwid.Frame):
 	############################################################################
 
 	def mouse_event(self, size, event, button, col, row, focus):
+
+		if button in (4, 5): # mouse wheel
+
+			super().mouse_event(size, event, button, col, row, focus)
 
 		self.set_focus(self.focus_part)
 
