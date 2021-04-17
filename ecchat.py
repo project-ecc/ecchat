@@ -193,6 +193,20 @@ class ChatApp:
 
 	############################################################################
 
+	def delete_message(self, party, text, uuid = '', ack = True):
+
+		del_text = '\u2588' * len(text)
+
+		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
+
+		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, del_text)]
+
+		self.walker.replace(party, markup, uuid)
+
+		self.scrollT.set_focus(len(self.scrollT.body) - 1)
+
+	############################################################################
+
 	def ack_message(self, uuid):
 
 		self.walker.set_markup_style(uuid, 2, 'tack')
@@ -965,11 +979,23 @@ class ChatApp:
 
 	############################################################################
 
-	def process_user_delete(self):
+	def process_user_delete(self, text):
 
-		pass
+		if len(text) > 0 and not text.startswith('/'):
 
-	############################################################################
+			if uuid := self.walker.recall_uuid():
+
+				self.footerT.set_edit_text(u'')
+
+				self.delete_message(1, text, uuid, False)
+
+				data = {'uuid' : uuid,
+						'cmmd' : 'delete',
+						'text' : text}
+
+				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+
+		############################################################################
 
 	def unhandled_keypress(self, key):
 
@@ -1001,7 +1027,7 @@ class ChatApp:
 
 			if key in ('delete', ):
 
-				self.process_user_delete()
+				self.process_user_delete(self.footerT.get_edit_text())
 				
 			if key in ('esc', ):
 
@@ -1091,23 +1117,17 @@ class ChatApp:
 
 							self.append_message(2, data['text'], data['uuid'])
 
-							rData = {'uuid' : data['uuid'],
-									 'cmmd' : data['cmmd'],
-									 'able' : True}
-
 						if data['cmmd'] == 'replace':
 
 							self.replace_message(2, data['text'], data['uuid'])
 
-							rData = {'uuid' : data['uuid'],
-									 'cmmd' : data['cmmd'],
-									 'able' : True}
+						if data['cmmd'] == 'delete':
 
-						else:
+							self.delete_message(2, data['text'], data['uuid'])
 
-							rData = {'uuid' : data['uuid'],
-									 'cmmd' : data['cmmd'],
-									 'able' : False}
+						rData = {'uuid' : data['uuid'],
+								 'cmmd' : data['cmmd'],
+								 'able' : True}
 
 						self.send_ecc_packet(eccPacket.METH_chatAck, rData)
 
@@ -1115,13 +1135,7 @@ class ChatApp:
 
 						data = ecc_packet.get_data()
 
-						if data['cmmd'] == 'add':
-
-							self.ack_message(data['uuid'])
-
-						if data['cmmd'] == 'replace':
-
-							self.ack_message(data['uuid'])
+						self.ack_message(data['uuid'])
 
 					elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
 
