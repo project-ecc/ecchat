@@ -198,6 +198,7 @@ class MessageWalker(urwid.SimpleListWalker):
 		self.uuid = []
 
 		self.recallOffset = 0
+		self.uuidAtOffset = ''
 
 		super().__init__([])
 
@@ -210,8 +211,25 @@ class MessageWalker(urwid.SimpleListWalker):
 		self.uuid.append(uuid)
 
 		self.recallOffset = 0
+		self.uuidAtOffset = ''
 
 		super().append(urwid.Text(text))
+
+############################################################################
+
+	def replace(self, qual, text, uuid):
+
+		for index, _uuid in enumerate(self.uuid):
+
+			if uuid == _uuid:
+
+				assert self.qual[index] == qual
+
+				self[index].set_text(text)
+
+				self.text[index] = text
+
+				break
 
 	############################################################################
 
@@ -251,6 +269,8 @@ class MessageWalker(urwid.SimpleListWalker):
 
 				if self.qual[scan_index] == qual:
 
+					self.uuidAtOffset = self.uuid[scan_index]
+
 					markup = self.text[scan_index]
 
 					(style, text) = markup[element]
@@ -270,5 +290,11 @@ class MessageWalker(urwid.SimpleListWalker):
 				self.recallOffset += 1
 
 		return text
+
+	############################################################################
+
+	def recall_uuid(self):
+
+		return self.uuidAtOffset
 
 ################################################################################

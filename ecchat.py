@@ -9,6 +9,7 @@ import pathlib
 import logging
 import signal
 import codecs
+import pickle
 import urwid
 import time
 import zmq
@@ -175,6 +176,18 @@ class ChatApp:
 		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
 
 		self.walker.append(party, markup, uuid)
+
+		self.scrollT.set_focus(len(self.scrollT.body) - 1)
+
+	############################################################################
+
+	def replace_message(self, party, text, uuid = '', ack = True):
+
+		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
+
+		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
+
+		self.walker.replace(party, markup, uuid)
 
 		self.scrollT.set_focus(len(self.scrollT.body) - 1)
 
@@ -930,6 +943,28 @@ class ChatApp:
 
 	############################################################################
 
+	def process_user_replace(self, text):
+
+		if uuid := self.walker.recall_uuid():
+
+			data = {'uuid' : uuid,
+					'cmmd' : 'replace',
+					'text' : text}
+
+			self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+
+		else:
+
+			self.process_user_entry(text)
+
+	############################################################################
+
+	def process_user_delete(self):
+
+		pass
+
+	############################################################################
+
 	def unhandled_keypress(self, key):
 
 		if isinstance(key, str):
@@ -954,6 +989,14 @@ class ChatApp:
 
 				self.process_user_entry(self.footerT.get_edit_text())
 
+			if key in ('meta enter', ):
+
+				self.process_user_replace(self.footerT.get_edit_text())
+
+			if key in ('delete', ):
+
+				self.process_user_delete()
+				
 			if key in ('esc', ):
 
 				self.check_quit()
@@ -1041,6 +1084,14 @@ class ChatApp:
 						if data['cmmd'] == 'add':
 
 							self.append_message(2, data['text'], data['uuid'])
+
+							rData = {'uuid' : data['uuid'],
+									 'cmmd' : data['cmmd'],
+									 'able' : True}
+
+						if data['cmmd'] == 'replace':
+
+							self.replace_message(2, data['text'], data['uuid'])
 
 							rData = {'uuid' : data['uuid'],
 									 'cmmd' : data['cmmd'],
