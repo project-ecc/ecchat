@@ -1025,7 +1025,7 @@ class ChatApp:
 
 				self.process_user_replace(self.footerT.get_edit_text())
 
-			if key in ('delete', ):
+			if key in ('meta delete', ):
 
 				self.process_user_delete(self.footerT.get_edit_text())
 				
