@@ -945,17 +945,23 @@ class ChatApp:
 
 	def process_user_replace(self, text):
 
-		if uuid := self.walker.recall_uuid():
+		if len(text) > 0:
 
-			data = {'uuid' : uuid,
-					'cmmd' : 'replace',
-					'text' : text}
+			if uuid := self.walker.recall_uuid():
 
-			self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+				self.footerT.set_edit_text(u'')
 
-		else:
+				self.replace_message(1, text, uuid, text.startswith('/'))
 
-			self.process_user_entry(text)
+				data = {'uuid' : uuid,
+						'cmmd' : 'replace',
+						'text' : text}
+
+				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+
+			else:
+
+				self.process_user_entry(text)
 
 	############################################################################
 
