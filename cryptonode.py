@@ -170,7 +170,7 @@ class eccoinNode(cryptoNode):
 
 		except exc.RpcInternalError:
 
-			raise cryptoNodeException('API Buffer was not correctly unregistered - try again after 60 seconds')
+			raise cryptoNodeException('API Buffer was not correctly unregistered or another instance running - try again after 60 seconds')
 
 		try:
 
