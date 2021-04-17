@@ -945,13 +945,13 @@ class ChatApp:
 
 	def process_user_replace(self, text):
 
-		if len(text) > 0:
+		if len(text) > 0 and not text.startswith('/'):
 
 			if uuid := self.walker.recall_uuid():
 
 				self.footerT.set_edit_text(u'')
 
-				self.replace_message(1, text, uuid, text.startswith('/'))
+				self.replace_message(1, text, uuid, False)
 
 				data = {'uuid' : uuid,
 						'cmmd' : 'replace',
@@ -1116,6 +1116,10 @@ class ChatApp:
 						data = ecc_packet.get_data()
 
 						if data['cmmd'] == 'add':
+
+							self.ack_message(data['uuid'])
+
+						if data['cmmd'] == 'replace':
 
 							self.ack_message(data['uuid'])
 

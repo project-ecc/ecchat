@@ -219,6 +219,9 @@ class MessageWalker(urwid.SimpleListWalker):
 
 	def replace(self, qual, text, uuid):
 
+		self.recallOffset = 0
+		self.uuidAtOffset = ''
+
 		for index, _uuid in enumerate(self.uuid):
 
 			if uuid == _uuid:
