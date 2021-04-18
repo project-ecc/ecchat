@@ -995,7 +995,94 @@ class ChatApp:
 
 				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
 
-		############################################################################
+	############################################################################
+
+	def process_ecc_packet(self, ecc_packet):
+
+		if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
+
+			data = ecc_packet.get_data()
+
+			if data['cmmd'] == 'add':
+
+				self.append_message(2, data['text'], data['uuid'])
+
+			if data['cmmd'] == 'replace':
+
+				self.replace_message(2, data['text'], data['uuid'])
+
+			if data['cmmd'] == 'delete':
+
+				self.delete_message(2, data['text'], data['uuid'])
+
+			rData = {'uuid' : data['uuid'],
+					 'cmmd' : data['cmmd'],
+					 'able' : True}
+
+			self.send_ecc_packet(eccPacket.METH_chatAck, rData)
+
+		elif ecc_packet.get_meth() == eccPacket.METH_chatAck:
+
+			data = ecc_packet.get_data()
+
+			self.ack_message(data['uuid'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
+
+			data = ecc_packet.get_data()
+
+			valid, index = check_symbol(data['coin'])
+
+			if valid:
+
+				address = coins[index].get_new_address()
+
+				rData = {'coin' : data['coin'],
+						 'addr' : address}
+
+				self.send_ecc_packet(eccPacket.METH_addrRes, rData)
+
+		elif ecc_packet.get_meth() == eccPacket.METH_addrRes:
+
+			data = ecc_packet.get_data()
+
+			self.complete_send(data['addr'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
+
+			data = ecc_packet.get_data()
+
+			self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
+
+			self.txid = data['txid']
+
+			if self.swap_pending:
+
+				self.complete_swap()
+
+		elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
+
+			data = ecc_packet.get_data()
+
+			self.swap_proposed(data['cogv'], data['amgv'], data['cotk'], data['amtk'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_swapReq:
+
+			data = ecc_packet.get_data()
+
+			self.swap_request(data['cogv'], data['adgv'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_swapRes:
+
+			data = ecc_packet.get_data()
+
+			self.swap_response(data['cotk'], data['adtk'])
+
+		else:
+
+			pass
+
+	############################################################################
 
 	def unhandled_keypress(self, key):
 
@@ -1047,6 +1134,8 @@ class ChatApp:
 
 	def quit(self, *args, **kwargs):
 
+		# TODO - send exit notification for all connected parties
+
 		raise urwid.ExitMainLoop()
 
 	############################################################################
@@ -1066,16 +1155,6 @@ class ChatApp:
 				self.subscribers[index].setsockopt(zmq.SUBSCRIBE, b'')
 
 				self.event_loop.watch_queue(self.subscribers[index], self.zmqHandler, zmq.POLLIN, index)
-
-	############################################################################
-
-	def zmqShutdown(self):
-
-		for subscriber in self.subscribers:
-
-			subscriber.close()
-
-		self.context.term()
 
 	############################################################################
 
@@ -1109,88 +1188,17 @@ class ChatApp:
 
 					ecc_packet = eccPacket.from_json(message)
 
-					if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
+					self.process_ecc_packet(ecc_packet)
 
-						data = ecc_packet.get_data()
+	############################################################################
 
-						if data['cmmd'] == 'add':
+	def zmqShutdown(self):
 
-							self.append_message(2, data['text'], data['uuid'])
+		for subscriber in self.subscribers:
 
-						if data['cmmd'] == 'replace':
+			subscriber.close()
 
-							self.replace_message(2, data['text'], data['uuid'])
-
-						if data['cmmd'] == 'delete':
-
-							self.delete_message(2, data['text'], data['uuid'])
-
-						rData = {'uuid' : data['uuid'],
-								 'cmmd' : data['cmmd'],
-								 'able' : True}
-
-						self.send_ecc_packet(eccPacket.METH_chatAck, rData)
-
-					elif ecc_packet.get_meth() == eccPacket.METH_chatAck:
-
-						data = ecc_packet.get_data()
-
-						self.ack_message(data['uuid'])
-
-					elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
-
-						data = ecc_packet.get_data()
-
-						valid, index = check_symbol(data['coin'])
-
-						if valid:
-
-							address = coins[index].get_new_address()
-
-							rData = {'coin' : data['coin'],
-									 'addr' : address}
-
-							self.send_ecc_packet(eccPacket.METH_addrRes, rData)
-
-					elif ecc_packet.get_meth() == eccPacket.METH_addrRes:
-
-						data = ecc_packet.get_data()
-
-						self.complete_send(data['addr'])
-
-					elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
-
-						data = ecc_packet.get_data()
-
-						self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
-
-						self.txid = data['txid']
-
-						if self.swap_pending:
-
-							self.complete_swap()
-
-					elif ecc_packet.get_meth() == eccPacket.METH_swapInf:
-
-						data = ecc_packet.get_data()
-
-						self.swap_proposed(data['cogv'], data['amgv'], data['cotk'], data['amtk'])
-
-					elif ecc_packet.get_meth() == eccPacket.METH_swapReq:
-
-						data = ecc_packet.get_data()
-
-						self.swap_request(data['cogv'], data['adgv'])
-
-					elif ecc_packet.get_meth() == eccPacket.METH_swapRes:
-
-						data = ecc_packet.get_data()
-
-						self.swap_response(data['cotk'], data['adtk'])
-
-					else:
-
-						pass
+		self.context.term()
 
 	############################################################################
 
