@@ -2,7 +2,7 @@
 # coding: UTF-8
 
 from eccpacket  import eccPacket
-from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
+from cryptonode import cryptoNode, cryptoNodeException
 
 ################################################################################
 ## txSend class ################################################################
