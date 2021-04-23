@@ -70,6 +70,7 @@ If the value `false` is returned in the `able` field it indicates that the appli
 The `addrReq` method is used to request a new receive address from the other party.
 
 	{
+		"uuid" : "<uuid value>"
 		"coin" : "<coin symbol>"
 		"type" : "P2PKH|P2SH|bech32"
 	}
@@ -79,6 +80,7 @@ The `addrReq` method is used to request a new receive address from the other par
 The `addrRes` method is used to reply to a `addrReq` message.
 
 	{
+		"uuid" : "<uuid value>"
 		"coin" : "<coin symbol>"
 		"addr" : "0|<address>"
 	}
@@ -90,6 +92,7 @@ If the value `0` is returned in the `addr` field it indicates that the other par
 The `txidInf` method is used to send transaction information from the sending party to the other party.
 
 	{
+		"uuid" : "<uuid value>"
 		"coin" : "<coin symbol>"
 		"amnt" : "<coin amount>"
 		"addr" : "<receive address>"
