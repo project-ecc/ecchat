@@ -120,10 +120,6 @@ class ChatApp:
 
 		self.otherTag = tag
 
-		self.send_pending = False	# TIDY
-		self.send_amount  = 0.0		# TIDY
-		self.send_index   = 0		# TIDY
-
 		self.swap_pending    = False
 		self.swap_uuid       = ''
 		self.swap_timeout_h  = 0
@@ -264,108 +260,6 @@ class ChatApp:
 		urwid.connect_signal(dialog, 'commit', callback)
 
 		dialog.show()
-
-	############################################################################
-
-	def start_send(self, amount, index): #TIDY
-
-		# Check 1 - Is a send currently incomplete ?
-
-		if self.send_pending:
-
-			self.append_message(0, 'Prior send incomplete - try again later')
-
-			return
-
-		# Check 2 - Can the send amount be converted to a float correctly ?
-
-		try:
-
-			float_amount = float(amount)
-
-		except ValueError:
-
-			self.append_message(0, 'Invalid send amount - number expected')
-
-			return
-
-		# Check 3 - Is the send amount in a sensible range ?
-
-		if float_amount <= 0:
-
-			self.append_message(0, 'Invalid send amount - must be greater than zero')
-
-			return
-
-		# Check 4 - Does the user's wallet hold an adequate balance ?
-
-		balance = coins[index].get_unlocked_balance()
-
-		if float_amount >= balance:
-
-			self.append_message(0, 'Invalid send amount - must be less than current balance = {:f}'.format(balance))
-
-			return
-
-		# Check 5 - Ensure the user's wallet is unlocked
-
-		if not self.check_wallet_unlocked(index):
-
-			self.append_message(0, 'Wallet could not be unlocked : {}'.format(coins[index].symbol))
-
-			return
-
-		# Request address from peer
-
-		data = {'coin' : coins[index].symbol,
-				'type' : 'P2PKH'}
-
-		self.send_ecc_packet(eccPacket.METH_addrReq, data)
-
-		self.loop.set_alarm_in(10, self.timeout_send)
-
-		self.send_pending = True
-		self.send_amount  = float_amount
-		self.send_index   = index
-
-	############################################################################
-
-	def complete_send(self, address): #TIDY
-
-		if address == '0':
-
-			self.append_message(0, 'Other party is unable or unwilling to receive unsolicited sends of {}'.format(coins[self.send_index].symbol))
-
-			#TODO : Test this !!!
-
-		if self.send_pending and address != '0':
-
-			try:
-
-				self.txid = coins[self.send_index].send_to_address(address, str(self.send_amount), "ecchat")
-
-			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds, slickrpc.exc.RpcTypeError: sendtoaddress: Invalid amount (code -3)
-
-				self.append_message(0, 'Wallet locked - please unlock')
-
-			else:
-
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.send_amount, coins[self.send_index].symbol,address))
-
-			# Send the METH_txidInf message - (coin, amount, address, txid)
-
-			data = {'coin' : coins[self.send_index].symbol,
-					'amnt' : '{:f}'.format(self.send_amount),
-					'addr' : address,
-					'txid' : self.txid}
-
-			self.send_ecc_packet(eccPacket.METH_txidInf, data)
-
-		# /send command complete - reset state variables
-
-		self.send_pending = False
-		self.send_amount  = 0.0
-		self.send_index   = 0
 
 	############################################################################
 
@@ -1057,7 +951,7 @@ class ChatApp:
 
 			if 'uuid' in data:
 
-				if data['uuid'] in txSend:
+				if data['uuid'] in self.txSend:
 
 					self.txSend[data['uuid']].do_send(data['addr'])
 
@@ -1230,7 +1124,7 @@ class ChatApp:
 
 			except cryptoNodeException as error:
 
-				print(error)
+				print(str(error))
 
 				return False
 

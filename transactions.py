@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # coding: UTF-8
 
-from eccpacket import eccPacket
+from eccpacket  import eccPacket
+from cryptonode import cryptoNode, cryptoNodeException
 
 ################################################################################
 ## txSend class ################################################################
@@ -94,13 +95,15 @@ class txSend():
 
 	def do_wallet_unlocked_check(self):
 
+		assert self.tx_state == self.STATE_checking
+
 		if self.coin.wallet_locked():
 
 			self.unlRetry += 1
 
 			if self.unlRetry > self.unlLimit:
 
-				self.do_failure('Wallet unlock retries exceeded : {}'.format(self.coin.symbol))
+				self.do_failure('Wallet unlock - {} attempts failed : {}'.format(self.unlLimit,self.coin.symbol))
 
 				return
 
@@ -113,6 +116,8 @@ class txSend():
 	############################################################################
 
 	def passphrase_callback(self, status, passphrase):
+
+		assert self.tx_state == self.STATE_checking
 
 		if status:
 
@@ -156,6 +161,8 @@ class txSend():
 
 	def do_send(self, addr):
 
+		assert self.tx_state == self.STATE_addr_req
+
 		self.addr = addr
 
 		if addr == '0':
@@ -172,9 +179,9 @@ class txSend():
 
 				self.txid = self.coin.send_to_address(addr, str(self.f_amount), "ecchat")
 
-			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds, slickrpc.exc.RpcTypeError: sendtoaddress: Invalid amount (code -3)
+			except cryptoNodeException as error:
 
-				self.do_failure('Wallet locked - please unlock')
+				self.do_failure(str(error))
 
 				return
 
@@ -190,7 +197,9 @@ class txSend():
 					'addr' : self.addr,
 					'txid' : self.txid}
 
-			self.send_ecc_packet(eccPacket.METH_txidInf, data)
+			self.parent.send_ecc_packet(eccPacket.METH_txidInf, data)
+
+			self.parent.txid = self.txid # TIDY
 
 			self.tx_state = self.STATE_complete
 		
