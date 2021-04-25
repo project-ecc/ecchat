@@ -29,7 +29,7 @@ from slickrpc import exc # RpcWalletUnlockNeeded only TO BE REMOVED !!!!!
 
 from eccpacket    import eccPacket
 from cryptonode   import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
-from transactions import txSend
+from transactions import txSend, txReceive
 
 # urwid extension classes
 
@@ -132,8 +132,9 @@ class ChatApp:
 
 		self.subscribers = []
 
-		self.txSend = {}
-		self.txSwap = {}
+		self.txSend    = {}
+		self.txReceive = {}
+		self.txSwap    = {}
 
 	############################################################################
 
@@ -963,7 +964,13 @@ class ChatApp:
 
 			self.txid = data['txid']
 
-			if self.swap_pending:
+			valid, index = check_symbol(data['coin'])
+
+			if valid:
+
+				self.txReceive[data['uuid']] = txReceive(self, data['uuid'], coins[index], data['amnt'], data['addr'], data['txid'])
+
+			if self.swap_pending: #TIDY
 
 				self.complete_swap()
 
