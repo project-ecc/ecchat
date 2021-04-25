@@ -458,7 +458,29 @@ class bitcoinNode(cryptoNode):
 
 	def send_to_address(self, address, amount, comment):
 
-		return self.proxy.sendtoaddress(address, amount, comment)
+		try:
+
+			txid = self.proxy.sendtoaddress(address, amount, comment)
+
+		except exc.RpcWalletUnlockNeeded:
+
+			raise cryptoNodeException('Wallet locked - please unlock')
+
+		except exc.RpcWalletInsufficientFunds:
+
+			raise cryptoNodeException('Insufficient funds in wallet')
+
+		except exc.RpcTypeError:
+
+			raise cryptoNodeException('Invalid amount')
+
+		except exc.RpcWalletError:
+
+			raise cryptoNodeException('Amount too small')
+
+		else:
+
+			return txid
 
 	############################################################################
 
@@ -583,7 +605,29 @@ class litecoinNode(cryptoNode):
 
 	def send_to_address(self, address, amount, comment):
 
-		return self.proxy.sendtoaddress(address, amount, comment)
+		try:
+
+			txid = self.proxy.sendtoaddress(address, amount, comment)
+
+		except exc.RpcWalletUnlockNeeded:
+
+			raise cryptoNodeException('Wallet locked - please unlock')
+
+		except exc.RpcWalletInsufficientFunds:
+
+			raise cryptoNodeException('Insufficient funds in wallet')
+
+		except exc.RpcTypeError:
+
+			raise cryptoNodeException('Invalid amount')
+
+		except exc.RpcWalletError:
+
+			raise cryptoNodeException('Amount too small')
+
+		else:
+
+			return txid
 
 	############################################################################
 
