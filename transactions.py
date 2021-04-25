@@ -217,7 +217,7 @@ class txReceive():
 		self.uuid     = uuid
 		self.coin     = coin
 		self.s_amount = amount
-		self.f_amount = 0.0
+		self.f_amount = float(amount)
 		self.addr     = addr
 		self.txid     = txid
 
