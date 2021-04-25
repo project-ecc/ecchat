@@ -23,7 +23,7 @@ from uuid import uuid4
 from zmqeventloop import zmqEventLoop
 
 #from slickrpc import Proxy
-from slickrpc import exc # RpcWalletUnlockNeeded only TO BE REMOVED !!!!!
+from slickrpc import exc # RpcWalletUnlockNeeded only TO BE REMOVED !!!!! # TIDY
 
 # eccPacket, cryptoNode & transaction classes
 
@@ -634,6 +634,22 @@ class ChatApp:
 
 	############################################################################
 
+	def echo_transactions(self, symbol):
+
+		for tx in self.txSend.values():
+
+			if tx.coin.symbol == symbol:
+
+				self.append_message(0, 'TX: {} {:f} {} {}'.format(tx.coin.symbol, tx.f_amount, tx.addr, tx.txid))
+
+		for tx in self.txReceive.values():
+
+			if tx.coin.symbol == symbol:
+
+				self.append_message(0, 'RX: {} {:f} {} {}'.format(tx.coin.symbol, tx.f_amount, tx.addr, tx.txid))
+
+	############################################################################
+
 	def process_user_entry(self, text):
 
 		if len(text) > 0:
@@ -665,6 +681,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/address <coin>', 'generate a new address'))
 				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
 				self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
+				self.append_message(0, '%-8s - %s' % ('/list    <coin>', 'list all transactions this session'))
 				self.append_message(0, '%-8s - %s' % ('         <coin>', 'coin symbol - defaults to ecc'))
 				self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
 				self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
@@ -845,6 +862,29 @@ class ChatApp:
 				else:
 
 					self.append_message(0, 'txid = %s' % 'none')
+
+			elif text.startswith('/list'):
+
+				match = re.match('/list (?P<symbol>\w+)', text)
+
+				if match:
+
+					valid, index = check_symbol(match.group('symbol'))
+
+					if valid:
+
+						self.echo_transactions(coins[index].symbol)
+
+					else:
+
+						self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbol')))
+
+				else:
+
+					for coin in coins:
+
+						self.echo_transactions(coin.symbol)
+
 
 			elif text.startswith('/'):
 
