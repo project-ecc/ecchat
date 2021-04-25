@@ -25,15 +25,15 @@ class GridFlowPlus(urwid.GridFlow):
 
 				return
 
-			if key in ('esc', 'N', 'n'):
+			if key in ('Y', 'y', 'O', 'o'): # Yes / OK
 
-				self.focus_position = 1
+				self.focus_position = 0
 
 				return super().keypress(size, 'enter')
 
-			if key in ('Y', 'y'):
+			if key in ('esc', 'N', 'n', 'C', 'c'): # ESCAPE / No / Cancel
 
-				self.focus_position = 0
+				self.focus_position = 1
 
 				return super().keypress(size, 'enter')
 
@@ -61,7 +61,7 @@ class YesNoDialog(urwid.WidgetWrap):
 		self.view = urwid.Overlay(self.view, self.parent, 'center', len(text) + 6, 'middle', 7)
 
 		self.frame.footer = GridFlowPlus([urwid.AttrMap(urwid.Button('Yes', self.on_yes), 'btn_nm', 'btn_hl'),
-			                              urwid.AttrMap(urwid.Button('No' , self.on_no) , 'btn_nm', 'btn_hl')],
+			                              urwid.AttrMap(urwid.Button('No' , self.on_no ), 'btn_nm', 'btn_hl')],
 			                             7, 3, 1, 'center')
 
 		self.frame.focus_position = 'footer'
@@ -90,30 +90,73 @@ class YesNoDialog(urwid.WidgetWrap):
 
 ################################################################################
 
-class PasswordDialog(urwid.WidgetWrap):
+class PassphraseEdit(urwid.Edit):
+
+	def __init__(self, on_enter, on_cancel, on_tab, **kwargs):
+
+		self.on_enter  = on_enter
+		self.on_cancel = on_cancel
+		self.on_tab    = on_tab
+
+		super().__init__(**kwargs)
+
+	############################################################################
+
+	def keypress(self, size, key):
+
+		if isinstance(key, str):
+
+			if key in ('enter', ):
+
+				self.on_enter()
+
+				return
+
+			if key in ('esc', ):
+
+				self.on_cancel()
+
+				return
+
+			if key in ('tab', ):
+
+				self.on_tab()
+
+				return
+
+		return super().keypress(size, key)
+
+################################################################################
+
+class PassphraseDialog(urwid.WidgetWrap):
 
 	signals = ['commit']
 
 	def __init__(self, text, loop):
 
+		self.text = text
 		self.loop = loop
 
 		self.parent = self.loop.widget
 
-		#self.body = urwid.Filler(urwid.Text(text))
+		self.label = urwid.Text(self.text)
 
-		#self.frame = urwid.Frame(self.body, focus_part = 'body')
+		self.input = PassphraseEdit(self.on_ok, self.on_cancel, self.on_tab, multiline=False, wrap = 'clip', allow_tab = False, mask='*')
 
-		#self.view = urwid.Padding(self.frame, ('fixed left', 2), ('fixed right' , 2))
-		#self.view = urwid.Filler (self.view,  ('fixed top' , 1), ('fixed bottom', 1))
-		#self.view = urwid.LineBox(self.view)
-		#self.view = urwid.Overlay(self.view, self.parent, 'center', len(text) + 6, 'middle', 7)
+		self.body  = urwid.Pile([urwid.Filler(self.label), urwid.Filler(urwid.AttrMap(self.input, 'header'))], 1)
 
-		#self.frame.footer = GridFlowPlus([urwid.AttrMap(urwid.Button('OK', self.on_ok), 'btn_nm', 'btn_hl'),
-		#	                              urwid.AttrMap(urwid.Button('Cancel' , self.on_cancel) , 'btn_nm', 'btn_hl')],
-		#	                             7, 3, 1, 'center')
+		self.frame = urwid.Frame(self.body, focus_part = 'body')
 
-		#self.frame.focus_position = 'footer'
+		self.view = urwid.Padding(self.frame, ('fixed left', 2), ('fixed right' , 2))
+		self.view = urwid.Filler (self.view,  ('fixed top' , 1), ('fixed bottom', 1))
+		self.view = urwid.LineBox(self.view)
+		self.view = urwid.Overlay(self.view, self.parent, 'center', len(text) + 6, 'middle', 9)
+
+		self.frame.footer = GridFlowPlus([urwid.AttrMap(urwid.Button('  OK  ',  self.on_ok),     'btn_nm', 'btn_hl'),
+			                              urwid.AttrMap(urwid.Button('Cancel' , self.on_cancel), 'btn_nm', 'btn_hl')],
+			                             10, 3, 1, 'center')
+
+		self.frame.focus_position = 'body'
 
 		super().__init__(self.view)
 
@@ -123,13 +166,21 @@ class PasswordDialog(urwid.WidgetWrap):
 
 		self.loop.widget = self.parent
 
-		urwid.emit_signal(self, 'commit')
+		urwid.emit_signal(self, 'commit', True, self.input.get_edit_text())
 
 	############################################################################
 
 	def on_cancel(self, *args, **kwargs):
 
 		self.loop.widget = self.parent
+
+		urwid.emit_signal(self, 'commit', False, '')
+
+	############################################################################
+
+	def on_tab(self, *args, **kwargs):
+
+		self.frame.focus_position = 'footer'
 
 	############################################################################
 

@@ -237,7 +237,17 @@ class eccoinNode(cryptoNode):
 
 	def unlock_wallet(self, passphrase, seconds):
 
-		self.proxy.walletpassphrase(passphrase, seconds)
+		try:
+
+			self.proxy.walletpassphrase(passphrase, seconds)
+
+		except exc.RpcWalletPassphraseIncorrect:
+
+			return False
+
+		else:
+
+			return True
 
 	############################################################################
 
@@ -410,7 +420,17 @@ class bitcoinNode(cryptoNode):
 
 	def unlock_wallet(self, passphrase, seconds):
 
-		self.proxy.walletpassphrase(passphrase, seconds)
+		try:
+
+			self.proxy.walletpassphrase(passphrase, seconds)
+
+		except exc.RpcWalletPassphraseIncorrect:
+
+			return False
+
+		else:
+
+			return True
 
 	############################################################################
 
@@ -525,7 +545,17 @@ class litecoinNode(cryptoNode):
 
 	def unlock_wallet(self, passphrase, seconds):
 
-		self.proxy.walletpassphrase(passphrase, seconds)
+		try:
+
+			self.proxy.walletpassphrase(passphrase, seconds)
+
+		except exc.RpcWalletPassphraseIncorrect:
+
+			return False
+
+		else:
+
+			return True
 
 	############################################################################
 
@@ -627,7 +657,7 @@ class moneroNode(cryptoNode):
 
 	def unlock_wallet(self, passphrase, seconds):
 
-		pass
+		return True
 
 	############################################################################
 

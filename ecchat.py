@@ -25,14 +25,15 @@ from zmqeventloop import zmqEventLoop
 #from slickrpc import Proxy
 from slickrpc import exc # RpcWalletUnlockNeeded only TO BE REMOVED !!!!!
 
-# eccPacket & cryptoNode classes
+# eccPacket, cryptoNode & transaction classes
 
-from eccpacket  import eccPacket
-from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
+from eccpacket    import eccPacket
+from cryptonode   import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
+from transactions import txSend
 
 # urwid extension classes
 
-from urwidext import GridFlowPlus, YesNoDialog, PasswordDialog, MessageListBox, FrameFocus, MessageWalker
+from urwidext import GridFlowPlus, YesNoDialog, PassphraseDialog, MessageListBox, FrameFocus, MessageWalker
 
 coins = []
 
@@ -105,7 +106,7 @@ class ChatApp:
 
 		urwid.set_encoding('utf-8')
 
-		self.version = '1.1'
+		self.version = '1.2'
 
 		self.party_name = ['ecchat', name, other]
 
@@ -119,9 +120,9 @@ class ChatApp:
 
 		self.otherTag = tag
 
-		self.send_pending = False
-		self.send_amount  = 0.0
-		self.send_index   = 0
+		self.send_pending = False	# TIDY
+		self.send_amount  = 0.0		# TIDY
+		self.send_index   = 0		# TIDY
 
 		self.swap_pending    = False
 		self.swap_uuid       = ''
@@ -134,6 +135,9 @@ class ChatApp:
 		self.txid = ''
 
 		self.subscribers = []
+
+		self.txSend = {}
+		self.txSwap = {}
 
 	############################################################################
 
@@ -253,7 +257,17 @@ class ChatApp:
 
 	############################################################################
 
-	def start_send(self, amount, index):
+	def show_passphrase_dialog(self, symbol, retry_no, retry_max, callback):
+
+		dialog = PassphraseDialog(text = u'Enter {} wallet unlock passphrase ({:d}/{:d}):'.format(symbol, retry_no, retry_max), loop = self.loop)
+
+		urwid.connect_signal(dialog, 'commit', callback)
+
+		dialog.show()
+
+	############################################################################
+
+	def start_send(self, amount, index): #TIDY
 
 		# Check 1 - Is a send currently incomplete ?
 
@@ -295,11 +309,11 @@ class ChatApp:
 
 		# Check 5 - Ensure the user's wallet is unlocked
 
-		while coins[index].wallet_locked():
+		if not self.check_wallet_unlocked(index):
 
-			passphrase = 'TODO'
+			self.append_message(0, 'Wallet could not be unlocked : {}'.format(coins[index].symbol))
 
-			coins[index].unlock_wallet(passphrase, 60)
+			return
 
 		# Request address from peer
 
@@ -316,7 +330,7 @@ class ChatApp:
 
 	############################################################################
 
-	def complete_send(self, address):
+	def complete_send(self, address): #TIDY
 
 		if address == '0':
 
@@ -330,7 +344,7 @@ class ChatApp:
 
 				self.txid = coins[self.send_index].send_to_address(address, str(self.send_amount), "ecchat")
 
-			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
+			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds, slickrpc.exc.RpcTypeError: sendtoaddress: Invalid amount (code -3)
 
 				self.append_message(0, 'Wallet locked - please unlock')
 
@@ -352,20 +366,6 @@ class ChatApp:
 		self.send_pending = False
 		self.send_amount  = 0.0
 		self.send_index   = 0
-
-	############################################################################
-
-	def timeout_send(self, loop = None, data = None):
-
-		if self.send_pending:
-
-			self.append_message(0, 'No response from other party - /send cancelled')
-
-			# /send command cancelled - reset state variables
-
-			self.send_pending = False
-			self.send_amount  = 0.0
-			self.send_index   = 0
 
 	############################################################################
 
@@ -887,7 +887,11 @@ class ChatApp:
 
 					if valid:
 
-						self.start_send(match_symbol.group('amount'), index)
+						uuid = str(uuid4())
+
+						self.txSend[uuid] = txSend(self, uuid, coins[index], match_symbol.group('amount'))
+
+						self.txSend[uuid].do_checks()
 
 					else:
 
@@ -895,7 +899,11 @@ class ChatApp:
 
 				elif match_default:
 
-					self.start_send(match_default.group('amount'), 0)
+					uuid = str(uuid4())
+
+					self.txSend[uuid] = txSend(self, uuid, coins[0], match_default.group('amount'))
+
+					self.txSend[uuid].do_checks()
 
 				else:
 
@@ -1037,7 +1045,8 @@ class ChatApp:
 
 				address = coins[index].get_new_address()
 
-				rData = {'coin' : data['coin'],
+				rData = {'uuid' : data['uuid'],
+						 'coin' : data['coin'],
 						 'addr' : address}
 
 				self.send_ecc_packet(eccPacket.METH_addrRes, rData)
@@ -1046,7 +1055,11 @@ class ChatApp:
 
 			data = ecc_packet.get_data()
 
-			self.complete_send(data['addr'])
+			if 'uuid' in data:
+
+				if data['uuid'] in txSend:
+
+					self.txSend[data['uuid']].do_send(data['addr'])
 
 		elif ecc_packet.get_meth() == eccPacket.METH_txidInf:
 
