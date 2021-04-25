@@ -204,3 +204,21 @@ class txSend():
 			self.tx_state = self.STATE_complete
 		
 ################################################################################
+## txReceive class #############################################################
+################################################################################
+
+class txReceive():
+
+	############################################################################
+
+	def __init__(self, parent, uuid, coin, amount, addr, txid):
+
+		self.parent   = parent
+		self.uuid     = uuid
+		self.coin     = coin
+		self.s_amount = amount
+		self.f_amount = 0.0
+		self.addr     = addr
+		self.txid     = txid
+
+################################################################################
