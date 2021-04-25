@@ -269,6 +269,10 @@ class eccoinNode(cryptoNode):
 
 			raise cryptoNodeException('Invalid amount')
 
+		except exc.RpcWalletError:
+
+			raise cryptoNodeException('Amount too small')
+
 		else:
 
 			return txid
