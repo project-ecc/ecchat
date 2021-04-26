@@ -682,7 +682,7 @@ class ChatApp:
 				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
 				self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
 				self.append_message(0, '%-8s - %s' % ('/list    <coin>', 'list all transactions this session'))
-				self.append_message(0, '%-8s - %s' % ('         <coin>', 'coin symbol - defaults to ecc'))
+				self.append_message(0, '%-8s - %s' % ('         <coin>', 'optional coin symbol - defaults to ecc'))
 				self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
 				self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
 
@@ -941,6 +941,12 @@ class ChatApp:
 	############################################################################
 
 	def process_ecc_packet(self, ecc_packet):
+
+		# Spam filter
+
+		if ecc_packet.get_from() != self.otherTag:
+
+			return
 
 		if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
 
