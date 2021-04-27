@@ -29,9 +29,9 @@ class eccPacket():
 
 	KEY_LIST = {METH_chatMsg : ('uuid', 'cmmd', 'text'),
 				METH_chatAck : ('uuid', 'cmmd', 'able'),
-				METH_addrReq : ('coin', 'type'),
-				METH_addrRes : ('coin', 'addr'),
-				METH_txidInf : ('coin', 'amnt', 'addr', 'txid'),
+				METH_addrReq : ('uuid', 'coin', 'type'),
+				METH_addrRes : ('uuid', 'coin', 'addr'),
+				METH_txidInf : ('uuid', 'coin', 'amnt', 'addr', 'txid'),
 				METH_swapInf : ('uuid', 'cogv', 'amgv', 'cotk', 'amtk'),
 				METH_swapReq : ('uuid', 'cogv', 'adgv'),
 				METH_swapRes : ('uuid', 'cotk', 'adtk')}
