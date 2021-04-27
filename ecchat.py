@@ -102,7 +102,7 @@ class ChatApp:
 				('btn_nm', 'black'           , 'brown'      , 'default' ),
 				('btn_hl', 'black'           , 'yellow'     , 'standout')]
 
-	def __init__(self, name, other, tag):
+	def __init__(self, name, other, tag, debug=False):
 
 		urwid.set_encoding('utf-8')
 
@@ -119,6 +119,8 @@ class ChatApp:
 		self.party_size = max(len(t) for t in self.party_name)
 
 		self.otherTag = tag
+
+		self.debug = debug
 
 		self.swap_pending    = False
 		self.swap_uuid       = ''
@@ -164,7 +166,9 @@ class ChatApp:
 
 		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, coins[0].routingTag, meth, data)
 
-		logging.info(ecc_packet.to_json())
+		if self.debug:
+
+			logging.info('TX: {}'.format(ecc_packet.to_json()))
 
 		ecc_packet.send(coins[0])
 
@@ -1146,6 +1150,10 @@ class ChatApp:
 
 					message = codecs.decode(packet, 'hex').decode()
 
+					if self.debug:
+
+						logging.info('RX: {}'.format(message))
+
 					ecc_packet = eccPacket.from_json(message)
 
 					self.process_ecc_packet(ecc_packet)
@@ -1252,15 +1260,16 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Simple command line chat for ECC')
 
-	argparser.add_argument('-n', '--name'  , action='store', help='nickname    (local)' , type=str, default = ''       , required=True)
-	argparser.add_argument('-o', '--other' , action='store', help='nickname    (remote)', type=str, default = '[other]', required=False)
-	argparser.add_argument('-t', '--tag'   , action='store', help='routing tag (remote)', type=str, default = ''       , required=True)
+	argparser.add_argument('-n', '--name'  , action='store',      help='nickname    (local)' , type=str, default = ''       , required=True )
+	argparser.add_argument('-o', '--other' , action='store',      help='nickname    (remote)', type=str, default = '[other]', required=False)
+	argparser.add_argument('-t', '--tag'   , action='store',      help='routing tag (remote)', type=str, default = ''       , required=True )
+	argparser.add_argument('-d', '--debug' , action='store_true', help='debug message log'   ,                                required=False)
 
 	command_line_args = argparser.parse_args()
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	app = ChatApp(command_line_args.name, command_line_args.other, command_line_args.tag)
+	app = ChatApp(command_line_args.name, command_line_args.other, command_line_args.tag, command_line_args.debug)
 
 	app.run()
 
