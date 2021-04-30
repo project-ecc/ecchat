@@ -11,7 +11,6 @@ import signal
 import codecs
 import pickle
 import urwid
-import time
 import zmq
 import sys
 import re
@@ -178,7 +177,7 @@ class ChatApp:
 
 		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
 
-		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
+		markup = [('time', datetime.datetime.now().strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
 
 		self.walker.append(party, markup, uuid)
 
@@ -190,7 +189,7 @@ class ChatApp:
 
 		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
 
-		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
+		markup = [('time', datetime.datetime.now().strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, text)]
 
 		self.walker.replace(party, markup, uuid)
 
@@ -204,7 +203,7 @@ class ChatApp:
 
 		tstyle = {True : self.party_text_style[party], False : 'tnak'} [ack]
 
-		markup = [('time', time.strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, del_text)]
+		markup = [('time', datetime.datetime.now().strftime(self._clock_fmt)), (self.party_name_style[party], u'{0:>{1}s} {2} '.format(self.party_name[party], self.party_size, self.party_separator[party])), (tstyle, del_text)]
 
 		self.walker.replace(party, markup, uuid)
 
@@ -220,7 +219,7 @@ class ChatApp:
 
 	def clock_refresh(self, loop = None, data = None):
 
-		text = time.strftime(self._clock_fmt)
+		text = datetime.datetime.now().strftime(self._clock_fmt)
 
 		for coin in coins:
 
@@ -585,6 +584,42 @@ class ChatApp:
 
 	############################################################################
 
+	def echo_help(self):
+
+		self.append_message(0, '%-8s - %s' % ('/help          ', 'display help - commands'))
+		self.append_message(0, '%-8s - %s' % ('/keys          ', 'display help - keys'))
+		self.append_message(0, '%-8s - %s' % ('/exit          ', 'exit - also /quit and ESC'))
+		self.append_message(0, '%-8s - %s' % ('/version       ', 'display ecchat version info'))
+		self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
+		self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
+		self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
+		self.append_message(0, '%-8s - %s' % ('/qr            ', 'display routing tag as QR code'))
+		self.append_message(0, '%-8s - %s' % ('/balance <coin>', 'display wallet balance'))
+		self.append_message(0, '%-8s - %s' % ('/address <coin>', 'generate a new address'))
+		self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
+		self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
+		self.append_message(0, '%-8s - %s' % ('/list    <coin>', 'list all transactions this session'))
+		self.append_message(0, '%-8s - %s' % ('         <coin>', 'optional coin symbol - defaults to ecc'))
+		self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
+		self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
+
+	############################################################################
+
+	def echo_keys(self):
+
+		self.append_message(0, '------------------------------------')
+		self.append_message(0, 'Recall, replace, erase, scroll, exit')
+		self.append_message(0, '------------------------------------')
+		self.append_message(0, 'CURSOR UP/DOWN     - Recall previous message / command')
+		self.append_message(0, 'ENTER              - Send new message / command')
+		self.append_message(0, 'ALT+ENTER          - Replace previous message')
+		self.append_message(0, 'ALT+DELETE         - Erase previous message')
+		self.append_message(0, 'ALT+CURSOR UP/DOWN - Scroll messages one line')
+		self.append_message(0, 'PAGE UP/DOWN       - Scroll messages one page')
+		self.append_message(0, 'ESCAPE             - Exit ecchat')
+
+	############################################################################
+
 	def echo_balance(self, coin):
 
 		balance_con = coin.get_balance()
@@ -644,13 +679,13 @@ class ChatApp:
 
 			if tx.coin.symbol == symbol:
 
-				self.append_message(0, 'TX: {} {:f} {} {}'.format(tx.coin.symbol, tx.f_amount, tx.addr, tx.txid))
+				self.append_message(0, 'TX: {} {} {:f} {} {}'.format(tx.time_tx.strftime('%x %X'), tx.coin.symbol, tx.f_amount, tx.addr, tx.txid))
 
 		for tx in self.txReceive.values():
 
 			if tx.coin.symbol == symbol:
 
-				self.append_message(0, 'RX: {} {:f} {} {}'.format(tx.coin.symbol, tx.f_amount, tx.addr, tx.txid))
+				self.append_message(0, 'RX: {} {} {:f} {} {}'.format(tx.time_tx.strftime('%x %X'), tx.coin.symbol, tx.f_amount, tx.addr, tx.txid))
 
 	############################################################################
 
@@ -674,21 +709,11 @@ class ChatApp:
 
 			elif text.startswith('/help'):
 
-				self.append_message(0, '%-8s - %s' % ('/help          ', 'display help information'))
-				self.append_message(0, '%-8s - %s' % ('/exit          ', 'exit - also /quit and ESC'))
-				self.append_message(0, '%-8s - %s' % ('/version       ', 'display ecchat version info'))
-				self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
-				self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
-				self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
-				self.append_message(0, '%-8s - %s' % ('/qr            ', 'display routing tag as QR code'))
-				self.append_message(0, '%-8s - %s' % ('/balance <coin>', 'display wallet balance'))
-				self.append_message(0, '%-8s - %s' % ('/address <coin>', 'generate a new address'))
-				self.append_message(0, '%-8s - %s' % ('/send x  <coin>', 'send x to other party'))
-				self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
-				self.append_message(0, '%-8s - %s' % ('/list    <coin>', 'list all transactions this session'))
-				self.append_message(0, '%-8s - %s' % ('         <coin>', 'optional coin symbol - defaults to ecc'))
-				self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
-				self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
+				self.echo_help()
+
+			elif text.startswith('/keys'):
+
+				self.echo_keys()
 
 			elif text.startswith('/version'):
 

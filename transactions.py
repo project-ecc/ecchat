@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: UTF-8
 
+from datetime   import datetime
 from eccpacket  import eccPacket
 from cryptonode import cryptoNode, cryptoNodeException
 
@@ -31,6 +32,7 @@ class txSend():
 		self.coin     = coin
 		self.addr     = ''
 		self.txid     = ''
+		self.time_tx  = 0.0
 		self.s_amount = amount
 		self.f_amount = 0.0
 		self.unlRetry = 0
@@ -187,22 +189,24 @@ class txSend():
 
 			else:
 
+				self.time_tx  = datetime.now()
+
 				self.parent.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.f_amount, self.coin.symbol, self.addr))
 
-			# Send the METH_txidInf message - (uuid, coin, amount, address, txid)
+				# Send the METH_txidInf message - (uuid, coin, amount, address, txid)
 
-			data = {'uuid' : self.uuid,
-					'coin' : self.coin.symbol,
-					'amnt' : '{:f}'.format(self.f_amount),
-					'addr' : self.addr,
-					'txid' : self.txid}
+				data = {'uuid' : self.uuid,
+						'coin' : self.coin.symbol,
+						'amnt' : '{:f}'.format(self.f_amount),
+						'addr' : self.addr,
+						'txid' : self.txid}
 
-			self.parent.send_ecc_packet(eccPacket.METH_txidInf, data)
+				self.parent.send_ecc_packet(eccPacket.METH_txidInf, data)
 
-			self.parent.txid = self.txid # TIDY
+				self.parent.txid = self.txid # TIDY
 
-			self.tx_state = self.STATE_complete
-		
+				self.tx_state = self.STATE_complete
+
 ################################################################################
 ## txReceive class #############################################################
 ################################################################################
@@ -220,5 +224,6 @@ class txReceive():
 		self.f_amount = float(amount)
 		self.addr     = addr
 		self.txid     = txid
+		self.time_tx  = datetime.now()
 
 ################################################################################
