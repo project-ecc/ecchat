@@ -1285,10 +1285,11 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Simple command line chat for ECC')
 
-	argparser.add_argument('-n', '--name'  , action='store',      help='nickname    (local)' , type=str, default = ''       , required=True )
-	argparser.add_argument('-o', '--other' , action='store',      help='nickname    (remote)', type=str, default = '[other]', required=False)
-	argparser.add_argument('-t', '--tag'   , action='store',      help='routing tag (remote)', type=str, default = ''       , required=True )
-	argparser.add_argument('-d', '--debug' , action='store_true', help='debug message log'   ,                                required=False)
+	argparser.add_argument('-n', '--name'  , action='store',      help='nickname    (local)' , type=str, default = ''           , required=True )
+	argparser.add_argument('-o', '--other' , action='store',      help='nickname    (remote)', type=str, default = '[other]'    , required=False)
+	argparser.add_argument('-t', '--tag'   , action='store',      help='routing tag (remote)', type=str, default = ''           , required=True )
+	argparser.add_argument('-c', '--conf'  , action='store',      help='configuration file'  , type=str, default = 'ecchat.conf', required=False)
+	argparser.add_argument('-d', '--debug' , action='store_true', help='debug message log'   ,                                    required=False)
 
 	command_line_args = argparser.parse_args()
 
