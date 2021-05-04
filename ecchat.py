@@ -101,7 +101,7 @@ class ChatApp:
 				('btn_nm', 'black'           , 'brown'      , 'default' ),
 				('btn_hl', 'black'           , 'yellow'     , 'standout')]
 
-	def __init__(self, name, other, tag, debug=False):
+	def __init__(self, name, other, tag, conf, debug=False):
 
 		urwid.set_encoding('utf-8')
 
@@ -118,8 +118,8 @@ class ChatApp:
 		self.party_size = max(len(t) for t in self.party_name)
 
 		self.otherTag = tag
-
-		self.debug = debug
+		self.conf     = conf
+		self.debug    = debug
 
 		self.swap_pending    = False
 		self.swap_uuid       = ''
@@ -611,7 +611,7 @@ class ChatApp:
 		self.append_message(0, 'Recall, replace, erase, scroll, exit')
 		self.append_message(0, '------------------------------------')
 		self.append_message(0, 'CURSOR UP/DOWN     - Recall previous message / command')
-		self.append_message(0, 'ENTER              - Send new message / command')
+		self.append_message(0, 'ENTER              - Send as new message / command')
 		self.append_message(0, 'ALT+ENTER          - Replace previous message')
 		self.append_message(0, 'ALT+DELETE         - Erase previous message')
 		self.append_message(0, 'ALT+CURSOR UP/DOWN - Scroll messages one line')
@@ -1197,6 +1197,8 @@ class ChatApp:
 
 	def cryptoInitialise(self):
 
+		#loadConfiguration() YODO
+
 		for coin in coins:
 
 			try:
@@ -1295,7 +1297,11 @@ def main():
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	app = ChatApp(command_line_args.name, command_line_args.other, command_line_args.tag, command_line_args.debug)
+	app = ChatApp(command_line_args.name,
+	              command_line_args.other,
+	              command_line_args.tag,
+	              command_line_args.conf,
+	              command_line_args.debug)
 
 	app.run()
 
