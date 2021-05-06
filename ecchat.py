@@ -67,7 +67,7 @@ class ChatApp:
 
 		urwid.set_encoding('utf-8')
 
-		self.version = '1.2'
+		self.version = '1.3'
 
 		self.party_name = ['ecchat', name, other]
 

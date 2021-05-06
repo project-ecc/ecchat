@@ -2,6 +2,7 @@
 # coding: UTF-8
 
 import pycurl
+import requests
 
 from itertools import count
 
@@ -15,6 +16,8 @@ from slickrpc import exc
 from monero.wallet import Wallet
 from monero.daemon import Daemon
 from monero.transaction import PaymentFilter
+
+import monero.exceptions
 
 ################################################################################
 ## cryptoNodeException class ###################################################
@@ -152,6 +155,10 @@ class eccoinNode(cryptoNode):
 		try:
 
 			info = self.proxy.getinfo()
+
+		except ValueError:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for eccoin')
 
 		except pycurl.error:
 
@@ -371,6 +378,10 @@ class bitcoinNode(cryptoNode):
 
 			info = self.proxy.getinfo()
 
+		except ValueError:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} daemon'.format(self.symbol))
+
 		except pycurl.error:
 
 			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
@@ -518,6 +529,10 @@ class litecoinNode(cryptoNode):
 
 			info = self.proxy.getnetworkinfo()
 
+		except ValueError:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} daemon'.format(self.symbol))
+
 		except pycurl.error:
 
 			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
@@ -651,11 +666,31 @@ class moneroNode(cryptoNode):
 
 		(host, port) = tuple(rpc_address.split(':'))
 
-		self.wallet = Wallet(host=host, port=port, user=rpc_user, password=rpc_pass)
+		try:
+
+			self.wallet = Wallet(host=host, port=port, user=rpc_user, password=rpc_pass)
+
+		except monero.backends.jsonrpc.exceptions.Unauthorized:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} wallet'.format(self.symbol))
+
+		except requests.exceptions.ConnectTimeout:
+
+			raise cryptoNodeException('Failed to connect - check that {} wallet is running'.format(self.symbol))
 
 		(host, port) = tuple(rpc_daemon.split(':'))
 
-		self.daemon = Daemon(host=host, port=port)
+		try:
+
+			self.daemon = Daemon(host=host, port=port)
+
+		except monero.backends.jsonrpc.exceptions.Unauthorized:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} daemon'.format(self.symbol))
+
+		except requests.exceptions.ConnectTimeout:
+
+			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
 
 	############################################################################
 
@@ -674,10 +709,30 @@ class moneroNode(cryptoNode):
 	############################################################################
 
 	def refresh(self):
-		
-		self.blocks = self.wallet.height()
 
-		info = self.daemon.info()
+		try:
+
+			self.blocks = self.wallet.height()
+
+		except monero.backends.jsonrpc.exceptions.Unauthorized:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} wallet'.format(self.symbol))
+
+		except requests.exceptions.ConnectTimeout:
+
+			raise cryptoNodeException('Failed to connect - check that {} wallet is running'.format(self.symbol))
+
+		try:
+
+			info = self.daemon.info()
+
+		except monero.backends.jsonrpc.exceptions.Unauthorized:
+
+			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} daemon'.format(self.symbol))
+
+		except requests.exceptions.ConnectTimeout:
+
+			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
 
 		self.peers = info['incoming_connections_count'] + info['outgoing_connections_count']
 

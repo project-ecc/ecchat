@@ -7,7 +7,7 @@ import sys
 
 import settings
 
-from cryptonode import eccoinNode, bitcoinNode, litecoinNode, moneroNode
+from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
 
 ################################################################################
 
@@ -95,7 +95,15 @@ def loadConfigurationAlt(coins, conf):
 
 				rpc_daemon  = '{}:{}'.format(parser[symbol]['daemonconnect'], parser[symbol]['daemonport'])
 
-				coins.append(moneroNode(symbol, rpc_address, rpc_daemon, parser[symbol]['rpcuser'], parser[symbol]['rpcpassword']))
+				try:
+
+					coins.append(moneroNode(symbol, rpc_address, rpc_daemon, parser[symbol]['rpcuser'], parser[symbol]['rpcpassword']))
+
+				except cryptoNodeException as error:
+
+					print(str(error))
+
+					return False
 
 			else:
 
