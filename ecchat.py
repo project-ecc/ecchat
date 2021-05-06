@@ -2,7 +2,6 @@
 # coding: UTF-8
 
 import datetime
-import settings
 import argparse
 import pyqrcode
 import pathlib
@@ -14,8 +13,6 @@ import urwid
 import zmq
 import sys
 import re
-
-import settings
 
 from uuid import uuid4
 
