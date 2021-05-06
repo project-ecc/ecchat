@@ -43,6 +43,8 @@ class cryptoNode():
 		self.rpc_user    = rpc_user
 		self.rpc_pass    = rpc_pass
 
+		self.available   = False
+
 		self.blocks      = 0
 		self.peers       = 0
 

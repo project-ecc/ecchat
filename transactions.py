@@ -3,7 +3,7 @@
 
 from datetime   import datetime
 from eccpacket  import eccPacket
-from cryptonode import cryptoNode, cryptoNodeException
+from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
 
 ################################################################################
 ## txSend class ################################################################
@@ -191,7 +191,7 @@ class txSend():
 
 				self.time_tx  = datetime.now()
 
-				self.parent.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.f_amount, self.coin.symbol, self.addr))
+				self.parent.append_message(0, '{:f} {} sent to {}'.format(self.f_amount, self.coin.symbol, self.addr))
 
 				# Send the METH_txidInf message - (uuid, coin, amount, address, txid)
 

@@ -15,6 +15,8 @@ import zmq
 import sys
 import re
 
+import settings
+
 from uuid import uuid4
 
 # ZMQ event loop adapter for urwid
@@ -23,6 +25,10 @@ from zmqeventloop import zmqEventLoop
 
 #from slickrpc import Proxy
 from slickrpc import exc # RpcWalletUnlockNeeded only TO BE REMOVED !!!!! # TIDY
+
+# Configuration file management : eccoin.conf & ecchat.conf
+
+from configure import loadConfigurationECC, loadConfigurationAlt
 
 # eccPacket, cryptoNode & transaction classes
 
@@ -33,50 +39,6 @@ from transactions import txSend, txReceive
 # urwid extension classes
 
 from urwidext import GridFlowPlus, YesNoDialog, PassphraseDialog, MessageListBox, FrameFocus, MessageWalker
-
-coins = []
-
-for index, chain in enumerate(settings.chains):
-
-	if index == 0:
-
-		if chain['coin_symbol'] != 'ecc':
-
-			print('ecc must be the first configured chain')
-
-			sys.exit()
-
-	if chain['coin_symbol'] == 'ecc':
-
-		coins.append(eccoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass'], settings.protocol_id))
-
-	elif chain['coin_symbol'] == 'ltc':
-
-		coins.append(litecoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
-
-	elif chain['coin_symbol'] == 'xmr':
-
-		coins.append(moneroNode(chain['coin_symbol'], chain['rpc_address'],chain['rpc_daemon'], chain['rpc_user'], chain['rpc_pass']))
-
-	else:
-
-		coins.append(bitcoinNode(chain['coin_symbol'], chain['rpc_address'], chain['rpc_user'], chain['rpc_pass']))
-
-################################################################################
-
-def check_symbol(symbol):
-
-	return_valid = False
-	return_index = 0
-
-	for index, coin in enumerate(coins):
-
-		if symbol.lower() == coin.symbol:
-
-			return_valid = True
-			return_index = index
-
-	return return_valid, return_index
 
 ################################################################################
 ## ChatApp class ###############################################################
@@ -133,9 +95,27 @@ class ChatApp:
 
 		self.subscribers = []
 
+		self.coins = []
+
 		self.txSend    = {}
 		self.txReceive = {}
 		self.txSwap    = {}
+
+	############################################################################
+
+	def check_symbol(self, symbol):
+
+		return_valid = False
+		return_index = 0
+
+		for index, coin in enumerate(self.coins):
+
+			if symbol.lower() == coin.symbol:
+
+				return_valid = True
+				return_index = index
+
+		return return_valid, return_index
 
 	############################################################################
 
@@ -163,13 +143,13 @@ class ChatApp:
 
 	def send_ecc_packet(self, meth, data):
 
-		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
 			logging.info('TX: {}'.format(ecc_packet.to_json()))
 
-		ecc_packet.send(coins[0])
+		ecc_packet.send(self.coins[0])
 
 	############################################################################
 
@@ -221,7 +201,7 @@ class ChatApp:
 
 		text = datetime.datetime.now().strftime(self._clock_fmt)
 
-		for coin in coins:
+		for coin in self.coins:
 
 			text += ' {} # {:d}/{:d} '.format(coin.symbol, coin.blocks, coin.peers)
 
@@ -233,7 +213,7 @@ class ChatApp:
 
 	def reset_buffer_timeout(self, loop = None, data = None):
 
-		if coins[0].reset_buffer_timeout():
+		if self.coins[0].reset_buffer_timeout():
 
 			loop.set_alarm_in(10, self.reset_buffer_timeout)
 
@@ -241,7 +221,7 @@ class ChatApp:
 
 	def block_refresh_timed(self, loop = None, data = None):
 
-		for coin in coins:
+		for coin in self.coins:
 
 			if not coin.zmqAddress:
 
@@ -253,7 +233,7 @@ class ChatApp:
 
 	def block_refresh(self, index):
 
-		coins[index].refresh()
+		self.coins[index].refresh()
 
 	############################################################################
 
@@ -306,7 +286,7 @@ class ChatApp:
 
 		# Check 4 - Does the user's wallet hold an adequate balance ?
 
-		balance = coins[indexGive].get_unlocked_balance()
+		balance = self.coins[indexGive].get_unlocked_balance()
 
 		if float_amountGive >= balance:
 
@@ -321,9 +301,9 @@ class ChatApp:
 		# Send swap information
 
 		data = {'uuid' : str(uuid4()),
-				'cogv' : coins[indexGive].symbol,
+				'cogv' : self.coins[indexGive].symbol,
 				'amgv' : float_amountGive,
-				'cotk' : coins[indexTake].symbol,
+				'cotk' : self.coins[indexTake].symbol,
 				'amtk' : float_amountTake}
 
 		self.send_ecc_packet(eccPacket.METH_swapInf, data)
@@ -360,8 +340,8 @@ class ChatApp:
 
 		# Check 2 - Are both the coins in the proposed swap available
 
-		validGive, indexGive = check_symbol(symbolGive)
-		validTake, indexTake = check_symbol(symbolTake)
+		validGive, indexGive = self.check_symbol(symbolGive)
+		validTake, indexTake = self.check_symbol(symbolTake)
 
 		if not validGive:
 
@@ -398,7 +378,7 @@ class ChatApp:
 
 		# Check 5 - Does the user's wallet hold an adequate balance ?
 
-		balance = coins[indexTake].get_unlocked_balance()
+		balance = self.coins[indexTake].get_unlocked_balance()
 
 		if float_amountTake >= balance:
 
@@ -428,10 +408,10 @@ class ChatApp:
 
 			return
 
-		address = coins[self.swap_indexGive].get_new_address()
+		address = self.coins[self.swap_indexGive].get_new_address()
 
 		data = {'uuid' : self.swap_uuid,
-				'cogv' : coins[self.swap_indexGive].symbol,
+				'cogv' : self.coins[self.swap_indexGive].symbol,
 				'adgv' : address}
 
 		self.send_ecc_packet(eccPacket.METH_swapReq, data)
@@ -444,14 +424,14 @@ class ChatApp:
 
 		if self.swap_pending:
 
-			assert symbolGive == coins[self.swap_indexGive].symbol
+			assert symbolGive == self.coins[self.swap_indexGive].symbol
 
 			self.swap_addressGive = addressGive
 
-			address = coins[self.swap_indexTake].get_new_address()
+			address = self.coins[self.swap_indexTake].get_new_address()
 
 			data = {'uuid' : self.swap_uuid,
-					'cotk' : coins[self.swap_indexTake].symbol,
+					'cotk' : self.coins[self.swap_indexTake].symbol,
 					'adtk' : address}
 
 			self.send_ecc_packet(eccPacket.METH_swapRes, data)
@@ -476,11 +456,11 @@ class ChatApp:
 
 		if self.swap_pending and addressTake != '0':
 
-			assert symbolTake == coins[self.swap_indexTake].symbol
+			assert symbolTake == self.coins[self.swap_indexTake].symbol
 
 			try:
 
-				self.txid = coins[self.swap_indexTake].send_to_address(addressTake, str(self.swap_amountTake), "ecchat")
+				self.txid = self.coins[self.swap_indexTake].send_to_address(addressTake, str(self.swap_amountTake), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
@@ -488,11 +468,11 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountTake, symbolTake, addressTake))
+				self.append_message(0, '{:f} {} sent to {}'.format(self.swap_amountTake, symbolTake, addressTake))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : coins[self.swap_indexTake].symbol,
+			data = {'coin' : self.coins[self.swap_indexTake].symbol,
 					'amnt' : '{:f}'.format(self.swap_amountTake),
 					'addr' : addressTake,
 					'txid' : self.txid}
@@ -517,7 +497,7 @@ class ChatApp:
 
 			try:
 
-				self.txid = coins[self.swap_indexGive].send_to_address(self.swap_addressGive, str(self.swap_amountGive), "ecchat")
+				self.txid = self.coins[self.swap_indexGive].send_to_address(self.swap_addressGive, str(self.swap_amountGive), "ecchat")
 
 			except exc.RpcWalletUnlockNeeded: # TODO RpcWalletInsufficientFunds
 
@@ -525,11 +505,11 @@ class ChatApp:
 
 			else:
 
-				self.append_message(0, '{:f} {} sent to {} [/txid available]'.format(self.swap_amountGive, coins[self.swap_indexGive].symbol, self.swap_addressGive))
+				self.append_message(0, '{:f} {} sent to {}'.format(self.swap_amountGive, self.coins[self.swap_indexGive].symbol, self.swap_addressGive))
 
 			# Send the METH_txidInf message - (coin, amount, address, txid)
 
-			data = {'coin' : coins[self.swap_indexGive].symbol,
+			data = {'coin' : self.coins[self.swap_indexGive].symbol,
 					'amnt' : '{:f}'.format(self.swap_amountGive),
 					'addr' : self.swap_addressGive,
 					'txid' : self.txid}
@@ -725,11 +705,11 @@ class ChatApp:
 
 				if match:
 
-					valid, index = check_symbol(match.group('symbol'))
+					valid, index = self.check_symbol(match.group('symbol'))
 
 					if valid:
 
-						self.append_message(0, '{:d}'.format(coins[index].blocks))
+						self.append_message(0, '{:d}'.format(self.coins[index].blocks))
 
 					else:
 
@@ -737,7 +717,7 @@ class ChatApp:
 
 				else:
 
-					for coin in coins:
+					for coin in self.coins:
 
 						self.append_message(0, '{} : {:d}'.format(coin.symbol, coin.blocks))
 
@@ -747,11 +727,11 @@ class ChatApp:
 
 				if match:
 
-					valid, index = check_symbol(match.group('symbol'))
+					valid, index = self.check_symbol(match.group('symbol'))
 
 					if valid:
 
-						self.append_message(0, '{:d}'.format(coins[index].peers))
+						self.append_message(0, '{:d}'.format(self.coins[index].peers))
 
 					else:
 
@@ -759,17 +739,17 @@ class ChatApp:
 
 				else:
 
-					for coin in coins:
+					for coin in self.coins:
 
 						self.append_message(0, '{} : {:d}'.format(coin.symbol, coin.peers))
 
 			elif text.startswith('/tag'):
 
-				self.append_message(0, '{}'.format(coins[0].routingTag))
+				self.append_message(0, '{}'.format(self.coins[0].routingTag))
 
 			elif text.startswith('/qr'):
 
-				self.echo_qrcode(pyqrcode.create(coins[0].routingTag).text(quiet_zone=2))
+				self.echo_qrcode(pyqrcode.create(self.coins[0].routingTag).text(quiet_zone=2))
 
 			elif text.startswith('/balance'):
 
@@ -777,11 +757,11 @@ class ChatApp:
 
 				if match:
 
-					valid, index = check_symbol(match.group('symbol'))
+					valid, index = self.check_symbol(match.group('symbol'))
 
 					if valid:
 
-						self.echo_balance(coins[index])
+						self.echo_balance(self.coins[index])
 
 					else:
 
@@ -789,7 +769,7 @@ class ChatApp:
 
 				else:
 
-					for coin in coins:
+					for coin in self.coins:
 
 						self.echo_balance(coin)
 
@@ -799,11 +779,11 @@ class ChatApp:
 
 				if match:
 
-					valid, index = check_symbol(match.group('symbol'))
+					valid, index = self.check_symbol(match.group('symbol'))
 
 					if valid:
 
-						address = coins[index].get_new_address()
+						address = self.coins[index].get_new_address()
 
 						self.append_message(0, '{}'.format(address))
 
@@ -813,7 +793,7 @@ class ChatApp:
 
 				else:
 
-					address = coins[0].get_new_address()
+					address = self.coins[0].get_new_address()
 
 					self.append_message(0, '{}'.format(address))
 
@@ -824,13 +804,13 @@ class ChatApp:
 
 				if match_symbol:
 
-					valid, index = check_symbol(match_symbol.group('symbol'))
+					valid, index = self.check_symbol(match_symbol.group('symbol'))
 
 					if valid:
 
 						uuid = str(uuid4())
 
-						self.txSend[uuid] = txSend(self, uuid, coins[index], match_symbol.group('amount'))
+						self.txSend[uuid] = txSend(self, uuid, self.coins[index], match_symbol.group('amount'))
 
 						self.txSend[uuid].do_checks()
 
@@ -842,7 +822,7 @@ class ChatApp:
 
 					uuid = str(uuid4())
 
-					self.txSend[uuid] = txSend(self, uuid, coins[0], match_default.group('amount'))
+					self.txSend[uuid] = txSend(self, uuid, self.coins[0], match_default.group('amount'))
 
 					self.txSend[uuid].do_checks()
 
@@ -856,8 +836,8 @@ class ChatApp:
 
 				if match:
 
-					validGive, indexGive = check_symbol(match.group('symbolGive'))
-					validTake, indexTake = check_symbol(match.group('symbolTake'))
+					validGive, indexGive = self.check_symbol(match.group('symbolGive'))
+					validTake, indexTake = self.check_symbol(match.group('symbolTake'))
 
 					if validGive and validTake:
 
@@ -898,11 +878,11 @@ class ChatApp:
 
 				if match:
 
-					valid, index = check_symbol(match.group('symbol'))
+					valid, index = self.check_symbol(match.group('symbol'))
 
 					if valid:
 
-						self.echo_transactions(coins[index].symbol)
+						self.echo_transactions(self.coins[index].symbol)
 
 					else:
 
@@ -910,7 +890,7 @@ class ChatApp:
 
 				else:
 
-					for coin in coins:
+					for coin in self.coins:
 
 						self.echo_transactions(coin.symbol)
 
@@ -1009,11 +989,11 @@ class ChatApp:
 
 			data = ecc_packet.get_data()
 
-			valid, index = check_symbol(data['coin'])
+			valid, index = self.check_symbol(data['coin'])
 
 			if valid:
 
-				address = coins[index].get_new_address()
+				address = self.coins[index].get_new_address()
 
 				rData = {'uuid' : data['uuid'],
 						 'coin' : data['coin'],
@@ -1035,15 +1015,15 @@ class ChatApp:
 
 			data = ecc_packet.get_data()
 
-			self.append_message(0, '{} {} received at {} [/txid available]'.format(data['amnt'], data['coin'], data['addr']))
+			self.append_message(0, '{} {} received at {}'.format(data['amnt'], data['coin'], data['addr']))
 
 			self.txid = data['txid']
 
-			valid, index = check_symbol(data['coin'])
+			valid, index = self.check_symbol(data['coin'])
 
 			if valid:
 
-				self.txReceive[data['uuid']] = txReceive(self, data['uuid'], coins[index], data['amnt'], data['addr'], data['txid'])
+				self.txReceive[data['uuid']] = txReceive(self, data['uuid'], self.coins[index], data['amnt'], data['addr'], data['txid'])
 
 			if self.swap_pending: #TIDY
 
@@ -1134,7 +1114,7 @@ class ChatApp:
 		self.context    = zmq.Context()
 		self.event_loop = zmqEventLoop()
 
-		for index, coin in enumerate(coins):
+		for index, coin in enumerate(self.coins):
 
 			self.subscribers.append(self.context.socket(zmq.SUB))
 
@@ -1167,7 +1147,7 @@ class ChatApp:
 
 			protocolID = contents.decode()[1:]
 
-			eccbuffer = coins[0].get_buffer(int(protocolID))
+			eccbuffer = self.coins[0].get_buffer(int(protocolID))
 
 			if eccbuffer:
 
@@ -1197,32 +1177,36 @@ class ChatApp:
 
 	def cryptoInitialise(self):
 
-		#loadConfiguration() YODO
+		if loadConfigurationECC(self.coins) and loadConfigurationAlt(self.coins, self.conf):
 
-		for coin in coins:
+			# TODO : Check coins[0] is online ???
 
-			try:
+			for coin in self.coins:
 
-				coin.initialise()
-				coin.refresh()
+				try:
 
-				if coin == coins[0]: # coins[0].symbol == 'ecc'
+					coin.initialise()
+					coin.refresh()
 
-					coin.setup_route(self.otherTag)
+					if coin == self.coins[0]: # self.coins[0].symbol == 'ecc'
 
-			except cryptoNodeException as error:
+						coin.setup_route(self.otherTag)
 
-				print(str(error))
+				except cryptoNodeException as error:
 
-				return False
+					print(str(error))
 
-		return True
+					return False
+
+			return True
+
+		return False
 
 	############################################################################
 
 	def cryptoShutdown(self):
 
-		for coin in coins:
+		for coin in self.coins:
 
 			coin.shutdown()
 
