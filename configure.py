@@ -5,8 +5,6 @@ import configparser
 import pathlib
 import sys
 
-import settings
-
 from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
 
 ################################################################################
@@ -27,7 +25,7 @@ def getEccoinDataDir():
 
 ################################################################################
 
-def loadConfigurationECC(coins):
+def loadConfigurationECC(coins, protocol_id):
 
 	rpcCheckKeys = {'rpcconnect', 'rpcport', 'rpcuser', 'rpcpassword'}
 
@@ -51,7 +49,7 @@ def loadConfigurationECC(coins):
 
 		rpc_address = '{}:{}'.format(parser['default']['rpcconnect'], parser['default']['rpcport'])
 
-		coins.append(eccoinNode('ecc', rpc_address, parser['default']['rpcuser'], parser['default']['rpcpassword'], settings.protocol_id))
+		coins.append(eccoinNode('ecc', rpc_address, parser['default']['rpcuser'], parser['default']['rpcpassword'], protocol_id))
 
 		return True
 

@@ -67,7 +67,10 @@ class ChatApp:
 
 		urwid.set_encoding('utf-8')
 
-		self.version = '1.3'
+		self.version      = '1.3'
+
+		self.protocol_id  = 1
+		self.protocol_ver = 1
 
 		self.party_name = ['ecchat', name, other]
 
@@ -143,7 +146,7 @@ class ChatApp:
 
 	def send_ecc_packet(self, meth, data):
 
-		ecc_packet = eccPacket(settings.protocol_id, settings.protocol_ver, self.otherTag, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_id, self.protocol_ver, self.otherTag, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
@@ -1177,7 +1180,7 @@ class ChatApp:
 
 	def cryptoInitialise(self):
 
-		if loadConfigurationECC(self.coins) and loadConfigurationAlt(self.coins, self.conf):
+		if loadConfigurationECC(self.coins, self.protocol_id) and loadConfigurationAlt(self.coins, self.conf):
 
 			# TODO : Check coins[0] is online ???
 
