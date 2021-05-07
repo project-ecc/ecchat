@@ -5,7 +5,7 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 | Protocol ID | Protocol Name |
 |:-:|:--|
 |1|ecchat|
-|2|ececho|
+|2|
 |3|ecfaucet|
 |4|ectranslate|
 |5|ecchatgroup|
@@ -197,7 +197,7 @@ The UML sequence specification for the above diagram follows:
 
 ----------
 
-## 2 : ececho
+## 2 : ec....
 
 This protocol uses a top level JSON structure as follows:
 
@@ -214,12 +214,6 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
-|echoReq|Echo request|
-|echoRes|Echo response|
-
-The `data` value sent in a `echoReq` message is returned identically in an `echoRes` message.
-
-The `data` value is not defined.
 
 ----------
 
