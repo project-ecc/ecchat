@@ -79,7 +79,14 @@ class ChatApp:
 
 		self.party_size = max(len(t) for t in self.party_name)
 
-		self.otherTag = tag
+		if tag == 'ececho':
+
+			self.otherTag = 'BImGKLu0cwgmRigdvoWTnJdQ0Q+QgscUzJgsdChUOTi2dkM6wF/KXf84w9VjIydfIwl3EDgNPvjLP3HgNyifZ9w='
+
+		else:
+
+			self.otherTag = tag
+
 		self.conf     = conf
 		self.debug    = debug
 
