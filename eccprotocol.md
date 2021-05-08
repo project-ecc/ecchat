@@ -51,7 +51,10 @@ The `chatMsg` method is used to add, replace and delete chat messages.
 		"uuid" : "<uuid value>"
 		"cmmd" : "add|replace|delete"
 		"text" : "<message text>"
+		"lang" : "<language code>"
 	}
+
+The `lang` field encodes message language using lower case two character ISO 639-1 encoding.
 
 ### chatAck
 
