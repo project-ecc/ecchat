@@ -609,9 +609,15 @@ class ChatApp:
 
 	def echo_balance(self, coin):
 
-		balance_con = coin.get_balance()
-		balance_unl = coin.get_unlocked_balance()
-		balance_unc = coin.get_unconfirmed_balance()
+		try:
+
+			balance_con = coin.get_balance()
+			balance_unl = coin.get_unlocked_balance()
+			balance_unc = coin.get_unconfirmed_balance()
+
+		except cryptoNodeException as error:
+
+			self.append_message(0, str(error))
 
 		if balance_con != balance_unl:
 
