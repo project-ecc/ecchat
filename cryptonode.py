@@ -435,19 +435,41 @@ class bitcoinNode(cryptoNode):
 
 			raise cryptoNodeException('{} daemon returned error: {}'.format(self.symbol, str(error)))
 
-		return result
+		else:
+
+			return result
 
 	############################################################################
 
 	def get_unlocked_balance(self):
 
-		return self.proxy.getbalance()
+		try:
+
+			result = self.proxy.getbalance()
+
+		except exc.RpcException as error:
+
+			raise cryptoNodeException('{} daemon returned error: {}'.format(self.symbol, str(error)))
+
+		else:
+
+			return result
 
 	############################################################################
 
 	def get_unconfirmed_balance(self):
 
-		return self.proxy.getunconfirmedbalance()
+		try:
+
+			result = self.proxy.getunconfirmedbalance()
+
+		except exc.RpcException as error:
+
+			raise cryptoNodeException('{} daemon returned error: {}'.format(self.symbol, str(error)))
+
+		else:
+
+			return result
 
 	############################################################################
 
