@@ -619,25 +619,27 @@ class ChatApp:
 
 			self.append_message(0, str(error))
 
-		if balance_con != balance_unl:
-
-			if balance_unc > 0:
-
-				self.append_message(0, '{} : {:f} confirmed ({:f} unlocked) + {:f} unconfirmed'.format(coin.symbol, balance_con, balance_unl, balance_unc))
-
-			else:
-
-				self.append_message(0, '{} : {:f} ({:f} unlocked)'.format(coin.symbol, balance_con, balance_unl))
-
 		else:
 
-			if balance_unc > 0:
+			if balance_con != balance_unl:
 
-				self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coin.symbol, balance_con, balance_unc))
+				if balance_unc > 0:
+
+					self.append_message(0, '{} : {:f} confirmed ({:f} unlocked) + {:f} unconfirmed'.format(coin.symbol, balance_con, balance_unl, balance_unc))
+
+				else:
+
+					self.append_message(0, '{} : {:f} ({:f} unlocked)'.format(coin.symbol, balance_con, balance_unl))
 
 			else:
 
-				self.append_message(0, '{} : {:f}'.format(coin.symbol, balance_con))
+				if balance_unc > 0:
+
+					self.append_message(0, '{} : {:f} confirmed + {:f} unconfirmed'.format(coin.symbol, balance_con, balance_unc))
+
+				else:
+
+					self.append_message(0, '{} : {:f}'.format(coin.symbol, balance_con))
 
 	############################################################################
 
