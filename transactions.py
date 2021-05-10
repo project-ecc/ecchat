@@ -3,7 +3,7 @@
 
 from datetime   import datetime
 from eccpacket  import eccPacket
-from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
+from cryptonode import cryptoNode, eccoinNode, bitcoinNode, moneroNode, cryptoNodeException
 
 ################################################################################
 ## txSend class ################################################################

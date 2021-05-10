@@ -5,7 +5,7 @@ import configparser
 import pathlib
 import sys
 
-from cryptonode import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
+from cryptonode import cryptoNode, eccoinNode, bitcoinNode, moneroNode, cryptoNodeException
 
 ################################################################################
 
@@ -85,11 +85,7 @@ def loadConfigurationAlt(coins, conf):
 
 			rpc_address = '{}:{}'.format(parser[symbol]['rpcconnect'], parser[symbol]['rpcport'])
 
-			if symbol == 'ltc':
-
-				coins.append(litecoinNode(symbol, rpc_address, parser[symbol]['rpcuser'], parser[symbol]['rpcpassword']))
-
-			elif symbol == 'xmr':
+			if symbol == 'xmr':
 
 				rpc_daemon  = '{}:{}'.format(parser[symbol]['daemonconnect'], parser[symbol]['daemonport'])
 
@@ -116,6 +112,12 @@ def createTemplateAltConf(conf):
 	output = [	'# Example ecchat.conf for adding extra altcoin full node wallets\n', 
 				'# \n',
 				'# Note - Do not add your ecc config here. It is read directly from eccoin.conf\n',
+				'# \n',
+				'# [btc]\n',
+				'# rpcuser=username\n',
+				'# rpcpassword=password\n',
+				'# rpcport=8332\n',
+				'# rpcconnect=127.0.0.1\n',
 				'# \n',
 				'# [ltc]\n',
 				'# rpcuser=username\n',

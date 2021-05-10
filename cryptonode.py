@@ -154,7 +154,7 @@ class eccoinNode(cryptoNode):
 
 		try:
 
-			info = self.proxy.getinfo()
+			info = self.proxy.getnetworkinfo()
 
 		except ValueError:
 
@@ -167,6 +167,10 @@ class eccoinNode(cryptoNode):
 		except exc.RpcInWarmUp:
 
 			raise cryptoNodeException('Failed to connect -  eccoin daemon is starting but not ready - try again after 60 seconds')
+
+		except exc.RpcMethodNotFound:
+
+			raise cryptoNodeException('RPC getnetworkinfo unavailable for {} daemon'.format(self.symbol))
 
 		if not self.version_min <= info['version'] <= self.version_max:
 
@@ -351,161 +355,10 @@ class eccoinNode(cryptoNode):
 			self.bufferKey = ''
 
 ################################################################################
-## bitcoinNode class ############################################################
+## bitcoinNode class ###########################################################
 ################################################################################
 
 class bitcoinNode(cryptoNode):
-
-	############################################################################
-
-	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass):
-
-		super().__init__(symbol, rpc_address, rpc_user, rpc_pass)
-
-		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address))
-
-	############################################################################
-
-	def __getattr__(self, method):
-
-		return getattr(self.proxy, method)
-
-	############################################################################
-
-	def initialise(self):
-
-		try:
-
-			info = self.proxy.getinfo()
-
-		except ValueError:
-
-			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} daemon'.format(self.symbol))
-
-		except pycurl.error:
-
-			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
-
-		except exc.RpcInWarmUp:
-
-			raise cryptoNodeException('Failed to connect -  {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
-
-		try:
-
-			zmqnotifications = self.proxy.getzmqnotifications()
-
-		except pycurl.error:
-
-			raise cryptoNodeException('Blockchain node for {} not available or incorrectly configured'.format(self.symbol))
-
-		except (exc.RpcMethodNotFound, ValueError):
-
-			zmqnotifications = []
-
-		for zmqnotification in zmqnotifications:
-
-			if zmqnotification['type'] == 'pubhashblock':
-
-				self.zmqAddress = zmqnotification['address']
-
-	############################################################################
-
-	def refresh(self):
-		
-		self.blocks = self.proxy.getblockcount()
-		self.peers  = self.proxy.getconnectioncount()
-
-	############################################################################
-
-	def get_balance(self):
-
-		return self.proxy.getbalance()
-
-	############################################################################
-
-	def get_unlocked_balance(self):
-
-		return self.proxy.getbalance()
-
-	############################################################################
-
-	def get_unconfirmed_balance(self):
-
-		return self.proxy.getunconfirmedbalance()
-
-	############################################################################
-
-	def get_new_address(self):
-
-		return self.proxy.getnewaddress()
-
-	############################################################################
-
-	def wallet_locked(self):
-
-		info = self.proxy.getwalletinfo()
-
-		if 'unlocked_until' in info:
-
-			return info['unlocked_until'] == 0
-
-		return False
-
-	############################################################################
-
-	def unlock_wallet(self, passphrase, seconds):
-
-		try:
-
-			self.proxy.walletpassphrase(passphrase, seconds)
-
-		except exc.RpcWalletPassphraseIncorrect:
-
-			return False
-
-		else:
-
-			return True
-
-	############################################################################
-
-	def send_to_address(self, address, amount, comment):
-
-		try:
-
-			txid = self.proxy.sendtoaddress(address, amount, comment)
-
-		except exc.RpcWalletUnlockNeeded:
-
-			raise cryptoNodeException('Wallet locked - please unlock')
-
-		except exc.RpcWalletInsufficientFunds:
-
-			raise cryptoNodeException('Insufficient funds in wallet')
-
-		except exc.RpcTypeError:
-
-			raise cryptoNodeException('Invalid amount')
-
-		except exc.RpcWalletError:
-
-			raise cryptoNodeException('Amount too small')
-
-		else:
-
-			return txid
-
-	############################################################################
-
-	def shutdown(self):
-
-		pass
-
-################################################################################
-## litecoinNode class ##########################################################
-################################################################################
-
-class litecoinNode(cryptoNode):
 
 	############################################################################
 
@@ -539,7 +392,11 @@ class litecoinNode(cryptoNode):
 
 		except exc.RpcInWarmUp:
 
-			raise cryptoNodeException('Failed to connect -  {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
+			raise cryptoNodeException('Failed to connect - {} daemon is starting but not ready - try again after 60 seconds'.format(self.symbol))
+
+		except exc.RpcMethodNotFound:
+
+			raise cryptoNodeException('RPC getnetworkinfo unavailable for {} daemon'.format(self.symbol))
 
 		try:
 

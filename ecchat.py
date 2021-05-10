@@ -30,7 +30,7 @@ from configure import loadConfigurationECC, loadConfigurationAlt
 # eccPacket, cryptoNode & transaction classes
 
 from eccpacket    import eccPacket
-from cryptonode   import cryptoNode, eccoinNode, bitcoinNode, litecoinNode, moneroNode, cryptoNodeException
+from cryptonode   import cryptoNode, eccoinNode, bitcoinNode, moneroNode, cryptoNodeException
 from transactions import txSend, txReceive
 
 # urwid extension classes
