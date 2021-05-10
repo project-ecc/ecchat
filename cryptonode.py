@@ -427,7 +427,15 @@ class bitcoinNode(cryptoNode):
 
 	def get_balance(self):
 
-		return self.proxy.getbalance()
+		try:
+
+			result = self.proxy.getbalance()
+
+		except exc.RpcException as error:
+
+			raise cryptoNodeException('{} daemon returned error: {}'.format(self.symbol, str(error)))
+
+		return result
 
 	############################################################################
 
