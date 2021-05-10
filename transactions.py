@@ -81,7 +81,15 @@ class txSend():
 
 		# Check 3 - Does the user's wallet hold an adequate balance ?
 
-		balance = self.coin.get_unlocked_balance()
+		try:
+
+			balance = self.coin.get_unlocked_balance()
+
+		except cryptoNodeException as error:
+
+			self.do_failure(str(error))
+
+			return
 
 		if self.f_amount >= balance:
 
