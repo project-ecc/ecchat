@@ -63,3 +63,29 @@ If either of these checksums do not match up, your copy of ecchat may have been 
 
 You should see something resembling the following:
 
+![ecchat 1.3 initial screen](https://raw.githubusercontent.com/project-ecc/ecchat/master/ecchat-1.3.png)
+
+11 - Enter a short message which ececho will repeat back to you.
+
+12 - Text with a / prefix is a command to ecchat:
+
+	/help - lists all / commands
+	/keys - info on recall, replace, erase, scroll and exit
+
+13 - While you are chatting with ececho, take a note of your routing tag which you'll need to give to someone else wishing to chat with you via ecchat:
+
+	/tag
+
+depending on your terminal emulation app, you should be able to copy this to the clipboard. With Putty on Windows this is done with SHIFT and a left click mouse drag.
+
+Alternatively you can take a screen shot of your routing tag as a QR code:
+
+	/qr
+
+14 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. ecchat 1.3 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
+
+	ltc  : Litecoin
+	doge : Dogecoin
+	xmr  : Monero
+	rdd  : Reddcoin
+	
