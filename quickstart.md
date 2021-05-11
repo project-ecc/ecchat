@@ -61,6 +61,8 @@ If either of these checksums do not match up, your copy of ecchat may have been 
 
 	$ ./ecchat -n my_name -o ececho -t ececho
 
+replacing `my_name` with your short nickname
+
 You should see something resembling the following:
 
 ![ecchat 1.3 initial screen](https://raw.githubusercontent.com/project-ecc/ecchat/master/ecchat-1.3.png)
@@ -84,7 +86,7 @@ Alternatively you can take a screen shot of your routing tag as a QR code:
 
 	/qr
 
-14 - To exit ecchat, you may enter either of these commands
+14 - To exit ecchat, you may enter either of these commands:
 
 	/exit
 	/quit
@@ -98,7 +100,7 @@ or hit ESCAPE.
 replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
 
 
-16 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. ecchat 1.3 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
+16 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.3 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
 
 	ltc  : Litecoin
 	doge : Dogecoin
