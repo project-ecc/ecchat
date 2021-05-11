@@ -1,10 +1,10 @@
-#ecchat - Quick Start Guide
+# ecchat - Quick Start Guide
 
 **ecchat** is a decentralized messaging application with integrated support for cross-chain transactions
 
 This Quick Start Guide helps you get started with ecchat version 1.3, the MVP beta release.
 
-##Installing and Configuring ecchat on Linux
+## Installing and Configuring ecchat on Linux
 
 1 - Ensure that eccoin.conf contains the following settings using your preferred text file editor:
 
