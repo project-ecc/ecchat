@@ -1,6 +1,6 @@
 # ecchat - Quick Start Guide
 
-**ecchat** is a decentralized messaging application with integrated support for cross-chain transactions
+**ecchat** is a decentralized messaging application with integrated support for cross-chain transactions.
 
 This Quick Start Guide helps you get started with ecchat version 1.3, the MVP beta release.
 
@@ -65,6 +65,8 @@ You should see something resembling the following:
 
 ![ecchat 1.3 initial screen](https://raw.githubusercontent.com/project-ecc/ecchat/master/ecchat-1.3.png)
 
+The status bar shows your available node connections with symbol, block height and connection count for each. Initially this will show ecc only.
+
 11 - Enter a short message which ececho will repeat back to you.
 
 12 - Text with a / prefix is a command to ecchat:
@@ -82,7 +84,21 @@ Alternatively you can take a screen shot of your routing tag as a QR code:
 
 	/qr
 
-14 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. ecchat 1.3 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
+14 - To exit ecchat, you may enter either of these commands
+
+	/exit
+	/quit
+
+or hit ESCAPE.
+
+15 - To have a conversation with another ecchat user, first you need to exchange routing tags using another messenger or email. Then start ecchat:
+
+	$ ./ecchat -n my_name -o other_name -t routing_tag_of_other_party
+
+replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
+
+
+16 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. ecchat 1.3 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
 
 	ltc  : Litecoin
 	doge : Dogecoin
