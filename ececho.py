@@ -124,10 +124,6 @@ class EchoApp:
 
 		[address, contents] = self.subscribers[index].recv_multipart()
 		
-		if address.decode() == 'hashblock':
-
-			self.coins[0].refresh()
-
 		if address.decode() == 'packet':
 
 			protocolID = contents.decode()[1:]
@@ -175,7 +171,6 @@ class EchoApp:
 				try:
 
 					coin.initialise()
-					coin.refresh()
 
 				except cryptoNodeException as error:
 
