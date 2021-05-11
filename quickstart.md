@@ -6,6 +6,8 @@ This Quick Start Guide helps you get started with ecchat version 1.3, the MVP be
 
 ## Installing and Configuring ecchat on Linux
 
+0 - Ensure you install ecchat on a host with Python 3.8 run-time libraries. The app uses 3.8 specific features and therefore cannot run under prior Python versions. The easiest way to achieve this is to ensure you are running on a recent Linux distro such as Ubuntu 20.04 which has Python 3.8 by default.
+
 1 - Ensure that eccoin.conf contains the following settings using your preferred text file editor:
 
 	$ vi ~/.eccoin/eccoin.conf
@@ -24,6 +26,17 @@ This Quick Start Guide helps you get started with ecchat version 1.3, the MVP be
 2 - Start eccoind in your preferred manner - command line or Lynx - to make the conf file changes current:
 
 	$ ~/eccoin/eccoind
+
+If eccoind crashes on starup with the following in `debug.log`:
+
+	************************
+	EXCEPTION: St13runtime_error
+	CDB: Error 22, can't open database
+	eccoin in AppInit()
+
+this means that you have an incompatible `routing.dat` file from a previous version of eccoind. To fix this, delete the file which will be recreated in a compatible format when eccoind next starts:
+
+	$ rm ~/.eccoin/routing.dat 
 
 3 - Ensure eccoind is running and responding to RPC commands:
 
