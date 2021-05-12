@@ -6,6 +6,8 @@ This Quick Start Guide helps you get started with ecchat version 1.3, the MVP be
 
 ## Installing and Configuring ecchat on Linux
 
+Please note that in the following, commands with paths are examples that may not be suitable for the specifics of your system and should be adapted appropriately. I have assumed that eccoin is installed in `~/eccoin` with configuration in `~/.eccoin` but that may not be the case on your system.
+
 0 - Ensure you install ecchat on a host with Python 3.8 run-time libraries. The app uses 3.8 specific features and therefore cannot run under prior Python versions. The easiest way to achieve this is to ensure you are running on a recent Linux distro such as Ubuntu 20.04 which has Python 3.8 by default.
 
 1 - Ensure that eccoin.conf contains the following settings using your preferred text file editor:
@@ -27,7 +29,7 @@ This Quick Start Guide helps you get started with ecchat version 1.3, the MVP be
 
 	$ ~/eccoin/eccoind
 
-If eccoind crashes on starup with the following in `debug.log`:
+If eccoind crashes on startup with the following in `debug.log`:
 
 	************************
 	EXCEPTION: St13runtime_error
@@ -117,6 +119,6 @@ replacing `my_name` with your short nickname, `other_name` with your preferred s
 
 	ltc  : Litecoin
 	doge : Dogecoin
-	xmr  : Monero
+	xmr  : Monero (using monero-wallet-rpc)
 	rdd  : Reddcoin
 	
