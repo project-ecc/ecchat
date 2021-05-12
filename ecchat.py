@@ -1273,7 +1273,7 @@ def main():
 
 	pathlib.Path('log').mkdir(parents=True, exist_ok=True)
 
-	logging.basicConfig(filename = 'log/{:%Y-%m-%d}.log'.format(datetime.datetime.now()),
+	logging.basicConfig(filename = 'log/ecchat-{:%Y-%m-%d}.log'.format(datetime.datetime.now()),
 						filemode = 'a',
 						level    = logging.INFO,
 						format   = '%(asctime)s - %(levelname)s : %(message)s',
