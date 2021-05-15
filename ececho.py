@@ -119,6 +119,12 @@ class EchoApp:
 						 'coin' : data['coin'],
 						 'addr' : address}
 
+			else:
+
+				rData = {'uuid' : data['uuid'],
+						 'coin' : data['coin'],
+						 'addr' : '0'}
+
 				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
 
 		else:
