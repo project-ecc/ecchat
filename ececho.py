@@ -85,11 +85,19 @@ class EchoApp:
 
 			self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatAck, ackData)
 
-			if data['text'].startswith('#STOP'):
+			if data['text'].startswith('#BALANCE'):
+
+				reply = "Balance = {:f}".format(self.coins[0].get_balance())
+
+			elif data['text'].startswith('#STOP!!!'):
+
+				reply = "ececho stopping ..."
 
 				self.running = False
 
-			reply = self.prefix + data['text']
+			else:
+
+				reply = self.prefix + data['text']
 
 			# echo back the reply text as a new chatMsg
 
@@ -98,6 +106,20 @@ class EchoApp:
 					   'text' : reply}
 
 			self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
+
+		elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
+
+			data = ecc_packet.get_data()
+
+			if data['coin'] == self.coins[0].symbol:
+
+				address = self.coins[0].get_new_address()
+
+				rData = {'uuid' : data['uuid'],
+						 'coin' : data['coin'],
+						 'addr' : address}
+
+				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
 
 		else:
 
