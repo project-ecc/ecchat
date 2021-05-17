@@ -8,6 +8,7 @@ import pathlib
 import logging
 import signal
 import codecs
+import cowsay
 import zmq
 import sys
 
@@ -85,27 +86,35 @@ class EchoApp:
 
 			self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatAck, ackData)
 
+			reply = []
+
 			if data['text'].startswith('#BALANCE'):
 
-				reply = "Balance = {:f}".format(self.coins[0].get_balance())
+				reply.append("Balance = {:f}".format(self.coins[0].get_balance()))
 
 			elif data['text'].startswith('#STOP!!!'):
 
-				reply = "ececho stopping ..."
+				reply.append("ececho stopping ...")
 
 				self.running = False
 
+			elif data['text'].startswith('"') and data['text'].endswith('"'):
+
+				reply = cowsay.get_output_string('cow', data['text'][1:-1]).splitlines()
+
 			else:
 
-				reply = self.prefix + data['text']
+				reply.append(self.prefix + data['text'])
 
 			# echo back the reply text as a new chatMsg
 
-			echData = {'uuid' : str(uuid4()),
-					   'cmmd' : 'add',
-					   'text' : reply}
+			for line in reply:
 
-			self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
+				echData = {'uuid' : str(uuid4()),
+						   'cmmd' : 'add',
+						   'text' : line}
+
+				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
 
 		elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
 
@@ -279,7 +288,7 @@ def main():
 
 	argparser.add_argument('-p', '--protocol', action='store'     , help='Protocol ID'      , type=int, default=1       , required=False)
 	argparser.add_argument('-n', '--name'    , action='store'     , help='nickname'         , type=str, default='ececho', required=False)
-	argparser.add_argument('-x', '--prefix'  , action='store'     , help='reply prefix'     , type=str, default='>>> '  , required=False)
+	argparser.add_argument('-x', '--prefix'  , action='store'     , help='reply prefix'     , type=str, default='> '    , required=False)
 	argparser.add_argument('-d', '--debug'   , action='store_true', help='debug message log',                             required=False)
 
 	command_line_args = argparser.parse_args()
