@@ -25,6 +25,7 @@ The following coins have been tested with **ecchat**:
 |Litecoin|ltc|litecoin.org|
 |Millennium Club Coin|mclb|millenniumclub.ca|
 |NEXT|next|next.exchange|
+|Pirate Chain|arrr|pirate.black|
 |Reddcoin|rdd|reddcoin.com|
 |Xuez|xuez|xuezcoin.com|
 
