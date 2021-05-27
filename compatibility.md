@@ -21,6 +21,7 @@ The following coins have been tested with **ecchat**:
 |:--|:--|:--|
 |Bitcoin|btc|bitcoin.org|
 |Eccoin|ecc|ecc.network|
+|Dashcoin|dash|dash.org|
 |Dogecoin|doge|dogecoin.com|
 |Litecoin|ltc|litecoin.org|
 |Millennium Club Coin|mclb|millenniumclub.ca|
