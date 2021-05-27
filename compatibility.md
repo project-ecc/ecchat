@@ -21,12 +21,14 @@ The following coins have been tested with **ecchat**:
 |:--|:--|:--|
 |Bitcoin|btc|bitcoin.org|
 |Eccoin|ecc|ecc.network|
+|Dash|dash|dash.org|
 |Dogecoin|doge|dogecoin.com|
 |Litecoin|ltc|litecoin.org|
 |Millennium Club Coin|mclb|millenniumclub.ca|
 |NEXT|next|next.exchange|
 |Pirate Chain|arrr|pirate.black|
 |Reddcoin|rdd|reddcoin.com|
+|Syscoin|sys|syscoin.org|
 |Xuez|xuez|xuezcoin.com|
 
 
