@@ -20,6 +20,7 @@ The following coins have been tested with **ecchat**:
 |Name|Symbol|URL|
 |:--|:--|:--|
 |Bitcoin|btc|[bitcoin.org](http://bitcoin.org)|
+|BitGreen|bitg|[bitg.org](http://bitg.org)|
 |Eccoin|ecc|[ecc.network](http://ecc.network)|
 |Dash|dash|[dash.org](http://dash.org)|
 |Dogecoin|doge|[dogecoin.com](http://dogecoin.com)|
@@ -27,6 +28,7 @@ The following coins have been tested with **ecchat**:
 |Millennium Club Coin|mclb|[millenniumclub.ca](http://millenniumclub.ca)|
 |NEXT|next|[next.exchange](http://next.exchange)|
 |Pirate Chain|arrr|[pirate.black](http://pirate.black)|
+|Qtum|qtum|[qtum.org](http://qtum.org)|
 |Reddcoin|rdd|[reddcoin.com](http://reddcoin.com)|
 |Syscoin|sys|[syscoin.org](http://syscoin.org)|
 |Xuez|xuez|[xuezcoin.com](http://xuezcoin.com)|
