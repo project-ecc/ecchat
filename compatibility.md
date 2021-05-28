@@ -19,7 +19,7 @@ The following coins have been tested with **ecchat**:
 
 |Name|Symbol|URL|
 |:--|:--|:--|
-|Bitcoin|btc|bitcoin.org|
+|Bitcoin|btc|<bitcoin.org>|
 |Eccoin|ecc|ecc.network|
 |Dash|dash|dash.org|
 |Dogecoin|doge|dogecoin.com|
