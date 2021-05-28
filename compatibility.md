@@ -20,16 +20,16 @@ The following coins have been tested with **ecchat**:
 |Name|Symbol|URL|
 |:--|:--|:--|
 |Bitcoin|btc|[bitcoin.org](http://bitcoin.org)|
-|Eccoin|ecc|ecc.network|
-|Dash|dash|dash.org|
-|Dogecoin|doge|dogecoin.com|
-|Litecoin|ltc|litecoin.org|
-|Millennium Club Coin|mclb|millenniumclub.ca|
-|NEXT|next|next.exchange|
-|Pirate Chain|arrr|pirate.black|
-|Reddcoin|rdd|reddcoin.com|
-|Syscoin|sys|syscoin.org|
-|Xuez|xuez|xuezcoin.com|
+|Eccoin|ecc|[ecc.network](http://ecc.network)|
+|Dash|dash|[dash.org](http://dash.org)|
+|Dogecoin|doge|[dogecoin.com](http://dogecoin.com)|
+|Litecoin|ltc|[litecoin.org](http://litecoin.org)|
+|Millennium Club Coin|mclb|[millenniumclub.ca](http://millenniumclub.ca)|
+|NEXT|next|[next.exchange](http://next.exchange)|
+|Pirate Chain|arrr|[pirate.black](http://pirate.black)|
+|Reddcoin|rdd|[reddcoin.com](http://reddcoin.com)|
+|Syscoin|sys|[syscoin.org](http://syscoin.org)|
+|Xuez|xuez|[xuezcoin.com](http://xuezcoin.com)|
 
 
 ## Monero Based Coins
