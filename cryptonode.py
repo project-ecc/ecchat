@@ -126,7 +126,7 @@ class cryptoNode():
 class eccoinNode(cryptoNode):
 
 	version_min = 30000
-	version_max = 30201
+	version_max = 30300
 
 	bufferIdx = count(start=1)
 
@@ -615,7 +615,7 @@ class moneroNode(cryptoNode):
 
 		except monero.backends.jsonrpc.exceptions.Unauthorized:
 
-			raise cryptoNodeException('Failed to connect - error in rpcuser or rpcpassword for {} daemon'.format(self.symbol))
+			raise cryptoNodeException('Failed to connect - check that {} daemon is running'.format(self.symbol))
 
 		except requests.exceptions.ConnectTimeout:
 
