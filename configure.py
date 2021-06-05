@@ -35,7 +35,7 @@ def loadConfigurationECC(coins, protocol_id):
 
 	eccConfigFile = getEccoinDataDir() / 'eccoin.conf'
 
-	parser = configparser.ConfigParser()
+	parser = configparser.ConfigParser(strict=False)
 
 	try:
 
