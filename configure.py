@@ -23,6 +23,10 @@ def getEccoinDataDir():
 
 		return pathlib.Path.home() / '.eccoin'
 
+	if sys.platform == "cygwin":
+
+		return pathlib.Path.home() / '.eccoin'
+
 ################################################################################
 
 def loadConfigurationECC(coins, protocol_id):
