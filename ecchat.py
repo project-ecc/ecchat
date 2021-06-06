@@ -597,13 +597,13 @@ class ChatApp:
 		self.append_message(0, '------------------------------------')
 		self.append_message(0, 'Recall, replace, erase, scroll, exit')
 		self.append_message(0, '------------------------------------')
-		self.append_message(0, 'CURSOR UP/DOWN     - Recall previous message / command')
-		self.append_message(0, 'ENTER              - Send as new message / command')
-		self.append_message(0, 'ALT+ENTER          - Replace previous message')
-		self.append_message(0, 'ALT+DELETE         - Erase previous message')
-		self.append_message(0, 'ALT+CURSOR UP/DOWN - Scroll messages one line')
-		self.append_message(0, 'PAGE UP/DOWN       - Scroll messages one page')
-		self.append_message(0, 'ESCAPE             - Exit ecchat')
+		self.append_message(0, 'CURSOR UP/DOWN       - Recall previous message / command')
+		self.append_message(0, 'ENTER                - Send as new message / command')
+		self.append_message(0, 'ALT+ENTER/LEFT/RIGHT - Replace previous message')
+		self.append_message(0, 'ALT+DELETE           - Erase previous message')
+		self.append_message(0, 'ALT+CURSOR UP/DOWN   - Scroll messages one line')
+		self.append_message(0, 'PAGE UP/DOWN         - Scroll messages one page')
+		self.append_message(0, 'ESCAPE               - Exit ecchat')
 
 	############################################################################
 
