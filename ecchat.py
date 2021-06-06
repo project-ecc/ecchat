@@ -1092,7 +1092,7 @@ class ChatApp:
 
 				self.process_user_entry(self.footerT.get_edit_text())
 
-			if key in ('meta enter', ):
+			if key in ('meta enter', 'meta left', 'meta right'):
 
 				self.process_user_replace(self.footerT.get_edit_text())
 
