@@ -128,6 +128,8 @@ class eccoinNode(cryptoNode):
 	version_min = 30000
 	version_max = 30300
 
+	version_fPacketSig = 30300
+
 	bufferIdx = count(start=1)
 
 	############################################################################
@@ -141,6 +143,10 @@ class eccoinNode(cryptoNode):
 		self.protocolId = protocol_id
 		self.routingTag = ''
 		self.bufferKey  = ''
+
+		# ECC feature flags (based on version number)
+
+		self.fPacketSig = False
 
 	############################################################################
 
@@ -172,9 +178,15 @@ class eccoinNode(cryptoNode):
 
 			raise cryptoNodeException('RPC getnetworkinfo unavailable for {} daemon'.format(self.symbol))
 
+		# Version checking and feature enablement
+
 		if not self.version_min <= info['version'] <= self.version_max:
 
 			raise cryptoNodeException('eccoind version {} not supported - please run a version in the range {}-{}'.format(info['version'], self.version_min, self.version_max))
+
+		self.fPacketSig = info['version'] >= self.version_fPacketSig
+
+		# Route setup
 
 		try:
 
@@ -184,6 +196,8 @@ class eccoinNode(cryptoNode):
 		except exc.RpcInternalError:
 
 			raise cryptoNodeException('API Buffer was not correctly unregistered or another instance running - try again after 60 seconds')
+
+		# ZMQ detection and configuration loading
 
 		try:
 
@@ -321,6 +335,12 @@ class eccoinNode(cryptoNode):
 		if not isRoute:
 
 			raise cryptoNodeException('No route available to : {}'.format(targetRoute))
+
+	############################################################################
+
+	def send_packet(self, dest_key, protocol_id, data)
+
+		self.proxy.sendpacket(dest_key, protocol_id, data)
 
 	############################################################################
 

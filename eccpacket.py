@@ -117,6 +117,6 @@ class eccPacket():
 
 	def send(self, proxy):
 
-		proxy.sendpacket(self.packet['to'], self.packet['id'], json.dumps(self.packet))
+		proxy.send_packet(self.packet['to'], self.packet['id'], json.dumps(self.packet))
 
 ################################################################################
