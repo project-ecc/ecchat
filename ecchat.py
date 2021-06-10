@@ -79,14 +79,7 @@ class ChatApp:
 
 		self.party_size = max(len(t) for t in self.party_name)
 
-		if tag == 'ececho':
-
-			self.otherTag = 'BImGKLu0cwgmRigdvoWTnJdQ0Q+QgscUzJgsdChUOTi2dkM6wF/KXf84w9VjIydfIwl3EDgNPvjLP3HgNyifZ9w='
-
-		else:
-
-			self.otherTag = tag
-
+		self.otherTag = tag
 		self.conf     = conf
 		self.debug    = debug
 
@@ -1204,6 +1197,8 @@ class ChatApp:
 					coin.refresh()
 
 					if coin == self.coins[0]: # self.coins[0].symbol == 'ecc'
+
+						self.otherTag = coin.resolve_route(self.otherTag)
 
 						coin.setup_route(self.otherTag)
 

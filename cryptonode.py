@@ -178,7 +178,7 @@ class eccoinNode(cryptoNode):
 
 			raise cryptoNodeException('RPC getnetworkinfo unavailable for {} daemon'.format(self.symbol))
 
-		# Version checking and feature enablement
+		# ECC daemon version checking and feature enablement
 
 		if not self.version_min <= info['version'] <= self.version_max:
 
@@ -186,7 +186,7 @@ class eccoinNode(cryptoNode):
 
 		self.fPacketSig = info['version'] >= self.version_fPacketSig
 
-		# Route setup
+		# ECC messaging buffer setup
 
 		try:
 
@@ -317,6 +317,22 @@ class eccoinNode(cryptoNode):
 			return True
 
 		return False
+
+	############################################################################
+
+	def resolve_route(self, targetRoute):
+
+		if targetRoute == 'ececho':
+
+			if self.fPacketSig:
+
+				return 'BAU3rdcs0BnDtOhXX/PjoR/99Toft8tyYWYxdTFlfiTAPQb43akF/waOo23REBVVRrSdsMX8iPHKDYgqhEGetSY=' # eccserver2.ddns.net
+
+			else
+
+				return 'BImGKLu0cwgmRigdvoWTnJdQ0Q+QgscUzJgsdChUOTi2dkM6wF/KXf84w9VjIydfIwl3EDgNPvjLP3HgNyifZ9w=' # eccserver1.ddns.net
+
+		return targetRoute
 
 	############################################################################
 
