@@ -64,7 +64,7 @@ class ChatApp:
 
 		urwid.set_encoding('utf-8')
 
-		self.version      = '1.3'
+		self.version      = '1.4'
 
 		self.protocol_id  = 1
 		self.protocol_ver = 1
@@ -580,8 +580,8 @@ class ChatApp:
 		self.append_message(0, '%-8s - %s' % ('/txid          ', 'display txid of last transaction'))
 		self.append_message(0, '%-8s - %s' % ('/list    <coin>', 'list all transactions this session'))
 		self.append_message(0, '%-8s - %s' % ('         <coin>', 'optional coin symbol - defaults to ecc'))
-		self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
-		self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
+#		self.append_message(0, '%-8s - %s' % ('/swap x <coin-1> for y <coin-2>', 'proposes a swap'))
+#		self.append_message(0, '%-8s - %s' % ('/execute       ', 'executes the proposed swap'))
 
 	############################################################################
 
@@ -838,37 +838,37 @@ class ChatApp:
 
 					self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
 
-			elif text.startswith('/swap'):
+#			elif text.startswith('/swap'):
 
-				match = re.match('/swap (?P<amountGive>([0-9]*\.)?[0-9]+) (?P<symbolGive>\w+) for (?P<amountTake>([0-9]*\.)?[0-9]+) (?P<symbolTake>\w+)', text)
+#				match = re.match('/swap (?P<amountGive>([0-9]*\.)?[0-9]+) (?P<symbolGive>\w+) for (?P<amountTake>([0-9]*\.)?[0-9]+) (?P<symbolTake>\w+)', text)
 
-				if match:
+#				if match:
 
-					validGive, indexGive = self.check_symbol(match.group('symbolGive'))
-					validTake, indexTake = self.check_symbol(match.group('symbolTake'))
+#					validGive, indexGive = self.check_symbol(match.group('symbolGive'))
+#					validTake, indexTake = self.check_symbol(match.group('symbolTake'))
 
-					if validGive and validTake:
+#					if validGive and validTake:
 
-						self.start_swap(match.group('amountGive'), indexGive,
-										match.group('amountTake'), indexTake)
+#						self.start_swap(match.group('amountGive'), indexGive,
+#										match.group('amountTake'), indexTake)
 
-					else:
+#					else:
 
-						if not validGive:
+#						if not validGive:
 
-							self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolGive')))
+#							self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolGive')))
 
-						if not validTake:
+#						if not validTake:
 
-							self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolTake')))
+#							self.append_message(0, 'Unknown coin symbol: {}'.format(match.group('symbolTake')))
 
-				else:
+#				else:
 
-					self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
+#					self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
 
-			elif text.startswith('/execute'):
+#			elif text.startswith('/execute'):
 
-				self.swap_execute()
+#				self.swap_execute()
 
 			elif text.startswith('/txid'):
 
