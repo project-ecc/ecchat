@@ -72,7 +72,15 @@ class EchoApp:
 
 		# Ensure we have a route back to whoever is sending an ecchat message
 
-		self.coins[0].setup_route(ecc_packet.get_from())
+		try:
+
+			self.coins[0].setup_route(ecc_packet.get_from())
+
+		except cryptoNodeException as error:
+
+			logging.info(str(error))
+
+			return
 
 		if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
 
