@@ -354,7 +354,7 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
-	def send_packet(self, dest_key, protocol_id, data)
+	def send_packet(self, dest_key, protocol_id, data):
 
 		if self.fPacketSig:
 
@@ -362,7 +362,7 @@ class eccoinNode(cryptoNode):
 
 			self.proxy.sendpacket(dest_key, protocol_id, data, self.routingTag, signature)
 
-		else
+		else:
 
 			self.proxy.sendpacket(dest_key, protocol_id, data)
 
