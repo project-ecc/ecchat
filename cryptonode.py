@@ -328,7 +328,7 @@ class eccoinNode(cryptoNode):
 
 				return 'BAU3rdcs0BnDtOhXX/PjoR/99Toft8tyYWYxdTFlfiTAPQb43akF/waOo23REBVVRrSdsMX8iPHKDYgqhEGetSY=' # eccserver2.ddns.net
 
-			else
+			else:
 
 				return 'BImGKLu0cwgmRigdvoWTnJdQ0Q+QgscUzJgsdChUOTi2dkM6wF/KXf84w9VjIydfIwl3EDgNPvjLP3HgNyifZ9w=' # eccserver1.ddns.net
 
