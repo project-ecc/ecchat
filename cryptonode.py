@@ -356,7 +356,8 @@ class eccoinNode(cryptoNode):
 
 	def send_packet(self, dest_key, protocol_id, data):
 
-		if self.fPacketSig:
+		if False:
+#		if self.fPacketSig:
 
 			signature = self.proxy.tagsignmessage(data)
 
