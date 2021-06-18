@@ -1137,6 +1137,8 @@ class ChatApp:
 
 	def zmqHandler(self, index):
 
+		logging.info('Entering zmqHandler')
+
 		if index > 0: # various chains return differing numbers of list values (ltc = 3)
 
 			slashdevslashnull = self.subscribers[index].recv_multipart(zmq.DONTWAIT)
