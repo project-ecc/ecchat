@@ -84,6 +84,8 @@ class ChatApp:
 		self.conf     = conf
 		self.debug    = debug
 
+		self.exitMsg  = ''
+
 		self.swap_pending    = False
 		self.swap_uuid       = ''
 		self.swap_timeout_h  = 0
@@ -222,9 +224,7 @@ class ChatApp:
 
 		except cryptoNodeException as error:
 
-			self.append_message(0, str(error))
-
-			time.sleep(1)
+			self.exitMsg = str(error)
 
 			raise urwid.ExitMainLoop()
 
@@ -1260,6 +1260,10 @@ class ChatApp:
 			self.zmqShutdown()
 
 		self.cryptoShutdown()
+
+		if self.exitMsg:
+
+			print(self.exitMsg)
 
 ################################################################################
 
