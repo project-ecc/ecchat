@@ -10,6 +10,7 @@ import signal
 import codecs
 import pickle
 import urwid
+import time
 import zmq
 import sys
 import re
@@ -213,9 +214,19 @@ class ChatApp:
 
 	def reset_buffer_timeout(self, loop = None, data = None):
 
-		if self.coins[0].reset_buffer_timeout():
+		try:
 
-			loop.set_alarm_in(10, self.reset_buffer_timeout)
+			if self.coins[0].reset_buffer_timeout():
+
+				loop.set_alarm_in(10, self.reset_buffer_timeout)
+
+		except cryptoNodeException as error:
+
+			self.append_message(0, str(error))
+
+			time.sleep(1)
+
+			raise urwid.ExitMainLoop()
 
 	############################################################################
 
@@ -1137,8 +1148,6 @@ class ChatApp:
 
 	def zmqHandler(self, index):
 
-		logging.info('Entering zmqHandler')
-
 		if index > 0: # various chains return differing numbers of list values (ltc = 3)
 
 			slashdevslashnull = self.subscribers[index].recv_multipart(zmq.DONTWAIT)
@@ -1146,6 +1155,8 @@ class ChatApp:
 			self.block_refresh(index)
 
 			return
+
+		# TODO : Note this can occasionally return an array of tuples causing a crash on Windows
 
 		[address, contents] = self.subscribers[index].recv_multipart(zmq.DONTWAIT)
 		
