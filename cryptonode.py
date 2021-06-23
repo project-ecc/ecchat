@@ -310,9 +310,15 @@ class eccoinNode(cryptoNode):
 
 		if self.bufferKey:
 
-			bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
+			try:
 
-			self.proxy.resetbuffertimeout(self.protocolId, bufferSig)
+				bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
+
+				self.proxy.resetbuffertimeout(self.protocolId, bufferSig)
+
+			except pycurl.error:
+
+				raise cryptoNodeException('Failed to connect - check that eccoin daemon is running')
 
 			return True
 
