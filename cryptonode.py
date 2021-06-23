@@ -318,6 +318,8 @@ class eccoinNode(cryptoNode):
 
 			except pycurl.error:
 
+				self.bufferKey = ''
+
 				raise cryptoNodeException('Failed to connect - check that eccoin daemon is running')
 
 			return True
