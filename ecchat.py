@@ -913,6 +913,9 @@ class ChatApp:
 
 						self.echo_transactions(coin.symbol)
 
+			elif text.startswith('/x'):
+
+				self.process_packet_notification(1)
 
 			elif text.startswith('/'):
 
@@ -965,6 +968,26 @@ class ChatApp:
 						'text' : text}
 
 				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+
+	############################################################################
+
+	def process_packet_notification(self, protocolID):
+
+		eccbuffer = self.coins[0].get_buffer(protocolID)
+
+		if eccbuffer:
+
+			for packet in eccbuffer.values():
+
+				message = codecs.decode(packet, 'hex').decode()
+
+				if self.debug:
+
+					logging.info('RX: {}'.format(message))
+
+				ecc_packet = eccPacket.from_json(message)
+
+				self.process_ecc_packet(ecc_packet)
 
 	############################################################################
 
@@ -1166,23 +1189,7 @@ class ChatApp:
 
 		if address.decode() == 'packet':
 
-			protocolID = contents.decode()[1:]
-
-			eccbuffer = self.coins[0].get_buffer(int(protocolID))
-
-			if eccbuffer:
-
-				for packet in eccbuffer.values():
-
-					message = codecs.decode(packet, 'hex').decode()
-
-					if self.debug:
-
-						logging.info('RX: {}'.format(message))
-
-					ecc_packet = eccPacket.from_json(message)
-
-					self.process_ecc_packet(ecc_packet)
+			self.process_packet_notification(int(contents.decode()[1:]))
 
 	############################################################################
 
