@@ -230,7 +230,7 @@ class ChatApp:
 
 	############################################################################
 
-	def block_refresh_timed(self, loop = None, data = None):
+	def block_refresh_timed(self, loop, data = None):
 
 		for coin in self.coins:
 
@@ -244,7 +244,23 @@ class ChatApp:
 
 	def block_refresh(self, index):
 
-		self.coins[index].refresh()
+		if not self.coins[index].no_refresh:
+
+			self.coins[index].refresh()
+
+			logging.info('refresh called for %s @ %d' % (self.coins[index].symbol, self.coins[index].blocks))
+
+			self.coins[index].no_refresh = True
+
+			self.loop.set_alarm_in(1, self.unblock_block_refresh, index)
+
+	############################################################################
+
+	def unblock_block_refresh(self, loop, index):
+
+		logging.info('unlocking block refresh for %s' % self.coins[index].symbol)
+
+		self.coins[index].no_refresh = False
 
 	############################################################################
 

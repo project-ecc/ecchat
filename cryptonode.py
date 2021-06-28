@@ -53,6 +53,8 @@ class cryptoNode():
 
 		self.zmqAddress  = ''
 
+		self.no_refresh  = False	# Used by owner to suppress refresh() calls during sync/catchup
+
 	############################################################################
 
 	def __getattr__(self, method):
