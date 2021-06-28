@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: UTF-8
 
+import sys
 import pycurl
 import requests
 
@@ -128,7 +129,8 @@ class cryptoNode():
 class eccoinNode(cryptoNode):
 
 	version_min = 30000
-	version_max = 30300
+	version_max = 99999
+	win_zmq_bug = 30300
 
 	version_fPacketSig = 30300
 
@@ -185,6 +187,10 @@ class eccoinNode(cryptoNode):
 		if not self.version_min <= info['version'] <= self.version_max:
 
 			raise cryptoNodeException('eccoind version {} not supported - please run a version in the range {}-{}'.format(info['version'], self.version_min, self.version_max))
+
+		if (info['version'] == win_zmq_bug) and (sys.platform == "win32"):
+
+			raise cryptoNodeException('eccoind version {} not supported on Windows - please upgrade'.format(info['version']))
 
 		self.fPacketSig = info['version'] >= self.version_fPacketSig
 
