@@ -188,7 +188,7 @@ class eccoinNode(cryptoNode):
 
 			raise cryptoNodeException('eccoind version {} not supported - please run a version in the range {}-{}'.format(info['version'], self.version_min, self.version_max))
 
-		if (info['version'] == self.win_zmq_bug) and (sys.platform == "win32"):
+		if (info['version'] == self.win_zmq_bug) and (sys.platform in ['win32', 'cygwin']):
 
 			raise cryptoNodeException('eccoind version {} not supported on Windows - please upgrade'.format(info['version']))
 
