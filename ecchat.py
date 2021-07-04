@@ -587,6 +587,20 @@ class ChatApp:
 
 	############################################################################
 
+	def echo_ecchat_startup(self):
+
+		self.append_message(0, "                _           _   ")
+		self.append_message(0, "Welcome to:    | |         | |  ")
+		self.append_message(0, "   ___  ___ ___| |__   __ _| |_ ")
+		self.append_message(0, "  / _ \/ __/ __| '_ \ / _` | __|")
+		self.append_message(0, " |  __/ (_| (__| | | | (_| | |_ ")
+		self.append_message(0, "  \___|\___\___|_| |_|\__,_|\__|")
+		self.append_message(0, "                                ")
+		self.append_message(0, "For help: /help for commands    ")
+		self.append_message(0, "          /keys for special keys")
+	
+	############################################################################
+
 	def echo_help(self):
 
 		self.append_message(0, '%-8s - %s' % ('/help          ', 'display help - commands'))
@@ -1273,6 +1287,8 @@ class ChatApp:
 			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
 
 			self.loop.set_alarm_in(10, self.block_refresh_timed)
+
+			self.echo_ecchat_startup()
 
 			self.loop.run()
 
