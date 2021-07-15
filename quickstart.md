@@ -141,12 +141,7 @@ or hit ESCAPE.
 replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
 
 
-19 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
-
-	ltc  : Litecoin
-	doge : Dogecoin
-	xmr  : Monero (using monero-wallet-rpc)
-	rdd  : Reddcoin
+19 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. For a full list of those known to work please refer to [compatibility.md](compatibility.md)
 
 ## Installing and Configuring ecchat on Linux
 
@@ -266,10 +261,4 @@ or hit ESCAPE.
 replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
 
 
-18 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. The following have been tested and are known to work. You are welcome to try others, numbering in the hundreds, that should also work. 
-
-	ltc  : Litecoin
-	doge : Dogecoin
-	xmr  : Monero (using monero-wallet-rpc)
-	rdd  : Reddcoin
-	
+18 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. For a full list of those known to work please refer to [compatibility.md](compatibility.md)
