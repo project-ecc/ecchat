@@ -94,7 +94,7 @@ This is necessary because ecchat running under Cygwin is unable to determine the
 
 	$ ecchat.exe -n my_name -o ececho -t ececho
 
-replacing `my_name` with your short nickname
+replacing `my_name` with your short nickname.
 
 You should see something resembling the following:
 
@@ -205,9 +205,9 @@ this means that you have an incompatible `routing.dat` file from a previous vers
 8 - Check that ecchat's md5 and sha256 file checksums are correct:
 
 	$ md5sum ecchat
-	0679f35c710a46ec66a538a17eee3ad6  ecchat
+	7cde0b9183238d5130d2762d002107ab  ecchat
 	$ sha256sum ecchat
-	367616c016c18f3a199a17e73c11fd11e07094bb7dbd683670283c27ff9ec5a0  ecchat
+	8f05037ac7d53487b1547ddeab4c0875493a2afa61a3a559cec27a69fd376c97  ecchat
 
 If either of these checksums do not match up, your copy of ecchat may have been tampered with and you should NOT run it.
 
@@ -219,7 +219,7 @@ If either of these checksums do not match up, your copy of ecchat may have been 
 
 	$ ./ecchat -n my_name -o ececho -t ececho
 
-replacing `my_name` with your short nickname
+replacing `my_name` with your short nickname.
 
 You should see something resembling the following:
 
@@ -246,7 +246,7 @@ The status bar shows your available node connections with symbol, block height a
 
 	/tag
 
-depending on your terminal emulation app, you should be able to copy this to the clipboard. With Putty on Windows this is done with SHIFT and a left click mouse drag.
+depending on your terminal emulation app, you should be able to copy this to the clipboard. With Cygwin64 Terminal this is done with SHIFT and a left click mouse drag.
 
 Alternatively you can take a screen shot of your routing tag as a QR code:
 
