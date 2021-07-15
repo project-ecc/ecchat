@@ -98,7 +98,7 @@ replacing `my_name` with your short nickname.
 
 You should see something resembling the following:
 
-![ecchat 1.4 initial screen](https://raw.githubusercontent.com/project-ecc/ecchat/master/ecchat-1.4.png)
+![ecchat 1.4 initial screen](https://raw.githubusercontent.com/project-ecc/ecchat/master/ecchat-1.4-win.png)
 
 The status bar shows your available node connections with symbol, block height and connection count for each. Initially this will show ecc only.
 
