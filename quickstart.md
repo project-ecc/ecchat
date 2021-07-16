@@ -88,11 +88,11 @@ This is necessary because ecchat running under Cygwin is unable to determine the
 
 10 - Run ecchat with the --help option to familiarise yourself with the available command line options:
 
-	$ ecchat.exe --help
+	$ ./ecchat.exe --help
 
 11 - Run ecchat with your first conversation with the ececho service:
 
-	$ ecchat.exe -n my_name -o ececho -t ececho
+	$ ./ecchat.exe -n my_name -o ececho -t ececho
 
 replacing `my_name` with your short nickname.
 
@@ -136,7 +136,7 @@ or hit ESCAPE.
 
 18 - To have a conversation with another ecchat user, first you need to exchange routing tags using another messenger or email. Then start ecchat:
 
-	$ ecchat.exe -n my_name -o other_name -t routing_tag_of_other_party
+	$ ./ecchat.exe -n my_name -o other_name -t routing_tag_of_other_party
 
 replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
 
