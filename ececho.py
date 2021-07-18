@@ -6,9 +6,10 @@ import datetime
 import argparse
 import pathlib
 import logging
+import hashlib
 import signal
 import codecs
-import cowsay
+import pickle
 import zmq
 import sys
 
@@ -36,13 +37,107 @@ class RepeatTimer(threading.Timer):
             self.function(*self.args, **self.kwargs)
 
 ################################################################################
+## UsageTrack class ############################################################
+################################################################################
+
+class UsageTrack:
+
+	usageFilePath = 'net'
+	usageFileName = 'taghashes.dat'
+
+	############################################################################
+
+	def __init__(self):
+
+		pathlib.Path(self.usageFilePath).mkdir(parents=True, exist_ok=True)
+
+		self.filePath  = pathlib.Path(self.usageFilePath) / self.usageFileName
+
+		self.tagHashes = self.loadListFile(self.filePath)
+
+		self.changed   = False
+
+	############################################################################
+
+	def start(self):
+
+		self.timer = RepeatTimer(10, self.saveIfNecessary)
+
+		self.timer.start()
+
+	############################################################################
+
+	def stop(self):
+
+		self.timer.cancel()
+
+	############################################################################
+
+	def usageByTag(self, tag):
+
+		tagHash = hashlib.sha256(tag.encode()).hexdigest()
+
+		if tagHash not in self.tagHashes:
+
+			self.tagHashes.append(tagHash)
+
+			self.changed = True
+
+	############################################################################
+
+	def count(self):
+
+		return len(self.tagHashes)
+
+	############################################################################
+
+	def saveIfNecessary(self):
+
+		if self.changed:
+
+			self.saveListFile(self.tagHashes, self.filePath)
+
+			self.changed = False
+
+	############################################################################
+
+	def loadListFile(self, filePath = ''):
+
+		nullList = []
+
+		if not pathlib.Path(filePath).is_file():
+
+			with open(filePath, 'wb') as f:
+
+				pickle.dump(nullList, f)
+
+				f.close()
+
+				return nullList
+
+		else:
+
+			with open(filePath, 'rb') as f:
+
+				return pickle.load(f)
+
+	############################################################################
+
+	def saveListFile(self, list = [], filePath = ''):
+
+		with open(filePath, 'wb') as f:
+
+			pickle.dump(list, f)
+
+			f.close()
+
+################################################################################
 ## EchoApp class ###############################################################
 ################################################################################
 
 class EchoApp:
 
 	def __init__(self, protocol, name, prefix, debug=False):
-
 
 		self.protocol_id	= protocol
 		self.protocol_ver	= 1
@@ -53,6 +148,8 @@ class EchoApp:
 		self.coins			= []
 		self.running		= True
 		self.timer          = 0
+
+		self.usageTrack		= UsageTrack()
 
 	############################################################################
 
@@ -100,15 +197,15 @@ class EchoApp:
 
 				reply.append("Balance = {:f}".format(self.coins[0].get_balance()))
 
+			if data['text'].startswith('#USAGE'):
+
+				reply.append("Unique users (identified by ECC routing tag) = {:d}".format(self.usageTrack.count()))
+
 			elif data['text'].startswith('#STOP!!!'):
 
 				reply.append("ececho stopping ...")
 
 				self.running = False
-
-			elif data['text'].startswith('"') and data['text'].endswith('"'):
-
-				reply = cowsay.get_output_string('cow', data['text'][1:-1]).splitlines()
 
 			else:
 
@@ -123,6 +220,8 @@ class EchoApp:
 						   'text' : line}
 
 				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
+
+			self.usageTrack.usageByTag(ecc_packet.get_from())
 
 		elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
 
@@ -249,6 +348,8 @@ class EchoApp:
 
 	def run(self):
 
+		self.usageTrack.start()
+
 		if self.cryptoInitialise():
 
 			self.zmqInitialise()
@@ -260,6 +361,8 @@ class EchoApp:
 			self.zmqShutdown()
 
 		self.cryptoShutdown()
+
+		self.usageTrack.stop()
 
 ################################################################################
 
