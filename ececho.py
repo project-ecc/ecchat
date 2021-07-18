@@ -197,7 +197,7 @@ class EchoApp:
 
 				reply.append("Balance = {:f}".format(self.coins[0].get_balance()))
 
-			if data['text'].startswith('#USAGE'):
+			elif data['text'].startswith('#USAGE'):
 
 				reply.append("Unique users (identified by ECC routing tag) = {:d}".format(self.usageTrack.count()))
 
