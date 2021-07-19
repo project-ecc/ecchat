@@ -5,9 +5,9 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 | Protocol ID | Protocol Name |
 |:-:|:--|
 |1|ecchat|
-|2|
+|2|ectranslate|
 |3|ecfaucet|
-|4|ectranslate|
+|4|ecresolve|
 |5|ecchatgroup|
 |6|ecnodeproxy
 |7|ectorrent|
@@ -51,10 +51,10 @@ The `chatMsg` method is used to add, replace and delete chat messages.
 		"uuid" : "<uuid value>"
 		"cmmd" : "add|replace|delete"
 		"text" : "<message text>"
-		"lang" : "<language code>"
+		"code" : "<language code>"
 	}
 
-The `lang` field encodes message language using lower case two character ISO 639-1 encoding.
+The `code` field encodes message language using lower case two character ISO 639-1 encoding.
 
 ### chatAck
 
@@ -80,7 +80,7 @@ The `addrReq` method is used to request a new receive address from the other par
 
 ### addrRes
 
-The `addrRes` method is used to reply to a `addrReq` message.
+The `addrRes` method is used to respond to a `addrReq` message.
 
 	{
 		"uuid" : "<uuid value>"
@@ -200,7 +200,7 @@ The UML sequence specification for the above diagram follows:
 
 ----------
 
-## 2 : ec....
+## 2 : ectranslate
 
 This protocol uses a top level JSON structure as follows:
 
@@ -217,6 +217,77 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
+|listReq|Request list of supported languages|
+|listRes|Respond with list of supported languages|
+|tranReq|Request translation|
+|tranRes|Respond with translation|
+
+The `data` value for each `meth` are as follows:
+
+### listReq
+
+The `listReq` method is used to request a list of supported languages.
+
+	{
+		"uuid" : "<uuid value>"
+	}
+
+
+### listRes
+
+The `listRes` method is used to respond to a `listReq` message.
+
+	{
+		"uuid" : "<uuid value>"
+		"list" : [
+					{
+						"code" : "<language code>"
+						"name" : "<language name>"
+					}
+					...
+			     ]
+	}
+
+The `code` field encodes message language using lower case two character ISO 639-1 encoding.
+
+### tranReq
+
+The `tranReq` method is used to request a translation.
+
+	{
+		"uuid" : "<uuid value>"
+		"text" : "<message text>"
+		"cofr" : "<language code - translate from>"
+		"coto" : "<language code - translate to>"
+	}
+
+The `cofr` and `coto` fields encode message language using lower case two character ISO 639-1 encoding.
+
+### tranRes
+
+The `tranRes` method is used to respond to a `tranReq` message.
+
+	{
+		"uuid" : "<uuid value>"
+		"text" : "<message text>"
+		"cofr" : "<language code - translate from>"
+		"coto" : "<language code - translate to>"
+		"erno" : "<error number>"
+		"errr" : "<error text>"
+	}
+
+The `cofr` and `coto` fields encode message language using lower case two character ISO 639-1 encoding.
+
+In the event of an error preventing a translation being performed, the `erno` field will be nonzero and the `errr` field will contain an error message.
+
+The following `erno` values are defined:
+
+|erno|Meaning|
+|:--|:--|
+|0|Request completed normally|
+|1|Error in language code - translate from|
+|2|Error in language code - translate to|
+|3|Micro-payment not received|
 
 ----------
 
@@ -281,7 +352,7 @@ The following `erno` values are defined:
 
 ----------
 
-## 4 : ectranslate
+## 4 : ecresolve
 
 This protocol uses a top level JSON structure as follows:
 
