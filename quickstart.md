@@ -18,7 +18,19 @@ Please note that ecchat is only supported with Cygwin on Windows 7 or later.
 
 	https://cygwin.com/setup-x86_64.exe
 
-Be sure to add the `wget` package during the installation. In the `Select Packages` page, set `View` to `Full` and set `Search` to `wget`. In the `New` column for the package `wget`, change the setting from `Skip` to the most recent version number.
+Add the `wget` package during the installation. In the `Select Packages` page, set `View` to `Full` and set `Search` to `wget`. In the `New` column for the package `wget`, change the setting from `Skip` to the most recent version number.
+
+Repeat the above procedure to also add the `python38` and `python38-zmq` packages.
+
+The latest Cygwin package versions, at the time of writing, used to test this installation procedure are:
+
+|Package|Version|
+|:--|:--|
+|python38|3.8.10-1|
+|python38-zmq|19.0.2-1|
+|wget|1.21.1-1|
+
+You may wish to add other packages to improve your command line enjoyment, such as `bash-completion`, `curl` and `git`, although there are not required for ecchat.
 
 1 - Ensure that eccoin.conf contains the following settings using your preferred text file editor:
 
@@ -88,11 +100,11 @@ This is necessary because ecchat running under Cygwin is unable to determine the
 
 10 - Run ecchat with the --help option to familiarise yourself with the available command line options:
 
-	$ ./ecchat.exe --help
+	$ ./ecchat --help
 
 11 - Run ecchat with your first conversation with the ececho service:
 
-	$ ./ecchat.exe -n my_name -o ececho -t ececho
+	$ ./ecchat -n my_name -o ececho -t ececho
 
 replacing `my_name` with your short nickname.
 
