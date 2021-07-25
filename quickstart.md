@@ -124,12 +124,16 @@ The status bar shows your available node connections with symbol, block height a
 
 	#BALANCE
 
-15 - Text with a / prefix is a command to ecchat:
+15 - View how many unique nodes have communicated with ececho:
+
+	#USAGE
+
+16 - Text with a / prefix is a command to ecchat:
 
 	/help - lists all / commands
 	/keys - info on recall, replace, erase, scroll and exit
 
-16 - While you are chatting with ececho, take a note of your routing tag which you'll need to give to someone else wishing to chat with you via ecchat:
+17 - While you are chatting with ececho, take a note of your routing tag which you'll need to give to someone else wishing to chat with you via ecchat:
 
 	/tag
 
@@ -138,22 +142,21 @@ depending on your terminal emulation app, you should be able to copy this to the
 Alternatively you can take a screen shot of your routing tag as a QR code:
 
 	/qr
-
-17 - To exit ecchat, you may enter either of these commands:
+18 - To exit ecchat, you may enter either of these commands:
 
 	/exit
 	/quit
 
 or hit ESCAPE.
 
-18 - To have a conversation with another ecchat user, first you need to exchange routing tags using another messenger or email. Then start ecchat:
+19 - To have a conversation with another ecchat user, first you need to exchange routing tags using another messenger or email. Then start ecchat:
 
 	$ ./ecchat.exe -n my_name -o other_name -t routing_tag_of_other_party
 
 replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
 
 
-19 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. For a full list of those known to work please refer to [compatibility.md](compatibility.md)
+20 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. For a full list of those known to work please refer to [compatibility.md](compatibility.md)
 
 ## Installing and Configuring ecchat on Linux
 
@@ -244,12 +247,16 @@ The status bar shows your available node connections with symbol, block height a
 
 	#BALANCE
 
-14 - Text with a / prefix is a command to ecchat:
+14 - View how many unique nodes have communicated with ececho:
+
+	#USAGE
+
+15 - Text with a / prefix is a command to ecchat:
 
 	/help - lists all / commands
 	/keys - info on recall, replace, erase, scroll and exit
 
-15 - While you are chatting with ececho, take a note of your routing tag which you'll need to give to someone else wishing to chat with you via ecchat:
+16 - While you are chatting with ececho, take a note of your routing tag which you'll need to give to someone else wishing to chat with you via ecchat:
 
 	/tag
 
@@ -259,18 +266,18 @@ Alternatively you can take a screen shot of your routing tag as a QR code:
 
 	/qr
 
-16 - To exit ecchat, you may enter either of these commands:
+17 - To exit ecchat, you may enter either of these commands:
 
 	/exit
 	/quit
 
 or hit ESCAPE.
 
-17 - To have a conversation with another ecchat user, first you need to exchange routing tags using another messenger or email. Then start ecchat:
+18 - To have a conversation with another ecchat user, first you need to exchange routing tags using another messenger or email. Then start ecchat:
 
 	$ ./ecchat -n my_name -o other_name -t routing_tag_of_other_party
 
 replacing `my_name` with your short nickname, `other_name` with your preferred short nick name of the other party and `routing_tag_or_other_party` with their routing tag.
 
 
-18 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. For a full list of those known to work please refer to [compatibility.md](compatibility.md)
+19 - The first time ecchat is run it creates a file `ecchat.conf`. You may use this file to add RPC connections to additional crypto nodes running either locally or on remote servers. A comment header explains the format. ecchat 1.4 supports most Bitcoin and Monero derived nodes. For a full list of those known to work please refer to [compatibility.md](compatibility.md)
