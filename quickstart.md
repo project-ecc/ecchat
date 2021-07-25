@@ -30,7 +30,7 @@ The latest Cygwin package versions, at the time of writing, used to test this in
 |python38-zmq|19.0.2-1|
 |wget|1.21.1-1|
 
-You may wish to add other packages to improve your command line enjoyment, such as `bash-completion`, `curl` and `git`, although there are not required for ecchat.
+You may wish to add other packages to improve your command line enjoyment, such as `bash-completion`, `curl` and `git`, although these are not required for ecchat.
 
 1 - Ensure that eccoin.conf contains the following settings using your preferred text file editor:
 
