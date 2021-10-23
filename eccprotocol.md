@@ -213,6 +213,53 @@ This protocol uses a top level JSON structure as follows:
 		"data" : "<nested JSON depending on type>"
 	}
 
+The following values for `meth` are defined:
+
+|meth|Purpose|
+|:--|:--|
+|nameAdv|Advertise name|
+|nameReq|Request name -> routing tag resolution|
+|nameRes|Respond with resolved routing tag|
+
+The `data` value for each `meth` are as follows:
+
+### nameAdv
+
+The `nameAdv` method is used to advertise a name for later resolution.
+
+	{
+		"uuid" : "<uuid value>"
+		"name" : "<name advertised>"
+		"type" : "service|chatname|chatgroup"
+	}
+
+The routing tag used for name resolution is taken from the `from` value in the enclosing data structure. The integrity of this may be ensured by only accepting signed messages from senders and validating the signature.
+
+Advertised names will time-out after 90s and therefore should be re-advertised every 60s.
+
+### nameReq
+
+The `nameReq` method is used to request name -> routing tag resolution.
+
+	{
+		"uuid" : "<uuid value>"
+		"name" : "<name to be resolved>"
+		"type" : "service|chatname|chatgroup"
+	}
+
+### nameRes
+
+The `nameReq` method is used to respond to a `nameReq` message.
+
+	{
+		"uuid" : "<uuid value>"
+		"name" : "<name to be resolved>"
+		"type" : "service|chatname|chatgroup"
+		"tags" : "[<routing tag 1>, <routing tag 2>, ...]"
+	}
+
+If the value `[]` (empty array) is returned in the `tags` field it indicates that a name of the specified type is unknown.
+
 ----------
 
 ## 3 : ectranslate
