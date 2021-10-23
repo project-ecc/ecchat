@@ -205,7 +205,7 @@ The UML sequence specification for the above diagram follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 4
+		"id"   : 2
 		"ver"  : 1
 		"to"   : "<routing tag of destination>"
 		"from" : "<routing tag of source>"
@@ -220,7 +220,7 @@ This protocol uses a top level JSON structure as follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 2
+		"id"   : 3
 		"ver"  : 1
 		"to"   : "<routing tag of destination>"
 		"from" : "<routing tag of source>"
@@ -311,7 +311,7 @@ The following `erno` values are defined:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 3
+		"id"   : 4
 		"ver"  : 1
 		"to"   : "<routing tag of destination>"
 		"from" : "<routing tag of source>"
