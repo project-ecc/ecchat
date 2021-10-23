@@ -5,9 +5,9 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 | Protocol ID | Protocol Name |
 |:-:|:--|
 |1|ecchat|
-|2|ectranslate|
-|3|ecfaucet|
-|4|ecresolve|
+|2|ecresolve|
+|3|ectranslate|
+|4|ecfaucet|
 |5|ecchatgroup|
 |6|ecnodeproxy
 |7|ectorrent|
@@ -200,7 +200,22 @@ The UML sequence specification for the above diagram follows:
 
 ----------
 
-## 2 : ectranslate
+## 2 : ecresolve
+
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 4
+		"ver"  : 1
+		"to"   : "<routing tag of destination>"
+		"from" : "<routing tag of source>"
+		"meth" : "<method called>"
+		"data" : "<nested JSON depending on type>"
+	}
+
+----------
+
+## 3 : ectranslate
 
 This protocol uses a top level JSON structure as follows:
 
@@ -291,7 +306,7 @@ The following `erno` values are defined:
 
 ----------
 
-## 3 : ecfaucet
+## 4 : ecfaucet
 
 This protocol uses a top level JSON structure as follows:
 
@@ -349,21 +364,6 @@ The following `erno` values are defined:
 |4|Faucet previously visited by node <tag>|
 |5|Faucet balance too low - payouts blocked|
 |6|Faucet wallet is currently locked|
-
-----------
-
-## 4 : ecresolve
-
-This protocol uses a top level JSON structure as follows:
-
-   	{
-		"id"   : 4
-		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
-	}
 
 ----------
 
