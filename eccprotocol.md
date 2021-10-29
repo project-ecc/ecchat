@@ -4,8 +4,8 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 
 | Protocol ID | Protocol Name |
 |:-:|:--|
-|1|ecchat|
-|2|ecresolve|
+|1|[ecchat](#1-ecchat)|
+|2|[ecresolve](#2-ecresolve)|
 |3|ectranslate|
 |4|ecfaucet|
 |5|ecchatgroup|
