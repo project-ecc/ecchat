@@ -4,14 +4,14 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 
 | Protocol ID | Protocol Name |
 |:-:|:--|
-|1|[ecchat](#1-ecchat)|
-|2|[ecresolve](#2-ecresolve)|
-|3|ectranslate|
-|4|ecfaucet|
-|5|ecchatgroup|
-|6|ecnodeproxy
-|7|ectorrent|
-|8|ecvpn|
+|1|[ecchat](#1--ecchat)|
+|2|[ecresolve](#2--ecresolve)|
+|3|[ectranslate](#3--ectranslate)|
+|4|[ecfaucet](#4--ecfaucet)|
+|5|[ecchatgroup](#5--ecchatgroup)|
+|6|[ecnodeproxy](#6--ecnodeproxy)|
+|7|[ectorrent](#7--ectorrent)|
+|8|[ecvpn](#8--ecvpn)|
 
 ----------
 
