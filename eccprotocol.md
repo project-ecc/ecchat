@@ -32,14 +32,14 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
-|chatMsg|Chat message content|
-|chatAck|Chat message acknowledge|
-|addrReq|Request new receive address|
-|addrRes|Respond with receive address|
-|txidInf|Send transaction information|
-|swapInf|Swap proposal information|
-|swapReq|Swap execution request|
-|swapRes|Swap execution response|
+|[chatMsg](#chatmsg)|Chat message content|
+|[chatAck](#chatack)|Chat message acknowledge|
+|[addrReq](#addrreq)|Request new receive address|
+|[addrRes](#addrres)|Respond with receive address|
+|[txidInf](#txidinf)|Send transaction information|
+|[swapInf](#swapinf)|Swap proposal information|
+|[swapReq](#swapreq)|Swap execution request|
+|[swapRes](#swapres)|Swap execution response|
 
 The `data` value for each `meth` are as follows:
 
@@ -217,9 +217,9 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
-|nameAdv|Advertise name|
-|nameReq|Request name -> routing tag resolution|
-|nameRes|Respond with resolved routing tag|
+|[nameAdv](#nameadv)|Advertise name|
+|[nameReq](#namereq)|Request name -> routing tag resolution|
+|[nameRes](#nameres)|Respond with resolved routing tag|
 
 The `data` value for each `meth` are as follows:
 
@@ -279,10 +279,10 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
-|listReq|Request list of supported languages|
-|listRes|Respond with list of supported languages|
-|tranReq|Request translation|
-|tranRes|Respond with translation|
+|[listReq](#listreq)|Request list of supported languages|
+|[listRes](#listres)|Respond with list of supported languages|
+|[tranReq](#tranreq)|Request translation|
+|[tranRes](#tranres)|Respond with translation|
 
 The `data` value for each `meth` are as follows:
 
@@ -370,8 +370,8 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
-|faucetReq|Faucet request|
-|faucetRes|Faucet response|
+|[faucetReq](#faucetreq)|Faucet request|
+|[faucetRes](#faucetreq)|Faucet response|
 
 The `data` value for each `meth` are as follows:
 
