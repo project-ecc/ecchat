@@ -20,6 +20,10 @@ from monero.transaction import PaymentFilter
 
 import monero.exceptions
 
+# DNS resolver to boot strap ecc name services
+
+import dns.resolver
+
 ################################################################################
 ## cryptoNodeException class ###################################################
 ################################################################################
@@ -152,6 +156,8 @@ class eccoinNode(cryptoNode):
 
 		self.fPacketSig = False
 
+		self.ecresolve_tags = []
+
 	############################################################################
 
 	def __getattr__(self, method):
@@ -224,6 +230,10 @@ class eccoinNode(cryptoNode):
 			if zmqnotification['type'] == 'pubhashblock':
 
 				self.zmqAddress = zmqnotification['address']
+
+		# Load ecresolve routing tags for subsequent ecc network name resolution
+
+		self.ecresolve_tags = self.get_ecresolve_tags()
 
 	############################################################################
 
@@ -333,6 +343,26 @@ class eccoinNode(cryptoNode):
 			return True
 
 		return False
+
+	############################################################################
+
+	def get_ecresolve_tags(self):
+
+		# TODO - Make this daemon version dependent ref new RPC
+
+		tags = []
+
+		resolved = dns.resolver.resolve('ecchat.io', 'TXT')
+
+		for entry in resolved:
+
+			decoded_entry = entry.to_text()[1:-1].split('=', 1)
+
+			if (len(decoded_entry) == 2) and (decoded_entry[0] == 'ecresolve'):
+
+				tags.append(decoded_entry[1])
+
+		return tags
 
 	############################################################################
 
