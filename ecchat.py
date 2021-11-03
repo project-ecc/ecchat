@@ -1244,6 +1244,10 @@ class ChatApp:
 
 					if coin == self.coins[0]: # self.coins[0].symbol == 'ecc'
 
+						for index, tag in enumerate(self.coins[0].ecresolve_tags):
+
+							logging.info('ecresolve tag #{} : {}'.format(index, tag))
+
 						self.otherTag = coin.resolve_route(self.otherTag)
 
 						coin.setup_route(self.otherTag)
