@@ -348,11 +348,19 @@ class eccoinNode(cryptoNode):
 
 	def get_ecresolve_tags(self):
 
+		domain = 'ecchat.io'
+
 		# TODO - Make this daemon version dependent ref new RPC
 
 		tags = []
 
-		resolved = dns.resolver.resolve('ecchat.io', 'TXT')
+		try:
+
+			resolved = dns.resolver.resolve(domain, 'TXT')
+
+		except:
+
+			raise cryptoNodeException('Error while resolving ecresolve routing tags from {} TXT record'.format(domain))
 
 		for entry in resolved:
 
