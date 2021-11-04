@@ -1229,6 +1229,22 @@ class ChatApp:
 
 	############################################################################
 
+	def logRoutingTags(self):
+
+		logging.info('Resolved local routing tag : {}'.format(self.coins[0].routingTag))
+
+		for index, tag in enumerate(self.coins[0].ecresolve_tags):
+
+			if tag == self.coins[0].routingTag:
+
+				logging.info('Resolved ecresolve tag #{}  * {}'.format(index, tag))
+
+			else:
+
+				logging.info('Resolved ecresolve tag #{}  : {}'.format(index, tag))
+
+	############################################################################
+
 	def cryptoInitialise(self):
 
 		if loadConfigurationECC(self.coins, self.protocol_id) and loadConfigurationAlt(self.coins, self.conf):
@@ -1244,9 +1260,7 @@ class ChatApp:
 
 					if coin == self.coins[0]: # self.coins[0].symbol == 'ecc'
 
-						for index, tag in enumerate(self.coins[0].ecresolve_tags):
-
-							logging.info('ecresolve tag #{} : {}'.format(index, tag))
+						self.logRoutingTags()
 
 						self.otherTag = coin.resolve_route(self.otherTag)
 
