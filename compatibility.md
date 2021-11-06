@@ -42,7 +42,7 @@ The following Monero based coins have been tested with **ecchat**:
 
 |Name|Symbol|URL|
 |:--|:--|:--|
-|Monero|xmr|getmonero.org|
+|Monero|xmr|[getmonero.org](http://getmonero.org)|
 
 ## ERC-20 Tokens
 
