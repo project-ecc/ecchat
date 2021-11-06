@@ -18,4 +18,5 @@ Things to explain:
 - quickstart.md
 - eccprotocol.md
 - compatibility.md
+- ecchat channel @ YouTube
 
