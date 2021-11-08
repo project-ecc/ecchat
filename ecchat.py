@@ -65,10 +65,16 @@ class ChatApp:
 
 		urwid.set_encoding('utf-8')
 
-		self.version      = '1.4'
+		self.version = '1.4'
 
-		self.protocol_id  = 1
-		self.protocol_ver = 1
+		self.protocol_id_ecchat  = 1
+		self.protocol_ver_ecchat = 1
+
+		self.protocol_id_ecresolve  = 2
+		self.protocol_ver_ecresolve = 1
+
+		self.protocol_id_ectranslate  = 3
+		self.protocol_ver_ectranslate = 1
 
 		self.party_name = ['ecchat', name, other]
 
@@ -144,13 +150,25 @@ class ChatApp:
 
 	############################################################################
 
-	def send_ecc_packet(self, meth, data):
+	def send_ecchat_packet(self, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_id, self.protocol_ver, self.otherTag, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_id_ecchat, self.protocol_ver_ecchat, self.otherTag, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
-			logging.info('TX: {}'.format(ecc_packet.to_json()))
+			logging.info('TX({}): {}'.format(self.protocol_id_ecchat, ecc_packet.to_json()))
+
+		ecc_packet.send(self.coins[0])
+
+	############################################################################
+
+	def send_ecresolve_packet(self, meth, data):
+
+		ecc_packet = eccPacket(self.protocol_id_ecresolve, self.protocol_ver_ecresolve, self.otherTag, self.coins[0].routingTag, meth, data)
+
+		if self.debug:
+
+			logging.info('TX({}): {}'.format(self.protocol_id_ecresolve, ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
 
@@ -242,6 +260,20 @@ class ChatApp:
 
 	############################################################################
 
+	def advertise_chat_name(self, loop = None, data = None):
+
+		uuid = str(uuid4())
+
+		data = {'uuid' : str(uuid4()),
+				'name' : self.party_name[1],
+				'type' : 'chatname'}
+
+		self.send_ecresolve_packet(eccPacket.METH_nameAdv, data)
+
+		loop.set_alarm_in(60, self.advertise_chat_name)
+
+	############################################################################
+
 	def block_refresh(self, index):
 
 		if not self.coins[index].no_refresh:
@@ -329,7 +361,7 @@ class ChatApp:
 				'cotk' : self.coins[indexTake].symbol,
 				'amtk' : float_amountTake}
 
-		self.send_ecc_packet(eccPacket.METH_swapInf, data)
+		self.send_ecchat_packet(eccPacket.METH_swapInf, data)
 
 		handle = self.loop.set_alarm_in(60, self.timeout_swap)
 
@@ -437,7 +469,7 @@ class ChatApp:
 				'cogv' : self.coins[self.swap_indexGive].symbol,
 				'adgv' : address}
 
-		self.send_ecc_packet(eccPacket.METH_swapReq, data)
+		self.send_ecchat_packet(eccPacket.METH_swapReq, data)
 
 		self.loop.set_alarm_in(10, self.timeout_execute)
 
@@ -457,7 +489,7 @@ class ChatApp:
 					'cotk' : self.coins[self.swap_indexTake].symbol,
 					'adtk' : address}
 
-			self.send_ecc_packet(eccPacket.METH_swapRes, data)
+			self.send_ecchat_packet(eccPacket.METH_swapRes, data)
 
 		else:
 
@@ -465,7 +497,7 @@ class ChatApp:
 					'cotk' : '',
 					'adtk' : '0'}
 
-			self.send_ecc_packet(eccPacket.METH_swapRes, data)
+			self.send_ecchat_packet(eccPacket.METH_swapRes, data)
 
 	############################################################################
 
@@ -500,7 +532,7 @@ class ChatApp:
 					'addr' : addressTake,
 					'txid' : self.txid}
 
-			self.send_ecc_packet(eccPacket.METH_txidInf, data)
+			self.send_ecchat_packet(eccPacket.METH_txidInf, data)
 
 		# /execute command complete - reset state variables
 
@@ -537,7 +569,7 @@ class ChatApp:
 					'addr' : self.swap_addressGive,
 					'txid' : self.txid}
 
-			self.send_ecc_packet(eccPacket.METH_txidInf, data)
+			self.send_ecchat_packet(eccPacket.METH_txidInf, data)
 
 		# /swap command complete - reset state variables
 
@@ -953,7 +985,7 @@ class ChatApp:
 						'cmmd' : 'add',
 						'text' : text}
 
-				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+				self.send_ecchat_packet(eccPacket.METH_chatMsg, data)
 
 	############################################################################
 
@@ -971,7 +1003,7 @@ class ChatApp:
 						'cmmd' : 'replace',
 						'text' : text}
 
-				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+				self.send_ecchat_packet(eccPacket.METH_chatMsg, data)
 
 			else:
 
@@ -993,7 +1025,7 @@ class ChatApp:
 						'cmmd' : 'delete',
 						'text' : text}
 
-				self.send_ecc_packet(eccPacket.METH_chatMsg, data)
+				self.send_ecchat_packet(eccPacket.METH_chatMsg, data)
 
 	############################################################################
 
@@ -1009,7 +1041,7 @@ class ChatApp:
 
 				if self.debug:
 
-					logging.info('RX: {}'.format(message))
+					logging.info('RX({}): {}'.format(protocolID, message))
 
 				ecc_packet = eccPacket.from_json(message)
 
@@ -1045,7 +1077,7 @@ class ChatApp:
 					 'cmmd' : data['cmmd'],
 					 'able' : True}
 
-			self.send_ecc_packet(eccPacket.METH_chatAck, rData)
+			self.send_ecchat_packet(eccPacket.METH_chatAck, rData)
 
 		elif ecc_packet.get_meth() == eccPacket.METH_chatAck:
 
@@ -1067,7 +1099,7 @@ class ChatApp:
 						 'coin' : data['coin'],
 						 'addr' : address}
 
-				self.send_ecc_packet(eccPacket.METH_addrRes, rData)
+				self.send_ecchat_packet(eccPacket.METH_addrRes, rData)
 
 		elif ecc_packet.get_meth() == eccPacket.METH_addrRes:
 
@@ -1247,7 +1279,7 @@ class ChatApp:
 
 	def cryptoInitialise(self):
 
-		if loadConfigurationECC(self.coins, self.protocol_id) and loadConfigurationAlt(self.coins, self.conf):
+		if loadConfigurationECC(self.coins, self.protocol_id_ecchat) and loadConfigurationAlt(self.coins, self.conf):
 
 			# TODO : Check coins[0] is online ???
 
@@ -1305,6 +1337,8 @@ class ChatApp:
 			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
 
 			self.loop.set_alarm_in(10, self.block_refresh_timed)
+
+			self.loop.set_alarm_in( 1, self.advertise_chat_name)
 
 			self.echo_ecchat_startup()
 

@@ -17,6 +17,7 @@ class eccPacket():
 	METH_swapInf = 'swapInf'
 	METH_swapReq = 'swapReq'
 	METH_swapRes = 'swapRes'
+	METH_nameAdv = 'nameAdv'
 
 	METH_SET = [METH_chatMsg,
 				METH_chatAck,
@@ -25,7 +26,8 @@ class eccPacket():
 				METH_txidInf,
 				METH_swapInf,
 				METH_swapReq,
-				METH_swapRes]
+				METH_swapRes,
+				METH_nameAdv]
 
 	KEY_LIST = {METH_chatMsg : ('uuid', 'cmmd', 'text'),
 				METH_chatAck : ('uuid', 'cmmd', 'able'),
@@ -34,7 +36,8 @@ class eccPacket():
 				METH_txidInf : ('uuid', 'coin', 'amnt', 'addr', 'txid'),
 				METH_swapInf : ('uuid', 'cogv', 'amgv', 'cotk', 'amtk'),
 				METH_swapReq : ('uuid', 'cogv', 'adgv'),
-				METH_swapRes : ('uuid', 'cotk', 'adtk')}
+				METH_swapRes : ('uuid', 'cotk', 'adtk'),
+				METH_nameAdv : ('uuid', 'name', 'type')}
 
 	############################################################################
 
