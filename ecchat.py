@@ -164,13 +164,15 @@ class ChatApp:
 
 	def send_ecresolve_packet(self, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_id_ecresolve, self.protocol_ver_ecresolve, self.otherTag, self.coins[0].routingTag, meth, data)
+		for tag in coins[0].ecresolve_tags:
 
-		if self.debug:
+			ecc_packet = eccPacket(self.protocol_id_ecresolve, self.protocol_ver_ecresolve, tag, self.coins[0].routingTag, meth, data)
 
-			logging.info('TX({}): {}'.format(self.protocol_id_ecresolve, ecc_packet.to_json()))
+			if self.debug:
 
-		ecc_packet.send(self.coins[0])
+				logging.info('TX({}): {}'.format(self.protocol_id_ecresolve, ecc_packet.to_json()))
+
+			ecc_packet.send(self.coins[0])
 
 	############################################################################
 
