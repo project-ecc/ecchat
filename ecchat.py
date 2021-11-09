@@ -164,7 +164,7 @@ class ChatApp:
 
 	def send_ecresolve_packet(self, meth, data):
 
-		for tag in coins[0].ecresolve_tags:
+		for tag in self.coins[0].ecresolve_tags:
 
 			ecc_packet = eccPacket(self.protocol_id_ecresolve, self.protocol_ver_ecresolve, tag, self.coins[0].routingTag, meth, data)
 
