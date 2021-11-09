@@ -219,12 +219,6 @@ class EchoApp:
 
 				reply.append("Unique users (identified by ECC routing tag) = {:d}".format(self.usageTrack.count()))
 
-			elif data['text'].startswith('#STOP!!!'):
-
-				reply.append("ececho stopping ...")
-
-				self.running = False
-
 			else:
 
 				reply.append(self.prefix + data['text'])
