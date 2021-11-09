@@ -152,13 +152,13 @@ class ServiceApp:
 
 	############################################################################
 
-	def send_ecc_packet(self, dest, meth, data):
+	def send_ecresolve_packet(self, dest, meth, data):
 
 		ecc_packet = eccPacket(self.protocol_id, self.protocol_ver, dest, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
-			logging.info('TX: {}'.format(ecc_packet.to_json()))
+			logging.info('TX({}): {}'.format(self.protocol_id, ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
 
@@ -178,71 +178,13 @@ class ServiceApp:
 
 			return
 
-		if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
+		if ecc_packet.get_meth() == eccPacket.METH_nameAdv:
 
 			data = ecc_packet.get_data()
 
-			# send the chatAck message
-
-			ackData = {'uuid' : data['uuid'],
-					   'cmmd' : data['cmmd'],
-					   'able' : True}
-
-			self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatAck, ackData)
-
-			reply = []
-
-			if data['text'].startswith('#BALANCE'):
-
-				reply.append("Balance = {:f}".format(self.coins[0].get_balance()))
-
-			elif data['text'].startswith('#USAGE'):
-
-				reply.append("Unique users (identified by ECC routing tag) = {:d}".format(self.usageTrack.count()))
-
-			elif data['text'].startswith('#STOP!!!'):
-
-				reply.append("ececho stopping ...")
-
-				self.running = False
-
-			else:
-
-				reply.append(self.prefix + data['text'])
-
-			# echo back the reply text as a new chatMsg
-
-			for line in reply:
-
-				echData = {'uuid' : str(uuid4()),
-						   'cmmd' : 'add',
-						   'text' : line}
-
-				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
+			logging.info('nameAdv : {} : {}'.format(data['name'], data['type']))
 
 			self.usageTrack.usageByTag(ecc_packet.get_from())
-
-		elif ecc_packet.get_meth() == eccPacket.METH_addrReq:
-
-			data = ecc_packet.get_data()
-
-			if data['coin'] == self.coins[0].symbol:
-
-				address = self.coins[0].get_new_address()
-
-				rData = {'uuid' : data['uuid'],
-						 'coin' : data['coin'],
-						 'addr' : address}
-
-				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
-
-			else:
-
-				rData = {'uuid' : data['uuid'],
-						 'coin' : data['coin'],
-						 'addr' : '0'}
-
-				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
 
 		else:
 
@@ -283,7 +225,7 @@ class ServiceApp:
 
 					if self.debug:
 
-						logging.info('RX: {}'.format(message))
+						logging.info('RX({}): {}'.format(protocolID, message))
 
 					ecc_packet = eccPacket.from_json(message)
 
@@ -307,6 +249,22 @@ class ServiceApp:
 
 	############################################################################
 
+	def logRoutingTags(self):
+
+		logging.info('Resolved local routing tag : {}'.format(self.coins[0].routingTag))
+
+		for index, tag in enumerate(self.coins[0].ecresolve_tags):
+
+			if tag == self.coins[0].routingTag:
+
+				logging.info('Resolved ecresolve tag #{}  * {}'.format(index, tag))
+
+			else:
+
+				logging.info('Resolved ecresolve tag #{}  : {}'.format(index, tag))
+
+	############################################################################
+
 	def cryptoInitialise(self):
 
 		if loadConfigurationECC(self.coins, self.protocol_id):
@@ -316,6 +274,8 @@ class ServiceApp:
 				try:
 
 					coin.initialise()
+
+					self.logRoutingTags()
 
 				except cryptoNodeException as error:
 
