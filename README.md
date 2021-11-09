@@ -1,6 +1,6 @@
 # ecchat
 
-ecchat is a decentralized messenger application built on the ecc message bus with integrated support for multi-chain cryptocurrency payments and cross-chain trusted swaps, with cross-chain atomic swaps in the pipeline.
+ecchat is a decentralized messenger application built on the ecc network (aka Roam) with integrated support for multi-chain cryptocurrency payments and cross-chain trusted swaps, with cross-chain atomic swaps in the pipeline. The transactional protocol underpinning ecchat will become the basis for a fully decentralized, non-custodial, non-KYC exchange.
 
 ![ecchat 1.4 initial screen](https://raw.githubusercontent.com/project-ecc/ecchat/master/ecchat-1.4.png)
 
