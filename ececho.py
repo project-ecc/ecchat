@@ -139,8 +139,12 @@ class EchoApp:
 
 	def __init__(self, protocol, name, prefix, debug=False):
 
-		self.protocol_id	= protocol
-		self.protocol_ver	= 1
+		self.protocol_id_ecchat  = protocol
+		self.protocol_ver_ecchat = 1
+
+		self.protocol_id_ecresolve  = 2
+		self.protocol_ver_ecresolve = 1
+
 		self.name			= name
 		self.prefix			= prefix
 		self.debug			= debug
@@ -153,15 +157,29 @@ class EchoApp:
 
 	############################################################################
 
-	def send_ecc_packet(self, dest, meth, data):
+	def send_ecchat_packet(self, dest, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_id, self.protocol_ver, dest, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_id_ecchat, self.protocol_ver_ecchat, dest, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
 			logging.info('TX: {}'.format(ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
+
+	############################################################################
+
+	def send_ecresolve_packet(self, meth, data):
+
+		for tag in self.coins[0].ecresolve_tags:
+
+			ecc_packet = eccPacket(self.protocol_id_ecresolve, self.protocol_ver_ecresolve, tag, self.coins[0].routingTag, meth, data)
+
+			if self.debug:
+
+				logging.info('TX({}): {}'.format(self.protocol_id_ecresolve, ecc_packet.to_json()))
+
+			ecc_packet.send(self.coins[0])
 
 	############################################################################
 
@@ -189,7 +207,7 @@ class EchoApp:
 					   'cmmd' : data['cmmd'],
 					   'able' : True}
 
-			self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatAck, ackData)
+			self.send_ecchat_packet(ecc_packet.get_from(), eccPacket.METH_chatAck, ackData)
 
 			reply = []
 
@@ -219,7 +237,7 @@ class EchoApp:
 						   'cmmd' : 'add',
 						   'text' : line}
 
-				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
+				self.send_ecchat_packet(ecc_packet.get_from(), eccPacket.METH_chatMsg, echData)
 
 			self.usageTrack.usageByTag(ecc_packet.get_from())
 
@@ -235,7 +253,7 @@ class EchoApp:
 						 'coin' : data['coin'],
 						 'addr' : address}
 
-				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
+				self.send_ecchat_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
 
 			else:
 
@@ -243,7 +261,7 @@ class EchoApp:
 						 'coin' : data['coin'],
 						 'addr' : '0'}
 
-				self.send_ecc_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
+				self.send_ecchat_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
 
 		else:
 
@@ -310,7 +328,7 @@ class EchoApp:
 
 	def cryptoInitialise(self):
 
-		if loadConfigurationECC(self.coins, self.protocol_id):
+		if loadConfigurationECC(self.coins, self.protocol_id_ecchat):
 
 			for coin in self.coins:
 
@@ -356,7 +374,13 @@ class EchoApp:
 
 			while self.running:
 
-				self.zmqHandler(0)
+				try:
+
+					self.zmqHandler(0)
+
+				except ServiceExit:
+
+					self.running = False
 
 			self.zmqShutdown()
 
@@ -366,11 +390,17 @@ class EchoApp:
 
 ################################################################################
 
+class ServiceExit(Exception):
+
+	pass
+
+################################################################################
+
 def terminate(signalNumber, frame):
 
 	logging.info('%s received - terminating' % signal.Signals(signalNumber).name)
 
-	sys.exit()
+	raise ServiceExit
 
 ################################################################################
 ### Main program ###############################################################

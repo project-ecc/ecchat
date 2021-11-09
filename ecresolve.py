@@ -315,7 +315,13 @@ class ServiceApp:
 
 			while self.running:
 
-				self.zmqHandler(0)
+				try:
+
+					self.zmqHandler(0)
+
+				except ServiceExit:
+
+					self.running = False
 
 			self.zmqShutdown()
 
@@ -325,11 +331,19 @@ class ServiceApp:
 
 ################################################################################
 
+class ServiceExit(Exception):
+
+	pass
+
+################################################################################
+
 def terminate(signalNumber, frame):
 
 	logging.info('%s received - terminating' % signal.Signals(signalNumber).name)
 
-	sys.exit()
+	raise ServiceExit
+
+#	sys.exit()
 
 ################################################################################
 ### Main program ###############################################################
