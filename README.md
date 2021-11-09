@@ -43,8 +43,9 @@ The ecc network ecosystem consists of a growing range of client applications and
 
 ## ecchat - features & capabilities
 
+More work to do here ...
 
-### Further Information
+## Further Information
 
 | Resource | Description |
 |:--|:--|
