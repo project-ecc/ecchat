@@ -424,9 +424,7 @@ class eccoinNode(cryptoNode):
 
 	def get_buffer(self, protocol_id = 1):
 
-		assert protocol_id == self.protocolId
-
-		if self.bufferKey:
+		if self.bufferKey and (protocol_id == self.protocolId):
 
 			bufferCmd = 'GetBufferRequest:' + str(protocol_id) + str(next(self.bufferIdx))
 
