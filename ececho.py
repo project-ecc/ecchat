@@ -189,7 +189,7 @@ class EchoApp:
 		uuid = str(uuid4())
 
 		data = {'uuid' : str(uuid4()),
-				'name' : self.party_name[1],
+				'name' : self.name,
 				'type' : 'chatname'}
 
 		self.send_ecresolve_packet(eccPacket.METH_nameAdv, data)
