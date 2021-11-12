@@ -61,15 +61,15 @@ class UsageTrack:
 
 	def start(self):
 
-		self.timer = RepeatTimer(10, self.saveIfNecessary)
+		self.buffer_timer = RepeatTimer(10, self.saveIfNecessary)
 
-		self.timer.start()
+		self.buffer_timer.start()
 
 	############################################################################
 
 	def stop(self):
 
-		self.timer.cancel()
+		self.buffer_timer.cancel()
 
 	############################################################################
 
@@ -151,7 +151,8 @@ class EchoApp:
 		self.subscribers	= []
 		self.coins			= []
 		self.running		= True
-		self.timer          = 0
+		self.buffer_timer   = 0
+		self.chatname_timer = 0
 
 		self.usageTrack		= UsageTrack()
 
@@ -180,6 +181,18 @@ class EchoApp:
 				logging.info('TX({}): {}'.format(self.protocol_id_ecresolve, ecc_packet.to_json()))
 
 			ecc_packet.send(self.coins[0])
+
+	############################################################################
+
+	def advertise_chat_name(self, loop = None, data = None):
+
+		uuid = str(uuid4())
+
+		data = {'uuid' : str(uuid4()),
+				'name' : self.party_name[1],
+				'type' : 'chatname'}
+
+		self.send_ecresolve_packet(eccPacket.METH_nameAdv, data)
 
 	############################################################################
 
@@ -336,9 +349,13 @@ class EchoApp:
 
 					return False
 
-				self.timer = RepeatTimer(10, self.reset_buffer_timeout)
+				self.buffer_timer   = RepeatTimer(10, self.reset_buffer_timeout)
 
-				self.timer.start()
+				self.buffer_timer.start()
+
+				self.chatname_timer =  RepeatTimer(60, self.advertise_chat_name)
+
+				elf.chatname_timer.start()
 
 			return True
 
@@ -348,9 +365,13 @@ class EchoApp:
 
 	def cryptoShutdown(self):
 
-		if self.timer:
+		if self.buffer_timer:
 
-			self.timer.cancel()
+			self.buffer_timer.cancel()
+
+		if self.chatname_timer:
+
+			self.chatname_timer.cancel()
 
 		for coin in self.coins:
 
