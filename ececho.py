@@ -355,7 +355,7 @@ class EchoApp:
 
 				self.chatname_timer =  RepeatTimer(60, self.advertise_chat_name)
 
-				elf.chatname_timer.start()
+				self.chatname_timer.start()
 
 			return True
 
