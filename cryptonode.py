@@ -372,9 +372,15 @@ class eccoinNode(cryptoNode):
 
 		return tags
 
+		# TODO - Setup routes, discover which are available, search for supplementary
+
+		# TODO - Somewhere ecresolve should also avertise if it is not one of the TXT seeds.
+
 	############################################################################
 
 	def resolve_route(self, targetRoute):
+
+		# TODO - Query ecresolve, paybe with a fallback to hard-coded.
 
 		if targetRoute == 'ececho':
 
