@@ -169,7 +169,7 @@ class NamesCache:
 
 			del self.cache[key]
 
-			logging.info('Name timeout {}'.format(key))
+			logging.info('Name timeout : {}'.format(key))
 
 	############################################################################
 
@@ -183,7 +183,7 @@ class NamesCache:
 
 				self.cache[name]['until'] = until
 
-				logging.info('Name extended {}'.format(name_tag))
+				logging.info('Name extended : {}'.format(name))
 
 				return True
 
@@ -195,7 +195,7 @@ class NamesCache:
 
 			self.cache[name] = {'type' : name_type, 'tag' : name_tag, 'until' : until}
 
-			logging.info('Name registered {}'.format(name_tag))
+			logging.info('Name registered : {}'.format(name))
 
 			return True
 
