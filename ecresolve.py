@@ -132,6 +132,86 @@ class UsageTrack:
 			f.close()
 
 ################################################################################
+## NamesCache class ############################################################
+################################################################################
+
+class NamesCache:
+
+	############################################################################
+
+	def __init__(self, timeout):
+
+		self.timeout = timeout
+
+		self.cache = {}
+
+	############################################################################
+
+	def start(self):
+
+		self.timer = RepeatTimer(10, self.timeoutNames)
+
+		self.timer.start()
+
+	############################################################################
+
+	def stop(self):
+
+		self.timer.cancel()
+
+	############################################################################
+
+	def timeoutNames(self):
+
+		now = datetime.datetime.now()
+
+		for key in [k for k, v in self.cache.items() if v['until'] < now]:
+
+			del self.cache[key]
+
+			logging.info('Name timeout {}'.format(key))
+
+	############################################################################
+
+	def add(self, name, name_type, name_tag):
+
+		until = datetime.datetime.now() + datetime.timedelta(seconds=self.timeout)
+
+		if name in self.cache:
+
+			if self.cache[name]['tag'] == name_tag:
+
+				self.cache[name]['until'] = until
+
+				logging.info('Name extended {}'.format(name_tag))
+
+				return True
+
+			else:
+
+				return False
+
+		else:
+
+			cache[name] = {'type' : name_type, 'tag' : name_tag, 'until' : until}
+
+			logging.info('Name registered {}'.format(name_tag))
+
+			return True
+
+	############################################################################
+
+	def resolve(self, name, name_type):
+
+		if name in self.cache:
+
+			if self.cache[name]['type'] == name_type:
+
+				return self.cache[name]['tag']
+
+		return None
+
+################################################################################
 ## ServiceApp class ############################################################
 ################################################################################
 
@@ -149,6 +229,7 @@ class ServiceApp:
 		self.timer          = 0
 
 		self.usageTrack		= UsageTrack(name)
+		self.namesCache     = NamesCache(90)
 
 	############################################################################
 
@@ -166,7 +247,9 @@ class ServiceApp:
 
 	def process_ecc_packet(self, ecc_packet):
 
-		# Ensure we have a route back to whoever is sending an ecchat message
+		# Ensure we have a route back to whoever is sending an ecresolve message
+
+		# TODO : Actually a return route is not necessarily required at this stage !
 
 		try:
 
@@ -185,6 +268,8 @@ class ServiceApp:
 			logging.info('nameAdv : {} : {}'.format(data['name'], data['type']))
 
 			self.usageTrack.usageByTag(ecc_packet.get_from())
+
+			self.namesCache.add(data['name'], data['type'], ecc_packet.get_from())
 
 		else:
 
@@ -308,6 +393,7 @@ class ServiceApp:
 	def run(self):
 
 		self.usageTrack.start()
+		self.namesCache.start()
 
 		if self.cryptoInitialise():
 
@@ -328,6 +414,7 @@ class ServiceApp:
 		self.cryptoShutdown()
 
 		self.usageTrack.stop()
+		self.namesCache.stop()
 
 ################################################################################
 
