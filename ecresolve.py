@@ -193,7 +193,7 @@ class NamesCache:
 
 		else:
 
-			cache[name] = {'type' : name_type, 'tag' : name_tag, 'until' : until}
+			self.cache[name] = {'type' : name_type, 'tag' : name_tag, 'until' : until}
 
 			logging.info('Name registered {}'.format(name_tag))
 
