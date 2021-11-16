@@ -333,6 +333,22 @@ class EchoApp:
 
 	############################################################################
 
+	def logRoutingTags(self):
+
+		logging.info('Resolved local routing tag : {}'.format(self.coins[0].routingTag))
+
+		for index, tag in enumerate(self.coins[0].ecresolve_tags):
+
+			if tag == self.coins[0].routingTag:
+
+				logging.info('Resolved ecresolve tag #{}  * {}'.format(index, tag))
+
+			else:
+
+				logging.info('Resolved ecresolve tag #{}  : {}'.format(index, tag))
+
+	############################################################################
+
 	def cryptoInitialise(self):
 
 		if loadConfigurationECC(self.coins, self.protocol_id_ecchat):
@@ -342,6 +358,8 @@ class EchoApp:
 				try:
 
 					coin.initialise()
+
+					self.logRoutingTags()
 
 				except cryptoNodeException as error:
 
@@ -353,7 +371,7 @@ class EchoApp:
 
 				self.buffer_timer.start()
 
-				self.chatname_timer =  RepeatTimer(60, self.advertise_chat_name)
+				self.chatname_timer = RepeatTimer(60, self.advertise_chat_name)
 
 				self.chatname_timer.start()
 
