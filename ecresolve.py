@@ -284,7 +284,7 @@ class ServiceApp:
 					 'type' : data['type'],
 					 'tags' : tags}
 
-			self.send_ecresolve_packet(eccPacket.METH_nameRes, rData)
+			self.send_ecresolve_packet(ecc_packet.get_from(), eccPacket.METH_nameRes, rData)
 
 		else:
 
