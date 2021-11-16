@@ -164,7 +164,7 @@ class EchoApp:
 
 		if self.debug:
 
-			logging.info('TX: {}'.format(ecc_packet.to_json()))
+			logging.info('TX({}): {}'.format(self.protocol_id_ecchat, ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
 
@@ -309,7 +309,7 @@ class EchoApp:
 
 					if self.debug:
 
-						logging.info('RX: {}'.format(message))
+						logging.info('RX({}): {}'.format(protocolID, message))
 
 					ecc_packet = eccPacket.from_json(message)
 
