@@ -231,9 +231,27 @@ class eccoinNode(cryptoNode):
 
 				self.zmqAddress = zmqnotification['address']
 
-		# Load ecresolve routing tags for subsequent ecc network name resolution
+		# Load ecresolve routing tags and setup routes for subsequent ecc network name resolution
 
 		self.ecresolve_tags = self.get_ecresolve_tags()
+
+		route = []
+
+		for tag in self.ecresolve_tags:
+
+			try:
+
+				self.proxy.findroute(tag)
+
+				route.append(self.proxy.haveroute(tag))
+
+			except exc.RpcInvalidAddressOrKey:
+
+				raise cryptoNodeException('Routing tag for ecresolve has invalid base64 encoding : {}'.format(tag))
+
+		if not any(route):
+
+			raise cryptoNodeException('No route available to ecresolve across all {} configured routing tags'.format(len(self.ecresolve_tags)))
 
 	############################################################################
 
@@ -372,15 +390,11 @@ class eccoinNode(cryptoNode):
 
 		return tags
 
-		# TODO - Setup routes, discover which are available, search for supplementary
-
-		# TODO - Somewhere ecresolve should also avertise if it is not one of the TXT seeds.
-
 	############################################################################
 
 	def resolve_route(self, targetRoute):
 
-		# TODO - Query ecresolve, paybe with a fallback to hard-coded.
+		# TODO - Query ecresolve, maybe with a fallback to hard-coded.
 
 		if targetRoute == 'ececho':
 
