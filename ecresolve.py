@@ -207,7 +207,9 @@ class NamesCache:
 
 			if self.cache[name]['type'] == name_type:
 
-				return self.cache[name]['tag']
+				logging.info('Name resolved : {}'.format(name))
+
+				return [self.cache[name]['tag']]
 
 		return None
 
@@ -270,6 +272,19 @@ class ServiceApp:
 			self.usageTrack.usageByTag(ecc_packet.get_from())
 
 			self.namesCache.add(data['name'], data['type'], ecc_packet.get_from())
+
+		elif ecc_packet.get_meth() == eccPacket.METH_nameReq:
+
+			data = ecc_packet.get_data()
+
+			tags = self.namesCache.resolve(data['name'], data['type'])
+
+			rData = {'uuid' : data['uuid'],
+					 'name' : data['name'],
+					 'type' : data['type'],
+					 'tags' : tags}
+
+			self.send_ecchat_packet(eccPacket.METH_nameRes, rData)
 
 		else:
 
