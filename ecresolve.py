@@ -169,7 +169,7 @@ class NamesCache:
 
 			del self.cache[key]
 
-			logging.info('Name timeout : {}'.format(key))
+			logging.info('NamesCache : Name timedout : {}'.format(key))
 
 	############################################################################
 
@@ -183,7 +183,7 @@ class NamesCache:
 
 				self.cache[name]['until'] = until
 
-				logging.info('Name extended : {}'.format(name))
+				logging.info('NamesCache : Name extended : {}'.format(name))
 
 				return True
 
@@ -195,7 +195,7 @@ class NamesCache:
 
 			self.cache[name] = {'type' : name_type, 'tag' : name_tag, 'until' : until}
 
-			logging.info('Name registered : {}'.format(name))
+			logging.info('NamesCache : Name register : {}'.format(name))
 
 			return True
 
@@ -266,8 +266,6 @@ class ServiceApp:
 		if ecc_packet.get_meth() == eccPacket.METH_nameAdv:
 
 			data = ecc_packet.get_data()
-
-			logging.info('nameAdv : {} : {}'.format(data['name'], data['type']))
 
 			self.usageTrack.usageByTag(ecc_packet.get_from())
 
