@@ -146,7 +146,8 @@ class eccoinNode(cryptoNode):
 
 		super().__init__(symbol, rpc_address, rpc_user, rpc_pass)
 
-		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address))
+		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address)) # Not thread safe ...
+		self.prox2 = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address)) # ... hence needing 2
 
 		self.protocolId = protocol_id
 		self.routingTag = ''
@@ -348,9 +349,9 @@ class eccoinNode(cryptoNode):
 
 			try:
 
-				bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
+				bufferSig = self.prox2.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
 
-				self.proxy.resetbuffertimeout(self.protocolId, bufferSig)
+				self.prox2.resetbuffertimeout(self.protocolId, bufferSig)
 
 			except pycurl.error:
 
