@@ -207,7 +207,7 @@ class NamesCache:
 
 			if self.cache[name]['type'] == name_type:
 
-				logging.info('Name resolved : {}'.format(name))
+				logging.info('NamesCache : Name resolved : {}'.format(name))
 
 				return [self.cache[name]['tag']]
 
