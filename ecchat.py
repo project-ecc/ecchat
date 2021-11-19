@@ -276,6 +276,26 @@ class ChatApp:
 
 	############################################################################
 
+	def resolve_route(self, targetRoute):
+
+		uuid = str(uuid4())
+
+		data = {'uuid' : str(uuid4()),
+				'name' : targetRoute,
+				'type' : 'chatname'}
+
+		self.send_ecresolve_packet(eccPacket.METH_nameReq, data)
+
+		# TODO - Set some kind of status so that the first ecresolve response (only) is handler : bWait_nameRes
+
+		if targetRoute == 'ececho':
+
+			return 'BAU3rdcs0BnDtOhXX/PjoR/99Toft8tyYWYxdTFlfiTAPQb43akF/waOo23REBVVRrSdsMX8iPHKDYgqhEGetSY=' # eccserver2.ddns.net
+
+		return targetRoute
+
+	############################################################################
+
 	def block_refresh(self, index):
 
 		if not self.coins[index].no_refresh:
@@ -1296,7 +1316,7 @@ class ChatApp:
 
 						self.logRoutingTags()
 
-						self.otherTag = coin.resolve_route(self.otherTag)
+						self.otherTag = self.resolve_route(self.otherTag)
 
 						coin.setup_route(self.otherTag)
 
