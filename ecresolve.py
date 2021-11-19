@@ -189,6 +189,8 @@ class NamesCache:
 
 			else:
 
+				logging.info('NamesCache : Name rejected : {} : {}'.format(name, 'Registration of existing name by another node rejected'))
+
 				return False
 
 		else:
