@@ -12,6 +12,21 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 |6|[ecnodeproxy](#6--ecnodeproxy)|
 |7|[ectorrent](#7--ectorrent)|
 |8|[ecvpn](#8--ecvpn)|
+|9|[ectweet](#9--ectweet)|
+
+All ECC Message structures share a standard JSON header:
+
+   	{
+		"id"   : <service protocol id>
+		"ver"  : <version (qualified by service protocol id>
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
+	}
+
+Note that an ECC Message has similar semantics to a UDP packet in IP networking, with protocol id being analogous to service port. For messages that expect a response message, an optional response protocol id may be specified, in the absence of which, the service protocol ID is used for any response. The response protocol id is analogous to the ephemeral response port used by TCP. It is essential to use a unique response protocol id in situations where multiple ECC Message apps run on the same node 
 
 ----------
 
@@ -22,10 +37,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 1
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 The following values for `meth` are defined:
@@ -207,10 +223,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 2
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 The following values for `meth` are defined:
@@ -269,10 +286,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 3
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 The following values for `meth` are defined:
@@ -360,10 +378,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 4
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 The following values for `meth` are defined:
@@ -421,10 +440,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 5
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 ----------
@@ -436,10 +456,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 6
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 ----------
@@ -451,10 +472,11 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 7
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
 ----------
@@ -466,9 +488,26 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"id"   : 8
 		"ver"  : 1
-		"to"   : "<routing tag of destination>"
-		"from" : "<routing tag of source>"
-		"meth" : "<method called>"
-		"data" : "<nested JSON depending on type>"
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
+	}
+
+----------
+
+## 9 : ectweet
+
+This protocol uses a top level JSON structure as follows:
+
+   	{
+		"id"   : 9
+		"ver"  : 1
+		"rid"  : <response protocol id (optional)>
+		"to"   : <routing tag of destination>
+		"from" : <routing tag of source>
+		"meth" : <method called>
+		"data" : <nested JSON depending on meth>
 	}
 
