@@ -343,9 +343,9 @@ class ServiceApp:
 
 	############################################################################
 
-	def reset_buffer_timeout(self):
+	def reset_buffer_timeouts(self):
 
-		self.coins[0].reset_buffer_timeout()
+		self.coins[0].reset_buffer_timeouts()
 
 	############################################################################
 
@@ -383,7 +383,7 @@ class ServiceApp:
 
 					return False
 
-				self.timer = RepeatTimer(10, self.reset_buffer_timeout)
+				self.timer = RepeatTimer(10, self.reset_buffer_timeouts)
 
 				self.timer.start()
 

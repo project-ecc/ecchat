@@ -327,9 +327,9 @@ class EchoApp:
 
 	############################################################################
 
-	def reset_buffer_timeout(self):
+	def reset_buffer_timeouts(self):
 
-		self.coins[0].reset_buffer_timeout()
+		self.coins[0].reset_buffer_timeouts()
 
 	############################################################################
 
@@ -367,7 +367,7 @@ class EchoApp:
 
 					return False
 
-				self.buffer_timer   = RepeatTimer(10, self.reset_buffer_timeout)
+				self.buffer_timer   = RepeatTimer(10, self.reset_buffer_timeouts)
 
 				self.buffer_timer.start()
 

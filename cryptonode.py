@@ -138,26 +138,30 @@ class eccoinNode(cryptoNode):
 
 	version_fPacketSig = 30300
 
-	bufferIdx = count(start=1)
+	serviceIdx = count(start=1)
+	respondIdx = count(start=1)
 
 	############################################################################
 
-	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass, protocol_id):
+	def __init__(self, symbol, rpc_address, rpc_user, rpc_pass, service_id = 1, respond_id = None):
 
 		super().__init__(symbol, rpc_address, rpc_user, rpc_pass)
 
 		self.proxy = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address)) # Not thread safe ...
 		self.prox2 = Proxy('http://%s:%s@%s' % (rpc_user, rpc_pass, rpc_address)) # ... hence needing 2
 
-		self.protocolId = protocol_id
+		self.serviceId  = service_id
+		self.respondId  = respond_id
+		self.serviceKey = ''
+		self.respondKey = ''
+
 		self.routingTag = ''
-		self.bufferKey  = ''
+
+		self.ecresolve_tags = []
 
 		# ECC feature flags (based on version number)
 
 		self.fPacketSig = False
-
-		self.ecresolve_tags = []
 
 	############################################################################
 
@@ -206,7 +210,14 @@ class eccoinNode(cryptoNode):
 		try:
 
 			self.routingTag = self.proxy.getroutingpubkey()
-			self.bufferKey  = self.proxy.registerbuffer(self.protocolId)
+
+			if self.serviceId:
+
+				self.serviceKey = self.proxy.registerbuffer(self.serviceId)
+
+			if self.respondId:
+
+				self.respondKey = self.proxy.registerbuffer(self.respondId)
 
 		except exc.RpcInternalError:
 
@@ -343,25 +354,57 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
-	def reset_buffer_timeout(self):
+	def reset_service_buffer_timeout(self):
 
-		if self.bufferKey:
+		if self.serviceKey:
 
 			try:
 
-				bufferSig = self.prox2.buffersignmessage(self.bufferKey, 'ResetBufferTimeout')
+				bufferSig = self.prox2.buffersignmessage(self.serviceKey, 'ResetBufferTimeout')
 
-				self.prox2.resetbuffertimeout(self.protocolId, bufferSig)
+				self.prox2.resetbuffertimeout(self.serviceId, bufferSig)
 
 			except pycurl.error:
 
-				self.bufferKey = ''
+				self.serviceKey = ''
 
 				raise cryptoNodeException('Failed to connect - check that eccoin daemon is running')
 
 			return True
 
 		return False
+
+	############################################################################
+
+	def reset_respond_buffer_timeout(self):
+
+		if self.respondKey:
+
+			try:
+
+				bufferSig = self.prox2.buffersignmessage(self.respondKey, 'ResetBufferTimeout')
+
+				self.prox2.resetbuffertimeout(self.respondId, bufferSig)
+
+			except pycurl.error:
+
+				self.serviceKey = ''
+
+				raise cryptoNodeException('Failed to connect - check that eccoin daemon is running')
+
+			return True
+
+		return False
+
+	############################################################################
+
+	def reset_buffer_timeouts(self):
+
+		serviceResult = self.reset_service_buffer_timeout()
+
+		respondResult = self.reset_respond_buffer_timeout()
+
+		return serviceResult or respondResult # OR semantics because the return value is used to gate timer setup
 
 	############################################################################
 
@@ -425,15 +468,15 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
-	def get_buffer(self, protocol_id = 1):
+	def get_service_buffer(self):
 
-		if self.bufferKey and (protocol_id == self.protocolId):
+		if self.serviceKey:
 
-			bufferCmd = 'GetBufferRequest:' + str(protocol_id) + str(next(self.bufferIdx))
+			bufferCmd = 'GetBufferRequest:' + str(self.serviceId) + str(next(self.serviceIdx))
 
-			bufferSig = self.proxy.buffersignmessage(self.bufferKey, bufferCmd)
+			bufferSig = self.proxy.buffersignmessage(self.serviceKey, bufferCmd)
 
-			eccbuffer = self.proxy.getbuffer(protocol_id, bufferSig)
+			eccbuffer = self.proxy.getbuffer(self.serviceId, bufferSig)
 
 			return eccbuffer
 
@@ -443,15 +486,55 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
+	def get_respond_buffer(self):
+
+		if self.respondKey:
+
+			bufferCmd = 'GetBufferRequest:' + str(self.respondId) + str(next(self.respondIdx))
+
+			bufferSig = self.proxy.buffersignmessage(self.respondKey, bufferCmd)
+
+			eccbuffer = self.proxy.getbuffer(self.respondId, bufferSig)
+
+			return eccbuffer
+
+		else:
+
+			return None
+
+	############################################################################
+
+	def get_buffer(self, protocol_id = 1):
+
+		if protocol_id == self.serviceId:
+
+			return self.get_service_buffer()
+
+		if protocol_id == self.respondId:
+
+			return self.get_respond_buffer()
+
+		return None
+
+	############################################################################
+
 	def shutdown(self):
 
-		if self.bufferKey:
+		if self.serviceKey:
 
-			bufferSig = self.proxy.buffersignmessage(self.bufferKey, 'ReleaseBufferRequest')
+			bufferSig = self.proxy.buffersignmessage(self.serviceKey, 'ReleaseBufferRequest')
 
-			self.proxy.releasebuffer(self.protocolId, bufferSig)
+			self.proxy.releasebuffer(self.serviceId, bufferSig)
 
-			self.bufferKey = ''
+			self.serviceKey = ''
+
+		if self.respondKey:
+
+			bufferSig = self.proxy.buffersignmessage(self.respondKey, 'ReleaseBufferRequest')
+
+			self.proxy.releasebuffer(self.respondId, bufferSig)
+
+			self.respondKey = ''
 
 ################################################################################
 ## bitcoinNode class ###########################################################

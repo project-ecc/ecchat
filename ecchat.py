@@ -234,13 +234,13 @@ class ChatApp:
 
 	############################################################################
 
-	def reset_buffer_timeout(self, loop = None, data = None):
+	def reset_buffer_timeouts(self, loop = None, data = None):
 
 		try:
 
-			if self.coins[0].reset_buffer_timeout():
+			if self.coins[0].reset_buffer_timeouts():
 
-				loop.set_alarm_in(10, self.reset_buffer_timeout)
+				loop.set_alarm_in(10, self.reset_buffer_timeouts)
 
 		except cryptoNodeException as error:
 
@@ -287,6 +287,8 @@ class ChatApp:
 		self.send_ecresolve_packet(eccPacket.METH_nameReq, data)
 
 		# TODO - Set some kind of status so that the first ecresolve response (only) is handler : bWait_nameRes
+
+		# self.nameReq_pending
 
 		if targetRoute == 'ececho':
 
@@ -1356,7 +1358,7 @@ class ChatApp:
 
 			self.loop.set_alarm_in( 1, self.clock_refresh)
 
-			self.loop.set_alarm_in(10, self.reset_buffer_timeout)
+			self.loop.set_alarm_in(10, self.reset_buffer_timeouts)
 
 			self.loop.set_alarm_in(10, self.block_refresh_timed)
 
