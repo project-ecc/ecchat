@@ -47,7 +47,7 @@ class eccPacket():
 
 	############################################################################
 
-	def __init__(self, _id = '', _ver = '', _to = '', _from = '', _meth = '', _data = ''):
+	def __init__(self, _ver = '', _sid = '', _rid = '', _to = '', _from = '', _meth = '', _data = ''):
 
 		assert isinstance(_data, dict)
 
@@ -55,12 +55,24 @@ class eccPacket():
 
 		assert all(key in _data for key in self.KEY_LIST[_meth])
 
-		self.packet = {	'id'	: _id,
-						'ver'	: _ver,
-						'to'	: _to,
-						'from'	: _from,
-						'meth'	: _meth,
-						'data'	: _data}
+		if len(_rid) == 0:
+
+			self.packet = {	'ver'	: _ver,
+							'sid'	: _sid,
+							'to'	: _to,
+							'from'	: _from,
+							'meth'	: _meth,
+							'data'	: _data}
+
+		else:
+
+			self.packet = {	'ver'	: _ver,
+							'sid'	: _sid,
+							'rid'	: _rid,
+							'to'	: _to,
+							'from'	: _from,
+							'meth'	: _meth,
+							'data'	: _data}
 
 	############################################################################
 
@@ -70,7 +82,13 @@ class eccPacket():
 
 		d = json.loads(json_string)
 
-		return cls(d['id'], d['ver'], d['to'], d['from'], d['meth'], d['data'])
+		if 'rid' in d:
+
+			return cls(d['ver'], d['sid'], d['rid'], d['to'], d['from'], d['meth'], d['data'])
+
+		else:
+
+			return cls(d['ver'], d['sid'], d['to'], d['from'], d['meth'], d['data'])
 
 	############################################################################
 
@@ -80,15 +98,27 @@ class eccPacket():
 
 	############################################################################
 
-	def get_id(self):
-
-		return self.packet['id']
-
-	############################################################################
-
 	def get_ver(self):
 
 		return self.packet['ver']
+
+	############################################################################
+
+	def get_sid(self):
+
+		return self.packet['sid']
+
+	############################################################################
+
+	def get_rid(self):
+
+		if 'rid' in self.packet:
+
+			return self.packet['rid']
+
+		else:
+
+			return None
 
 	############################################################################
 
@@ -126,6 +156,18 @@ class eccPacket():
 
 	def send(self, proxy):
 
-		proxy.send_packet(self.packet['to'], self.packet['id'], json.dumps(self.packet))
+		proxy.send_packet(self.packet['to'], self.packet['sid'], json.dumps(self.packet))
+
+	############################################################################
+
+	def send_response(self, proxy):
+
+		if 'rid' in self.packet:
+
+			proxy.send_packet(self.packet['to'], self.packet['rid'], json.dumps(self.packet))
+
+		else:
+
+			proxy.send_packet(self.packet['to'], self.packet['sid'], json.dumps(self.packet))
 
 ################################################################################
