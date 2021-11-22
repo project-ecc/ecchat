@@ -1,8 +1,8 @@
 # ECC Message Protocols
 
-The ECC Message Protocols are a set of protocols, each identified by an integer Protocol ID. The following have been reserved:
+The ECC Message Protocols are a set of protocols, each identified by an integer Service Protocol ID or `sid`. The following have been defined:
 
-| Protocol ID | Protocol Name |
+| Service Protocol ID | Protocol Name |
 |:-:|:--|
 |1|[ecchat](#1--ecchat)|
 |2|[ecresolve](#2--ecresolve)|
@@ -14,19 +14,31 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 |8|[ecvpn](#8--ecvpn)|
 |9|[ectweet](#9--ectweet)|
 
-All ECC Message structures share a standard JSON header:
+ECC Message protocols share a standard JSON header containing the following fields:
+
+| Name | Status | Description |
+|:-:|:-:|:--|
+|ver|required|version - qualified by sid|
+|sid|required|service protocol id|
+|rid|optional|response protocol id|
+|to|required|routing tag of destination|
+|from|required|routing tag of source|
+|meth|required|method called|
+|data|required|nested JSON depending on meth|
+
+The header structure is as follows:
 
    	{
-		"id"   : <service protocol id>
-		"ver"  : <version (qualified by service protocol id>
-		"rid"  : <response protocol id (optional)>
+		"ver"  : <version - qualified by sid>
+		"sid"  : <service protocol id>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
 		"data" : <nested JSON depending on meth>
 	}
 
-Note that an ECC Message has similar semantics to a UDP packet in IP networking, with protocol id being analogous to service port. For messages that expect a response message, an optional response protocol id may be specified, in the absence of which, the service protocol ID is used for any response. The response protocol id is analogous to the ephemeral response port used by TCP. It is essential to use a unique response protocol id in situations where multiple ECC Message apps run on the same node 
+An ECC Message has similar semantics to a UDP packet in IP networking, with service protocol id `sid` being analogous to service port. For messages that expect a response message, an optional response protocol id `rid` may be specified, in the absence of which, the service protocol ID is used for any response. The response protocol id is analogous to the ephemeral response port used by TCP. It is essential to use a unique response protocol id in situations where multiple ECC Message apps or services run on the same node sharing the same routing tag.
 
 ----------
 
@@ -35,8 +47,8 @@ Note that an ECC Message has similar semantics to a UDP packet in IP networking,
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 1
 		"ver"  : 1
+		"sid"  : 1
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -221,8 +233,8 @@ The UML sequence specification for the above diagram follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 2
 		"ver"  : 1
+		"sid"  : 2
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -284,8 +296,8 @@ If the value `[]` (empty array) is returned in the `tags` field it indicates tha
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 3
 		"ver"  : 1
+		"sid"  : 3
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -376,8 +388,8 @@ The following `erno` values are defined:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 4
 		"ver"  : 1
+		"sid"  : 4
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -438,8 +450,8 @@ The following `erno` values are defined:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 5
 		"ver"  : 1
+		"sid"  : 5
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -454,8 +466,8 @@ This protocol uses a top level JSON structure as follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 6
 		"ver"  : 1
+		"sid"  : 6
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -470,8 +482,8 @@ This protocol uses a top level JSON structure as follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 7
 		"ver"  : 1
+		"sid"  : 7
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -486,8 +498,8 @@ This protocol uses a top level JSON structure as follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 8
 		"ver"  : 1
+		"sid"  : 8
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
@@ -502,8 +514,8 @@ This protocol uses a top level JSON structure as follows:
 This protocol uses a top level JSON structure as follows:
 
    	{
-		"id"   : 9
 		"ver"  : 1
+		"sid"  : 9
 		"rid"  : <response protocol id (optional)>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
