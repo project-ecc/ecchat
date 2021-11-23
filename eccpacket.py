@@ -88,7 +88,7 @@ class eccPacket():
 
 		else:
 
-			return cls(d['ver'], d['sid'], d['to'], d['from'], d['meth'], d['data'])
+			return cls(d['ver'], d['sid'], d['sid'], d['to'], d['from'], d['meth'], d['data'])
 
 	############################################################################
 
