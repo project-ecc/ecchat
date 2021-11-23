@@ -16,15 +16,15 @@ The ECC Message Protocols are a set of protocols, each identified by an integer 
 
 ECC Message protocols share a standard JSON header containing the following fields:
 
-| Name | Status | Description |
-|:-:|:-:|:--|
-|ver|required|version - qualified by sid|
-|sid|required|service protocol id|
-|rid|optional|response protocol id|
-|to|required|routing tag of destination|
-|from|required|routing tag of source|
-|meth|required|method called|
-|data|required|nested JSON depending on meth|
+| Name | Description |
+|:-:|:--|
+|ver|version - qualified by sid|
+|sid|service protocol id|
+|rid|response protocol id|
+|to|routing tag of destination|
+|from|routing tag of source|
+|meth|method called|
+|data|nested JSON depending on meth|
 
 The header structure is as follows:
 
@@ -38,7 +38,7 @@ The header structure is as follows:
 		"data" : <nested JSON depending on meth>
 	}
 
-An ECC Message has similar semantics to a UDP packet in IP networking, with service protocol id `sid` being analogous to service port. For messages that expect a response message, an optional response protocol id `rid` may be specified, in the absence of which, the service protocol ID is used for any response. The response protocol id is analogous to the ephemeral response port used by TCP. It is essential to use a unique response protocol id in situations where multiple ECC Message apps or services run on the same node sharing the same routing tag.
+An ECC Message has similar semantics to a UDP packet in IP networking, with service protocol id `sid` being analogous to service port. For messages that expect a response message, a response protocol id `rid` may be specified. If the response protocol id is zero, the service protocol ID is used for any response. The response protocol id is analogous to the ephemeral response port used by TCP. It is essential to use a unique response protocol id in situations where multiple ECC Message apps or services run on the same node sharing the same routing tag.
 
 ----------
 
@@ -49,7 +49,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 1
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -235,7 +235,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 2
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -298,7 +298,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 3
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -390,7 +390,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 4
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -452,7 +452,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 5
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -468,7 +468,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 6
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -484,7 +484,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 7
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -500,7 +500,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 8
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
@@ -516,7 +516,7 @@ This protocol uses a top level JSON structure as follows:
    	{
 		"ver"  : 1
 		"sid"  : 9
-		"rid"  : <response protocol id (optional)>
+		"rid"  : <response protocol id>
 		"to"   : <routing tag of destination>
 		"from" : <routing tag of source>
 		"meth" : <method called>
