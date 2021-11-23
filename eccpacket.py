@@ -47,7 +47,7 @@ class eccPacket():
 
 	############################################################################
 
-	def __init__(self, _ver = '', _sid = '', _rid = '', _to = '', _from = '', _meth = '', _data = ''):
+	def __init__(self, _ver = '', _sid = 0, _rid = 0, _to = '', _from = '', _meth = '', _data = ''):
 
 		assert isinstance(_data, dict)
 
@@ -55,7 +55,7 @@ class eccPacket():
 
 		assert all(key in _data for key in self.KEY_LIST[_meth])
 
-		if len(_rid) == 0:
+		if _rid == 0:
 
 			self.packet = {	'ver'	: _ver,
 							'sid'	: _sid,
