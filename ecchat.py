@@ -152,7 +152,7 @@ class ChatApp:
 
 	def send_ecchat_packet(self, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_ver_ecchat, self.protocol_id_ecchat, '', self.otherTag, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_ver_ecchat, self.protocol_id_ecchat, 0, self.otherTag, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
@@ -166,7 +166,7 @@ class ChatApp:
 
 		for tag in self.coins[0].ecresolve_tags:
 
-			ecc_packet = eccPacket(self.protocol_ver_ecresolve, self.protocol_id_ecresolve, '', tag, self.coins[0].routingTag, meth, data)
+			ecc_packet = eccPacket(self.protocol_ver_ecresolve, self.protocol_id_ecresolve, 0, tag, self.coins[0].routingTag, meth, data)
 
 			if self.debug:
 

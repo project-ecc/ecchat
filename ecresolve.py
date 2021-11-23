@@ -239,7 +239,7 @@ class ServiceApp:
 
 	def send_ecresolve_packet(self, dest, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_ver, dest, self.protocol_id, '', self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_ver, dest, self.protocol_id, 0, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
