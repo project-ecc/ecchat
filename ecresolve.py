@@ -259,8 +259,6 @@ class ServiceApp:
 
 				self.coins[0].setup_route(ecc_packet.get_from())
 
-				logging.info("##### setup route for return path following nameReq #####")
-
 			except cryptoNodeException as error:
 
 				logging.info(str(error))
