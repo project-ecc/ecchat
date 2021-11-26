@@ -29,7 +29,7 @@ def getEccoinDataDir():
 
 ################################################################################
 
-def loadConfigurationECC(coins, protocol_id):
+def loadConfigurationECC(coins, service_id = 1, respond_id = None):
 
 	rpcCheckKeys = {'rpcconnect', 'rpcport', 'rpcuser', 'rpcpassword'}
 
@@ -53,7 +53,7 @@ def loadConfigurationECC(coins, protocol_id):
 
 		rpc_address = '{}:{}'.format(parser['default']['rpcconnect'], parser['default']['rpcport'])
 
-		coins.append(eccoinNode('ecc', rpc_address, parser['default']['rpcuser'], parser['default']['rpcpassword'], protocol_id))
+		coins.append(eccoinNode('ecc', rpc_address, parser['default']['rpcuser'], parser['default']['rpcpassword'], service_id, respond_id))
 
 		return True
 
