@@ -71,7 +71,15 @@ class eccPacket():
 
 		d = json.loads(json_string)
 
-		return cls(d['ver'], d['sid'], d['rid'], d['to'], d['from'], d['meth'], d['data'])
+		# TOTO : Implement comprehensive key presence checks
+
+		if 'id' in d: # Back compatible crash prevention
+
+			return cls(d['ver'], d['id'],  d['id'],  d['to'], d['from'], d['meth'], d['data'])
+
+		else:
+
+			return cls(d['ver'], d['sid'], d['rid'], d['to'], d['from'], d['meth'], d['data'])
 
 	############################################################################
 
