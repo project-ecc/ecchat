@@ -253,17 +253,17 @@ class ServiceApp:
 
 		# Ensure we have a route back to whoever sent the ecresolve message for messages needing a response
 
-		if ecc_packet.get_meth() in [eccPacket.METH_nameReq]:
+#		if ecc_packet.get_meth() in [eccPacket.METH_nameReq]:
 
-			try:
+		try:
 
-				self.coins[0].setup_route(ecc_packet.get_from())
+			self.coins[0].setup_route(ecc_packet.get_from())
 
-			except cryptoNodeException as error:
+		except cryptoNodeException as error:
 
-				logging.info(str(error))
+			logging.info(str(error))
 
-				return
+			return
 
 		if ecc_packet.get_meth() == eccPacket.METH_nameAdv:
 
