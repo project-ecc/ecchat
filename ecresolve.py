@@ -245,7 +245,7 @@ class ServiceApp:
 
 			logging.info('TX({}): {}'.format(rid, ecc_packet.to_json()))
 
-		ecc_packet.send(self.coins[0])
+		ecc_packet.send_response(self.coins[0])
 
 	############################################################################
 
