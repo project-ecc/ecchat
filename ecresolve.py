@@ -213,7 +213,7 @@ class NamesCache:
 
 				return [self.cache[name]['tag']]
 
-		return None
+		return []
 
 ################################################################################
 ## ServiceApp class ############################################################
@@ -237,13 +237,13 @@ class ServiceApp:
 
 	############################################################################
 
-	def send_ecresolve_packet(self, dest, meth, data):
+	def send_response_packet(self, dest, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_ver, self.protocol_id, 0, dest, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_ver, self.protocol_id, self.coins[0].respondId, dest, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
-			logging.info('TX({}): {}'.format(self.protocol_id, ecc_packet.to_json()))
+			logging.info('TX({}): {}'.format(self.coins[0].respondId, ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
 
@@ -251,19 +251,19 @@ class ServiceApp:
 
 	def process_ecc_packet(self, ecc_packet):
 
-		# Ensure we have a route back to whoever is sending an ecresolve message
+		# Ensure we have a route back to whoever sent the ecresolve message for messages needing a response
 
-		# TODO : Actually a return route is not necessarily required at this stage !
+		if ecc_packet.get_meth() in [eccPacket.METH_nameReq]
 
-		try:
+			try:
 
-			self.coins[0].setup_route(ecc_packet.get_from())
+				self.coins[0].setup_route(ecc_packet.get_from())
 
-		except cryptoNodeException as error:
+			except cryptoNodeException as error:
 
-			logging.info(str(error))
+				logging.info(str(error))
 
-			return
+				return
 
 		if ecc_packet.get_meth() == eccPacket.METH_nameAdv:
 
@@ -284,7 +284,7 @@ class ServiceApp:
 					 'type' : data['type'],
 					 'tags' : tags}
 
-			self.send_ecresolve_packet(ecc_packet.get_from(), eccPacket.METH_nameRes, rData)
+			self.send_response_packet(ecc_packet.get_from(), eccPacket.METH_nameRes, rData)
 
 		else:
 
