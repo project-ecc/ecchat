@@ -253,7 +253,7 @@ class ServiceApp:
 
 		# Ensure we have a route back to whoever sent the ecresolve message for messages needing a response
 
-		if ecc_packet.get_meth() in [eccPacket.METH_nameReq]
+		if ecc_packet.get_meth() in [eccPacket.METH_nameReq]:
 
 			try:
 
