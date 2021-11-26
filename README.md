@@ -58,7 +58,9 @@ Names and reserved names differ only in their reservation status. The ecc networ
 
 	/reserve satoshi 365 days
 
-A chat name reservation request will fail if the name is in use by any other ecchat session, is the subject of an unexpired reservation, of if the user has less than 10,000 ECC available (unlocked) in their wallet. There is no limit to the number of names that may be reserved, subject to available wallet balance.
+A chat name reservation request will fail if the name is in use by any other ecchat session, is the subject of an unexpired reservation, of if the user has less than 10,000 ECC available (unlocked) in their wallet. There is no limit to the number of names that may be reserved, subject to available wallet balance. 
+
+Chat names are _not_ tied to ecc network routing tags and may therefore be reused across different nodes and devices - desktop and mobile.
 
 ## Further Information
 
