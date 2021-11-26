@@ -243,7 +243,7 @@ class ServiceApp:
 
 		if self.debug:
 
-			logging.info('TX({}): {}'.format(self.coins[0].respondId, ecc_packet.to_json()))
+			logging.info('TX({}): {}'.format(rid, ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
 
