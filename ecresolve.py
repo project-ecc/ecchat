@@ -237,9 +237,9 @@ class ServiceApp:
 
 	############################################################################
 
-	def send_response_packet(self, dest, meth, data):
+	def send_response_packet(self, dest, rid, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_ver, self.protocol_id, self.coins[0].respondId, dest, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(self.protocol_ver, self.protocol_id, rid, dest, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
@@ -284,7 +284,7 @@ class ServiceApp:
 					 'type' : data['type'],
 					 'tags' : tags}
 
-			self.send_response_packet(ecc_packet.get_from(), eccPacket.METH_nameRes, rData)
+			self.send_response_packet(ecc_packet.get_from(), ecc_packet.get_rid(), eccPacket.METH_nameRes, rData)
 
 		else:
 
