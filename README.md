@@ -54,11 +54,11 @@ To start an ecchat conversation with someone (or something) you must know their 
 
 Names and reserved names are automatically resolved to routing tags on behalf of users by the ecresolve service.
 
-Names and reserved names differ only in their reservation status. The ecc network keeps track of names currently is use by active ecchat sessoins and permits users to choose unique chat names on a first come first served basis. When a user exits their ecchat session, the chat name they used becomes available for anyone else to use (after a 90s timeout period). Users who wish to retain their preferred chat name across multiple ecchat sessions may chose to reserve any chat name for a period of their choosing measured in days, weeks, months or years. Name reservation is free, but requires a pay-to-self transaction of 10,000 ECC locked for the corresponding period. This is automated by ecchat using the /reserve command:
+Names and reserved names differ only in their reservation status. The ecc network keeps track of names currently is use by active ecchat sessions and permits users to choose unique chat names on a first come first served basis. When a user exits their ecchat session, the chat name they used becomes available for anyone else to use (after a 90s timeout period). Users who wish to retain their preferred chat name across multiple ecchat sessions may chose to reserve any chat name for a period of their choosing measured in days, weeks, months or years. Name reservation is free, but requires a pay-to-self transaction of 10,000 ECC locked for the corresponding period. This is automated by ecchat using the /reserve command:
 
 	/reserve satoshi 365 days
 
-A chat name reservation request will fail if the name is in use by any other ecchat session, is the subject of an unexpired reservation, of if the user has less than 10,000 ECC available (unlocked) in their wallet. There is no limit to the number of names that may be reserved, subject to available wallet balance. 
+A chat name reservation request will fail if the name is in use by any other ecchat session, is the subject of an unexpired reservation, of if the user has less than 10,000 ECC available (unlocked) in their wallet. There is no limit on the number of names that may be reserved, subject to available wallet balance. 
 
 Chat names are _not_ tied to ecc network routing tags and may therefore be reused across different nodes and devices - desktop or mobile.
 
