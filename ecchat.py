@@ -61,7 +61,9 @@ class ChatApp:
 				('btn_nm', 'black'           , 'brown'      , 'default' ),
 				('btn_hl', 'black'           , 'yellow'     , 'standout')]
 
-	def __init__(self, name, other, tag, conf, debug=False):
+	############################################################################
+
+	def __init__(self, name, other, conf, debug=False):
 
 		urwid.set_encoding('utf-8')
 
@@ -86,7 +88,7 @@ class ChatApp:
 
 		self.party_size = max(len(t) for t in self.party_name)
 
-		self.otherTag = tag
+		self.otherTag = ''
 		self.conf     = conf
 		self.debug    = debug
 
@@ -166,7 +168,7 @@ class ChatApp:
 
 		for tag in self.coins[0].ecresolve_tags:
 
-			ecc_packet = eccPacket(self.protocol_ver_ecresolve, self.protocol_id_ecresolve, 0, tag, self.coins[0].routingTag, meth, data)
+			ecc_packet = eccPacket(self.protocol_ver_ecresolve, self.protocol_id_ecresolve, self.coins[0].respondId, tag, self.coins[0].routingTag, meth, data)
 
 			if self.debug:
 
@@ -278,6 +280,14 @@ class ChatApp:
 
 	def resolve_route(self, targetRoute):
 
+		# Check first if route is already a literal routing tag
+
+		if len(targetRoute) == 88 and targetRoute[-1] == '=':
+
+			return targetRoute
+
+		# Try ecresolve name resolution
+
 		uuid = str(uuid4())
 
 		data = {'uuid' : str(uuid4()),
@@ -288,13 +298,15 @@ class ChatApp:
 
 		# TODO - Set some kind of status so that the first ecresolve response (only) is handler : bWait_nameRes
 
+		# Set self.other_tag and call setup_route on it in the nameRes handler : then abstract and make it robust !
+
 		# self.nameReq_pending
 
-		if targetRoute == 'ececho':
+#		if targetRoute == 'ececho':
 
-			return 'BAU3rdcs0BnDtOhXX/PjoR/99Toft8tyYWYxdTFlfiTAPQb43akF/waOo23REBVVRrSdsMX8iPHKDYgqhEGetSY=' # eccserver2.ddns.net
+#			return 'BAU3rdcs0BnDtOhXX/PjoR/99Toft8tyYWYxdTFlfiTAPQb43akF/waOo23REBVVRrSdsMX8iPHKDYgqhEGetSY=' # eccserver2.ddns.net
 
-		return targetRoute
+#		return targetRoute
 
 	############################################################################
 
@@ -1076,10 +1088,10 @@ class ChatApp:
 	def process_ecc_packet(self, ecc_packet):
 
 		# Spam filter
+#TODO to handle receiving ecresolve responses - make a list of permitted senders - make sure to add the other tag
+#		if ecc_packet.get_from() != self.otherTag:
 
-		if ecc_packet.get_from() != self.otherTag:
-
-			return
+#			return
 
 		if ecc_packet.get_meth() == eccPacket.METH_chatMsg:
 
@@ -1170,6 +1182,16 @@ class ChatApp:
 			data = ecc_packet.get_data()
 
 			self.swap_response(data['cotk'], data['adtk'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_nameRes:
+
+			data = ecc_packet.get_data()
+
+			self.otherTag = data['tags'][0]
+
+			logging.info('Resolved {} -> {}'.format(self.party_name[2], self.otherTag))
+
+			self.coins[0].setup_route(self.otherTag)
 
 		else:
 
@@ -1322,9 +1344,11 @@ class ChatApp:
 
 						self.logRoutingTags()
 
-						self.otherTag = self.resolve_route(self.otherTag)
+						self.resolve_route(self.party_name[2])
 
-						coin.setup_route(self.otherTag)
+#	TODO - tidy			self.otherTag = self.resolve_route(self.otherTag)
+
+#						coin.setup_route(self.otherTag)
 
 				except cryptoNodeException as error:
 
@@ -1413,9 +1437,8 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Simple command line chat for ECC')
 
-	argparser.add_argument('-n', '--name'  , action='store',      help='nickname    (local)' , type=str, default = ''           , required=True )
-	argparser.add_argument('-o', '--other' , action='store',      help='nickname    (remote)', type=str, default = '[other]'    , required=False)
-	argparser.add_argument('-t', '--tag'   , action='store',      help='routing tag (remote)', type=str, default = ''           , required=True )
+	argparser.add_argument('-n', '--name'  , action='store',      help='chat name   (local)' , type=str, default = ''           , required=True )
+	argparser.add_argument('-o', '--other' , action='store',      help='chat name   (remote)', type=str, default = ''           , required=False)
 	argparser.add_argument('-c', '--conf'  , action='store',      help='configuration file'  , type=str, default = 'ecchat.conf', required=False)
 	argparser.add_argument('-d', '--debug' , action='store_true', help='debug message log'   ,                                    required=False)
 
@@ -1425,7 +1448,6 @@ def main():
 
 	app = ChatApp(command_line_args.name,
 	              command_line_args.other,
-	              command_line_args.tag,
 	              command_line_args.conf,
 	              command_line_args.debug)
 

@@ -155,7 +155,7 @@ class txSend():
 				'coin' : self.coin.symbol,
 				'type' : 'P2PKH'}
 
-		self.parent.send_ecc_packet(eccPacket.METH_addrReq, data)
+		self.parent.send_ecchat_packet(eccPacket.METH_addrReq, data)
 
 		self.parent.loop.set_alarm_in(10, self.do_addr_req_timeout)
 
@@ -209,7 +209,7 @@ class txSend():
 						'addr' : self.addr,
 						'txid' : self.txid}
 
-				self.parent.send_ecc_packet(eccPacket.METH_txidInf, data)
+				self.parent.send_ecchat_packet(eccPacket.METH_txidInf, data)
 
 				self.parent.txid = self.txid # TIDY
 
