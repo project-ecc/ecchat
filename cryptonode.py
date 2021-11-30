@@ -302,6 +302,9 @@ class eccoinNode(cryptoNode):
 
 		info = self.proxy.getwalletinfo()
 
+		# TODO : Handle staking_only_unlock
+		# TODO : Check that the unlock remains in force for sufficient time
+
 		if 'unlocked_until' in info:
 
 			return info['unlocked_until'] == 0
