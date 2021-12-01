@@ -317,7 +317,7 @@ class eccoinNode(cryptoNode):
 
 		try:
 
-			self.proxy.walletpassphrase(passphrase, seconds, ("false", "true")[staking])
+			self.proxy.walletpassphrase(passphrase, seconds, staking)
 
 		except exc.RpcWalletPassphraseIncorrect:
 
