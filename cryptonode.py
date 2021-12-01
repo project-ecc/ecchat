@@ -313,11 +313,11 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
-	def unlock_wallet(self, passphrase, seconds):
+	def unlock_wallet(self, passphrase, seconds, staking = False):
 
 		try:
 
-			self.proxy.walletpassphrase(passphrase, seconds)
+			self.proxy.walletpassphrase(passphrase, seconds, ("false", "true")[staking])
 
 		except exc.RpcWalletPassphraseIncorrect:
 
