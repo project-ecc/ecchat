@@ -111,7 +111,13 @@ class cryptoNode():
 
 	############################################################################
 
-	def unlock_wallet(self, passphrase, seconds):
+	def unlock_wallet(self, passphrase, seconds, staking = False):
+
+		raise NotImplementedError
+
+	############################################################################
+
+	def revert_wallet_lock(self):
 
 		raise NotImplementedError
 
@@ -708,7 +714,7 @@ class bitcoinNode(cryptoNode):
 
 	############################################################################
 
-	def unlock_wallet(self, passphrase, seconds):
+	def unlock_wallet(self, passphrase, seconds, staking = False):
 
 		try:
 
@@ -722,6 +728,12 @@ class bitcoinNode(cryptoNode):
 
 			return True
 
+	############################################################################
+
+	def revert_wallet_lock(self):
+
+		pass
+		
 	############################################################################
 
 	def send_to_address(self, address, amount, comment):
@@ -882,10 +894,16 @@ class moneroNode(cryptoNode):
 
 	############################################################################
 
-	def unlock_wallet(self, passphrase, seconds):
+	def unlock_wallet(self, passphrase, seconds, staking = False):
 
 		return True
 
+	############################################################################
+
+	def revert_wallet_lock(self):
+
+		pass
+		
 	############################################################################
 
 	def send_to_address(self, address, amount, comment):
