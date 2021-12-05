@@ -2,6 +2,7 @@
 # coding: UTF-8
 
 import sys
+import time
 import pycurl
 import requests
 
@@ -104,7 +105,7 @@ class cryptoNode():
 
 	############################################################################
 
-	def wallet_locked(self):
+	def wallet_locked(self, cache_prior_state = False):
 
 		raise NotImplementedError
 
@@ -162,6 +163,10 @@ class eccoinNode(cryptoNode):
 		# ECC feature flags (based on version number)
 
 		self.fPacketSig = False
+
+		# Caching prior unlock state for post transaction reversion
+
+		self.cached_prior_walletinfo = {}
 
 	############################################################################
 
@@ -298,18 +303,25 @@ class eccoinNode(cryptoNode):
 
 	############################################################################
 
-	def wallet_locked(self):
+	def wallet_locked(self, cache_prior_state = False):
 
 		info = self.proxy.getwalletinfo()
 
-		# TODO : Handle staking_only_unlock
-		# TODO : Check that the unlock remains in force for sufficient time
+		if cache_prior_state and info.keys() >= {'unlocked_until', 'staking_only_unlock'}:
+
+			self.cached_prior_walletinfo = info.copy()
 
 		if 'unlocked_until' in info:
 
-			return info['unlocked_until'] == 0
+			if 'staking_only_unlock' in info:
 
-		return False
+				return info['staking_only_unlock'] or (info['unlocked_until'] == 0)
+
+			else:
+
+				return info['unlocked_until'] == 0
+
+		return False # unencrypted wallet
 
 	############################################################################
 
@@ -325,7 +337,27 @@ class eccoinNode(cryptoNode):
 
 		else:
 
+			# Cache passphrase for later call to revert_wallet_lock
+
+			if self.cached_prior_walletinfo:
+
+				self.cached_prior_walletinfo['passphrase'] = passphrase 
+
 			return True
+
+	############################################################################
+
+	def revert_wallet_lock(self):
+
+		if self.cached_prior_walletinfo and 'passphrase' in self.cached_prior_walletinfo:
+
+			if self.cached_prior_walletinfo['unlocked_until'] > 0:
+
+				seconds = self.cached_prior_walletinfo['unlocked_until'] - int(time.time())
+
+				self.unlock_wallet(self.cached_prior_walletinfo['passphrase'], seconds, self.cached_prior_walletinfo['staking_only_unlock'])
+
+				self.cached_prior_walletinfo.clear()
 
 	############################################################################
 
@@ -664,7 +696,7 @@ class bitcoinNode(cryptoNode):
 
 	############################################################################
 
-	def wallet_locked(self):
+	def wallet_locked(self, cache_prior_state = False):
 
 		info = self.proxy.getwalletinfo()
 
@@ -842,7 +874,7 @@ class moneroNode(cryptoNode):
 
 	############################################################################
 
-	def wallet_locked(self):
+	def wallet_locked(self, cache_prior_state = False):
 
 		# Assume that wallet is unlocked when monero-wallet-rpc is started
 

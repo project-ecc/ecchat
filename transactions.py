@@ -107,7 +107,7 @@ class txSend():
 
 		assert self.tx_state == self.STATE_checking
 
-		if self.coin.wallet_locked():
+		if self.coin.wallet_locked(cache_prior_state = (self.unlRetry == 0)):
 
 			self.unlRetry += 1
 
@@ -167,6 +167,8 @@ class txSend():
 
 			self.do_failure('No response from other party - /send cancelled')
 
+			self.coin.revert_wallet_lock()
+
 	############################################################################
 
 	def do_send(self, addr):
@@ -179,8 +181,8 @@ class txSend():
 
 			self.do_failure('Other party is unable or unwilling to receive unsolicited sends of {}'.format(self.coin.symbol))
 
-			#TODO : Test this !!!
-
+			self.coin.revert_wallet_lock()
+			
 			return
 
 		if (self.tx_state == self.STATE_addr_req) and addr != '0':
@@ -188,6 +190,8 @@ class txSend():
 			try:
 
 				self.txid = self.coin.send_to_address(addr, str(self.f_amount), "ecchat")
+
+				self.coin.revert_wallet_lock()
 
 			except cryptoNodeException as error:
 
