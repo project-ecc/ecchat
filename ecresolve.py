@@ -365,7 +365,7 @@ class ServiceApp:
 
 	def cryptoInitialise(self):
 
-		if loadConfigurationECC(self.coins, eccPacket._protocol_id_ecchat):
+		if loadConfigurationECC(self.coins, eccPacket._protocol_id_ecresolve):
 
 			for coin in self.coins:
 
