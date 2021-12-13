@@ -221,10 +221,8 @@ class NamesCache:
 
 class ServiceApp:
 
-	def __init__(self, protocol, name, debug=False):
+	def __init__(self, name, debug=False):
 
-		self.protocol_id	= protocol
-		self.protocol_ver	= 1
 		self.name			= name
 		self.debug			= debug
 		self.subscribers	= []
@@ -239,7 +237,7 @@ class ServiceApp:
 
 	def send_response_packet(self, dest, rid, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_ver, self.protocol_id, rid, dest, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(eccPacket._protocol_id_ecresolve, rid, dest, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
@@ -367,7 +365,7 @@ class ServiceApp:
 
 	def cryptoInitialise(self):
 
-		if loadConfigurationECC(self.coins, self.protocol_id):
+		if loadConfigurationECC(self.coins, eccPacket._protocol_id_ecchat):
 
 			for coin in self.coins:
 
@@ -460,7 +458,6 @@ def main():
 
 	argparser = argparse.ArgumentParser(description='Echo service for ecchat')
 
-	argparser.add_argument('-p', '--protocol', action='store'     , help='Protocol ID'      , type=int, default=2          , required=False)
 	argparser.add_argument('-n', '--name'    , action='store'     , help='service name'     , type=str, default='ecresolve', required=False)
 	argparser.add_argument('-d', '--debug'   , action='store_true', help='debug message log',                                required=False)
 
@@ -478,8 +475,7 @@ def main():
 
 	logging.info('Arguments %s', vars(command_line_args))
 
-	app = ServiceApp(command_line_args.protocol,
-	                 command_line_args.name,
+	app = ServiceApp(command_line_args.name,
 	                 command_line_args.debug)
 
 	app.run()

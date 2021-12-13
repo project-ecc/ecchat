@@ -139,12 +139,6 @@ class EchoApp:
 
 	def __init__(self, protocol, name, prefix, debug=False):
 
-		self.protocol_id_ecchat  = protocol
-		self.protocol_ver_ecchat = 1
-
-		self.protocol_id_ecresolve  = 2
-		self.protocol_ver_ecresolve = 1
-
 		self.name			= name
 		self.prefix			= prefix
 		self.debug			= debug
@@ -160,11 +154,11 @@ class EchoApp:
 
 	def send_ecchat_packet(self, dest, meth, data):
 
-		ecc_packet = eccPacket(self.protocol_ver_ecchat, self.protocol_id_ecchat, 0, dest, self.coins[0].routingTag, meth, data)
+		ecc_packet = eccPacket(eccPacket._protocol_id_ecchat, 0, dest, self.coins[0].routingTag, meth, data)
 
 		if self.debug:
 
-			logging.info('TX({}): {}'.format(self.protocol_id_ecchat, ecc_packet.to_json()))
+			logging.info('TX({}): {}'.format(eccPacket._protocol_id_ecchat, ecc_packet.to_json()))
 
 		ecc_packet.send(self.coins[0])
 
@@ -174,11 +168,11 @@ class EchoApp:
 
 		for tag in self.coins[0].ecresolve_tags:
 
-			ecc_packet = eccPacket(self.protocol_ver_ecresolve, self.protocol_id_ecresolve, 0, tag, self.coins[0].routingTag, meth, data)
+			ecc_packet = eccPacket(eccPacket._protocol_id_ecresolve, 0, tag, self.coins[0].routingTag, meth, data)
 
 			if self.debug:
 
-				logging.info('TX({}): {}'.format(self.protocol_id_ecresolve, ecc_packet.to_json()))
+				logging.info('TX({}): {}'.format(eccPacket._protocol_id_ecresolve, ecc_packet.to_json()))
 
 			ecc_packet.send(self.coins[0])
 
@@ -351,7 +345,7 @@ class EchoApp:
 
 	def cryptoInitialise(self):
 
-		if loadConfigurationECC(self.coins, self.protocol_id_ecchat):
+		if loadConfigurationECC(self.coins, eccPacket._protocol_id_ecchat):
 
 			for coin in self.coins:
 

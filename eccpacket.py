@@ -9,6 +9,13 @@ import json
 
 class eccPacket():
 
+	_protocol_id_no_id_zero  = 0 # this variable is really a comment !
+	_protocol_id_ecchat      = 1
+	_protocol_id_ecresolve   = 2
+	_protocol_id_ectranslate = 3
+
+	_protocol_versions_by_id = [0,1,1,1]
+
 	METH_chatMsg = 'chatMsg'
 	METH_chatAck = 'chatAck'
 	METH_addrReq = 'addrReq'
@@ -47,7 +54,7 @@ class eccPacket():
 
 	############################################################################
 
-	def __init__(self, _ver = 0, _sid = 0, _rid = 0, _to = '', _from = '', _meth = '', _data = ''):
+	def __init__(self, _sid = 0, _rid = 0, _to = '', _from = '', _meth = '', _data = ''):
 
 		assert isinstance(_data, dict)
 
@@ -55,7 +62,7 @@ class eccPacket():
 
 		assert all(key in _data for key in self.KEY_LIST[_meth])
 
-		self.packet = {	'ver'	: _ver,
+		self.packet = {	'ver'	: self._protocol_versions_by_id[_sid],
 						'sid'	: _sid,
 						'rid'	: _rid,
 						'to'	: _to,
@@ -75,11 +82,11 @@ class eccPacket():
 
 		if 'id' in d: # Back compatible crash prevention
 
-			return cls(d['ver'], d['id'],  d['id'],  d['to'], d['from'], d['meth'], d['data'])
+			return cls(d['id'],  d['id'],  d['to'], d['from'], d['meth'], d['data'])
 
 		else:
 
-			return cls(d['ver'], d['sid'], d['rid'], d['to'], d['from'], d['meth'], d['data'])
+			return cls(d['sid'], d['rid'], d['to'], d['from'], d['meth'], d['data'])
 
 	############################################################################
 
