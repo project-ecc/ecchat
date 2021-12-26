@@ -167,9 +167,9 @@ class NamesCache:
 
 		for key in [k for k, v in self.cache.items() if v['until'] < now]:
 
-			del self.cache[key]
+			logging.info('NamesCache : Name timedout : {}/{}'.format(key, self.cache[key]['type']))
 
-			logging.info('NamesCache : Name timedout : {}'.format(key))
+			del self.cache[key]
 
 	############################################################################
 
@@ -183,7 +183,7 @@ class NamesCache:
 
 				self.cache[name]['until'] = until
 
-				logging.info('NamesCache : Name extended : {}'.format(name))
+				logging.info('NamesCache : Name extended : {}/{}'.format(name, name_type))
 
 				return True
 
@@ -197,7 +197,7 @@ class NamesCache:
 
 			self.cache[name] = {'type' : name_type, 'tag' : name_tag, 'until' : until}
 
-			logging.info('NamesCache : Name register : {}'.format(name))
+			logging.info('NamesCache : Name register : {}/{}'.format(name, name_type))
 
 			return True
 
@@ -213,7 +213,7 @@ class NamesCache:
 
 				return [self.cache[name]['tag']]
 
-		logging.info('NamesCache : Name unknown : {}/{}'.format(name, name_type))
+		logging.info('NamesCache : Name unknown  : {}/{}'.format(name, name_type))
 
 		return []
 
