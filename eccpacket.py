@@ -16,8 +16,8 @@ class eccPacket():
 
 	_protocol_versions_by_id = [0,1,1,1]
 
-	METH_chatMsg = 'chatReq'
-	METH_chatMsg = 'chatRes'
+	METH_chatReq = 'chatReq'
+	METH_chatRes = 'chatRes'
 	METH_chatMsg = 'chatMsg'
 	METH_chatAck = 'chatAck'
 	METH_addrReq = 'addrReq'
