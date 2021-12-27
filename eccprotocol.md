@@ -60,7 +60,9 @@ The following values for `meth` are defined:
 
 |meth|Purpose|
 |:--|:--|
-|[chatMsg](#chatmsg)|Chat message content|
+|[chatReq](#chatreq)|Chat request|
+|[chatRes](#chatres)|Chat response|
+|[chatMsg](#chatmas)|Chat message content|
 |[chatAck](#chatack)|Chat message acknowledge|
 |[addrReq](#addrreq)|Request new receive address|
 |[addrRes](#addrres)|Respond with receive address|
@@ -70,6 +72,30 @@ The following values for `meth` are defined:
 |[swapRes](#swapres)|Swap execution response|
 
 The `data` value for each `meth` are as follows:
+
+### chatReq
+
+The `chatReq` method is used to request the initiation of a chat conversation.
+
+	{
+		"uuid" : "<uuid value>"
+		"cmmd" : "start|stop"
+		"name" : "<chat name>"
+	}
+
+The `name` field should contain the chat name of the requesting party.
+
+### chatRes
+
+The `chatRes` method is used to respond to a `chatReq` message.
+
+	{
+		"uuid" : "<uuid value>"
+		"cmmd" : "accept|reject"
+		"name" : "<chat name>"
+	}
+
+The `name` field should contain the chat name of the responding party.
 
 ### chatMsg
 

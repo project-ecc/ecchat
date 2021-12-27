@@ -16,6 +16,8 @@ class eccPacket():
 
 	_protocol_versions_by_id = [0,1,1,1]
 
+	METH_chatMsg = 'chatReq'
+	METH_chatMsg = 'chatRes'
 	METH_chatMsg = 'chatMsg'
 	METH_chatAck = 'chatAck'
 	METH_addrReq = 'addrReq'
@@ -28,7 +30,9 @@ class eccPacket():
 	METH_nameReq = 'nameReq'
 	METH_nameRes = 'nameRes'
 
-	METH_SET = [METH_chatMsg,
+	METH_SET = [METH_chatReq,
+				METH_chatRes,
+				METH_chatMsg,
 				METH_chatAck,
 				METH_addrReq,
 				METH_addrRes,
@@ -40,7 +44,9 @@ class eccPacket():
 				METH_nameReq,
 				METH_nameRes]
 
-	KEY_LIST = {METH_chatMsg : ('uuid', 'cmmd', 'text'),
+	KEY_LIST = {METH_chatReq : ('uuid', 'cmmd', 'name'),
+				METH_chatRes : ('uuid', 'cmmd', 'name'),
+				METH_chatMsg : ('uuid', 'cmmd', 'text'),
 				METH_chatAck : ('uuid', 'cmmd', 'able'),
 				METH_addrReq : ('uuid', 'coin', 'type'),
 				METH_addrRes : ('uuid', 'coin', 'addr'),
