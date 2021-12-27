@@ -264,6 +264,16 @@ class EchoApp:
 
 				self.send_ecchat_packet(ecc_packet.get_from(), eccPacket.METH_addrRes, rData)
 
+		elif ecc_packet.get_meth() == eccPacket.METH_chatReq:
+
+			data = ecc_packet.get_data()
+
+			rData = {'uuid' : data['uuid'],
+					 'cmmd' : 'accept',
+					 'name' : self.name}
+
+			self.send_ecchat_packet(ecc_packet.get_from(), eccPacket.METH_chatRes, rData)
+
 		else:
 
 			pass
