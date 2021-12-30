@@ -8,7 +8,6 @@ import pathlib
 import logging
 import signal
 import codecs
-import pickle
 import urwid
 import time
 import zmq
@@ -32,9 +31,7 @@ from configure import loadConfigurationECC, loadConfigurationAlt
 
 from eccpacket    import eccPacket
 from cryptonode   import cryptoNode, eccoinNode, bitcoinNode, moneroNode, cryptoNodeException
-from transactions import txSend, txReceive
-
-#TODO from conversation import conversation
+from transactions import txChat, txSend, txReceive
 
 # urwid extension classes
 
@@ -75,12 +72,8 @@ class ChatApp:
 		self.party_separator  = ['|', '>', '<']
 
 		self.party_name_style = ['ecchat', 'self', 'other']
-
 		self.party_text_style = ['ecchat', 'text', 'text']
 
-		self.party_size = max(len(t) for t in self.party_name)
-
-		self.otherTag = ''
 		self.conf     = conf
 		self.debug    = debug
 
@@ -100,6 +93,7 @@ class ChatApp:
 
 		self.coins = []
 
+		self.txChat    = None
 		self.txSend    = {}
 		self.txReceive = {}
 		self.txSwap    = {}
@@ -126,13 +120,13 @@ class ChatApp:
 
 		self.walker  = MessageWalker ()
 
-		self.headerT = urwid.Text    (u'ecchat {} : {} > {}'.format(self._version, self.party_name[1], self.party_name[2]))
+		self.headerT = urwid.Text    ('')
 		self.headerA = urwid.AttrMap (self.headerT, 'header')
 
 		self.scrollT = MessageListBox(self.walker)
 		self.scrollA = urwid.AttrMap (self.scrollT, 'scroll')
 
-		self.statusT = urwid.Text    (u'Initializing ...')
+		self.statusT = urwid.Text    ('')
 		self.statusA = urwid.AttrMap (self.statusT, 'status')
 
 		self.footerT = urwid.Edit    ('> ')
@@ -142,21 +136,59 @@ class ChatApp:
 
 		self.window  = FrameFocus    (body = self.frame, footer = self.footerA, focus_part = 'footer')
 
+		# Set initial text
+
+		self.set_party_name(2, '')
+
+		self.set_status_text(u'Initializing ...')
+
+		self.party_size = max(len(t) for t in self.party_name)
+
+	############################################################################
+
+	def set_party_name(self, party, name):
+
+		self.party_name[party] = name
+
+		self.party_size = max(len(t) for t in self.party_name)
+
+		self.set_header_text(self.party_name[1], self.party_name[2])
+
+	############################################################################
+
+	def set_header_text(self, local_name, remote_name):
+
+		if remote_name:
+
+			self.headerT.set_text(u'ecchat {} : {} > {}'.format(self._version, local_name, remote_name))
+
+		else:
+
+			self.set_header_text(local_name, '(no chat active)')
+
+	############################################################################
+
+	def set_status_text(self, text):
+
+		self.statusT.set_text(text)
+
 	############################################################################
 
 	def send_ecchat_packet(self, meth, data):
 
-		ecc_packet = eccPacket(eccPacket._protocol_id_ecchat, 0,
-			                   self.otherTag,
-			                   self.coins[0].routingTag,
-			                   meth,
-			                   data)
+		if self.txChat:
 
-		if self.debug:
+			ecc_packet = eccPacket(eccPacket._protocol_id_ecchat, 0,
+				                   self.txChat.tag,
+				                   self.coins[0].routingTag,
+				                   meth,
+				                   data)
 
-			logging.info('TX({}): {}'.format(eccPacket._protocol_id_ecchat, ecc_packet.to_json()))
+			if self.debug:
 
-		ecc_packet.send(self.coins[0])
+				logging.info('TX({}): {}'.format(eccPacket._protocol_id_ecchat, ecc_packet.to_json()))
+
+			ecc_packet.send(self.coins[0])
 
 	############################################################################
 
@@ -230,7 +262,7 @@ class ChatApp:
 
 			text += ' {} # {:d}/{:d} '.format(coin.symbol, coin.blocks, coin.peers)
 
-		self.statusT.set_text(text)
+		self.set_status_text(text)
 
 		loop.set_alarm_in(1, self.clock_refresh)
 
@@ -275,42 +307,6 @@ class ChatApp:
 		self.send_ecresolve_packet(eccPacket.METH_nameAdv, data)
 
 		loop.set_alarm_in(60, self.advertise_chat_name)
-
-	############################################################################
-
-	def resolve_route(self, targetRoute):
-
-		# Check first if route is already a literal routing tag
-
-		if len(targetRoute) == 88 and targetRoute[-1] == '=':
-
-			return targetRoute
-
-		# TODO - NOTE THIS DOES NOT WORK WELL due to lengthy name : display as "<tag> or first few characters ..."
-
-		# Try ecresolve name resolution
-
-		uuid = str(uuid4())
-
-		data = {'uuid' : str(uuid4()),
-				'name' : targetRoute,
-				'type' : 'chatname'}
-
-		self.send_ecresolve_packet(eccPacket.METH_nameReq, data)
-
-		# TODO - Set some kind of status so that the first ecresolve response (only) is handler : bWait_nameRes
-
-		# Have a timer send a message every 10s waiting for name to come online.
-
-		# Set self.other_tag and call setup_route on it in the nameRes handler : then abstract and make it robust !
-
-		# self.nameReq_pending
-
-		if targetRoute == 'ececho':
-
-			return 'BAU3rdcs0BnDtOhXX/PjoR/99Toft8tyYWYxdTFlfiTAPQb43akF/waOo23REBVVRrSdsMX8iPHKDYgqhEGetSY=' # eccserver2.ddns.net
-
-		return targetRoute
 
 	############################################################################
 
@@ -677,6 +673,7 @@ class ChatApp:
 
 		self.append_message(0, '%-8s - %s' % ('/help          ', 'display help - commands'))
 		self.append_message(0, '%-8s - %s' % ('/keys          ', 'display help - keys'))
+		self.append_message(0, '%-8s - %s' % ('/chat    <name>', 'start a chat by name or routing tag'))
 		self.append_message(0, '%-8s - %s' % ('/exit          ', 'exit - also /quit and ESC'))
 		self.append_message(0, '%-8s - %s' % ('/version       ', 'display ecchat version info'))
 		self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
@@ -811,6 +808,30 @@ class ChatApp:
 			elif text.startswith('/keys'):
 
 				self.echo_keys()
+
+			elif text.startswith('/chat'):
+
+				match = re.match('/chat (?P<name>\S+)', text)
+
+				if match:
+
+					uuid = str(uuid4())
+
+					self.txChat = txChat(self, uuid, match.group('name'))
+
+					self.txChat.resolve_chat()
+
+				else:
+
+					if self.txChat:
+
+						self.txChat.stop_chat()
+
+						self.txChat = None
+
+					else:
+
+						self.append_message(0, 'To start a new chat, specify chat name following /chat command')
 
 			elif text.startswith('/version'):
 
@@ -1021,11 +1042,18 @@ class ChatApp:
 
 			else:
 
-				data = {'uuid' : uuid,
-						'cmmd' : 'add',
-						'text' : text}
+				if self.txChat and self.txChat.ok_to_chat():
 
-				self.send_ecchat_packet(eccPacket.METH_chatMsg, data)
+					data = {'uuid' : uuid,
+							'cmmd' : 'add',
+							'text' : text}
+
+					self.send_ecchat_packet(eccPacket.METH_chatMsg, data)
+
+				else:
+
+					self.append_message(0, 'Use /chat <name> to start a chat')
+
 
 	############################################################################
 
@@ -1093,7 +1121,7 @@ class ChatApp:
 
 		# Spam filter
 #TODO to handle receiving ecresolve responses - make a list of permitted senders - make sure to add the other tag
-#		if ecc_packet.get_from() != self.otherTag:
+#		if ecc_packet.get_from() != self.otherTag: not it's self.txChat.tag :)
 
 #			return
 
@@ -1191,11 +1219,29 @@ class ChatApp:
 
 			data = ecc_packet.get_data()
 
-			self.otherTag = data['tags'][0]
+			if 'uuid' in data:
 
-			logging.info('Resolved {} -> {}'.format(self.party_name[2], self.otherTag))
+				if data['uuid'] == self.txChat.uuid:
 
-			self.coins[0].setup_route(self.otherTag)
+					self.txChat.request_chat(data['tags'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_chatRes:
+
+			data = ecc_packet.get_data()
+
+			if 'uuid' in data:
+
+				if data['uuid'] == self.txChat.uuid:
+
+					if data['cmmd'] == 'accept':
+
+						self.txChat.start_chat(data['name'])
+
+					if data['cmmd'] == 'reject':
+
+						self.txChat.stop_chat()
+
+						self.txChat = None
 
 		else:
 
@@ -1344,23 +1390,15 @@ class ChatApp:
 					coin.initialise()
 					coin.refresh()
 
-					if coin == self.coins[0]: # self.coins[0].symbol == 'ecc'
-
-						self.logRoutingTags()
-#TODO
-# Move this to something responding to /chat
-						self.party_name[2] = 'ececho'
-						self.otherTag = self.resolve_route(self.party_name[2])
-
-#						self.otherTag = self.resolve_route(self.otherTag)
-
-						coin.setup_route(self.otherTag)
-
 				except cryptoNodeException as error:
 
 					print(str(error))
 
 					return False
+
+				if coin == self.coins[0]: # self.coins[0].symbol == 'ecc'
+
+					self.logRoutingTags()
 
 			return True
 

@@ -5,6 +5,173 @@ from datetime   import datetime
 from eccpacket  import eccPacket
 from cryptonode import cryptoNode, eccoinNode, bitcoinNode, moneroNode, cryptoNodeException
 
+###########################################################################################
+# TODO - Consider implementing a txObject base class that has parent/uuid/errorTxt,
+# has do_failure and implements a callback registration mechanism back up to the zmqHandler
+###########################################################################################
+
+################################################################################
+## txChat class ################################################################
+################################################################################
+
+class txChat():
+
+	STATE_initial	= 1
+	STATE_resolve	= 2
+	STATE_request   = 3
+	STATE_accept	= 4
+	STATE_failure	= 5
+
+	############################################################################
+
+	def __init__(self, parent, uuid, name):
+
+		self.parent   = parent
+		self.uuid     = uuid
+		self.name     = name
+		self.tag      = ''
+		self.errorTxt = ''
+
+		self.tx_state = self.STATE_initial
+
+	############################################################################
+
+	def do_failure(self, text):
+
+		self.errorTxt = text
+
+		self.parent.append_message(0, self.errorTxt)
+
+		self.tx_state = self.STATE_failure		
+
+	############################################################################
+
+	def ok_to_chat(self):
+
+		return self.tx_state == self.STATE_accept
+
+	############################################################################
+
+	def is_routing_tag(self, targetRoute):
+
+		return len(targetRoute) == 88 and targetRoute[-1] == '='
+
+	############################################################################
+
+	def resolve_chat(self):
+
+		assert self.tx_state == self.STATE_initial
+
+		self.tx_state = self.STATE_resolve
+
+		if self.is_routing_tag(self.name):
+
+			self.request_chat([self.name])
+
+		else:
+
+			self.parent.append_message(0, 'Attempting to resolve: {}'.format(self.name))
+
+			# Try ecresolve name resolution
+
+			data = {'uuid' : self.uuid,
+					'name' : self.name,
+					'type' : 'chatname'}
+
+			self.parent.send_ecresolve_packet(eccPacket.METH_nameReq, data)
+
+			self.parent.loop.set_alarm_in(5, self.do_resolve_timeout)
+
+	############################################################################
+
+	def do_resolve_timeout(self, loop = None, data = None):
+
+		if self.tx_state == self.STATE_resolve:
+
+			self.do_failure('Failed to resolve: {}'.format(self.name))
+
+	############################################################################
+
+	def request_chat(self, tags):
+
+		if self.tx_state == self.STATE_resolve:
+
+			if len(tags) > 0:
+
+				self.tag = tags[0]
+
+				if self.tag == self.parent.coins[0].routingTag:
+
+					self.do_failure('Computer says no - you cannot talk to yourself')
+
+					return
+
+				self.parent.append_message(0, 'Resolved: {}'.format(self.name))
+
+				try:
+
+					self.parent.coins[0].setup_route(self.tag)
+
+				except cryptoNodeException as error:
+
+					self.do_failure(str(error))
+
+					return
+
+				# Request chat
+
+				self.tx_state = self.STATE_request
+
+				data = {'uuid' : self.uuid,
+						'cmmd' : 'start',
+						'name' : self.name}
+
+				self.parent.send_ecchat_packet(eccPacket.METH_chatReq, data)
+
+				self.parent.append_message(0, 'Chat request sent to: {}'.format(self.name))
+
+				self.parent.loop.set_alarm_in(5, self.do_request_timeout)
+
+			else:
+
+				pass # awaiting response from other ecresolve instances, or timeout
+
+	############################################################################
+
+	def do_request_timeout(self, loop = None, data = None):
+
+		if self.tx_state == self.STATE_request:
+
+			self.parent.append_message(0, 'Waiting for chat request to be accepted by: {}'.format(self.name))
+
+			self.parent.loop.set_alarm_in(5, self.do_request_timeout)
+
+	############################################################################
+
+	def start_chat(self, name):
+
+		if self.tx_state == self.STATE_request:
+
+			self.tx_state = self.STATE_accept
+
+			self.name = name # For chats started by routing tag, this is the first time we discover other party name
+
+			self.parent.append_message(0, 'Chat request accepted by: {}'.format(self.name))
+
+			self.parent.set_party_name(2, self.name)
+		
+	############################################################################
+
+	def stop_chat(self):
+
+		if self.tx_state == self.STATE_accept:
+
+			self.tx_state = self.STATE_initial
+
+			self.parent.append_message(0, 'Chat ended with: {}'.format(self.name))
+
+			self.parent.set_party_name(2, '')
+		
 ################################################################################
 ## txSend class ################################################################
 ################################################################################
