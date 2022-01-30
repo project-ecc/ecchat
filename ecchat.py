@@ -673,9 +673,9 @@ class ChatApp:
 
 		self.append_message(0, '%-8s - %s' % ('/help          ', 'display help - commands'))
 		self.append_message(0, '%-8s - %s' % ('/keys          ', 'display help - keys'))
-		self.append_message(0, '%-8s - %s' % ('/chat    <name>', 'start a chat by name or routing tag'))
 		self.append_message(0, '%-8s - %s' % ('/exit          ', 'exit - also /quit and ESC'))
 		self.append_message(0, '%-8s - %s' % ('/version       ', 'display ecchat version info'))
+		self.append_message(0, '%-8s - %s' % ('/chat    <name>', 'start a chat by name or routing tag'))
 		self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
 		self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
 		self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
@@ -1224,6 +1224,12 @@ class ChatApp:
 				if data['uuid'] == self.txChat.uuid:
 
 					self.txChat.request_chat(data['tags'])
+
+		elif ecc_packet.get_meth() == eccPacket.METH_chatReq:
+
+			data = ecc_packet.get_data()
+
+			# TODO - create a txChat instance, prompt user, tee up phase 2 for /accept /reject
 
 		elif ecc_packet.get_meth() == eccPacket.METH_chatRes:
 
