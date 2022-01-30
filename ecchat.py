@@ -676,6 +676,7 @@ class ChatApp:
 		self.append_message(0, '%-8s - %s' % ('/exit          ', 'exit - also /quit and ESC'))
 		self.append_message(0, '%-8s - %s' % ('/version       ', 'display ecchat version info'))
 		self.append_message(0, '%-8s - %s' % ('/chat    <name>', 'start a chat by name or routing tag'))
+		self.append_message(0, '%-8s - %s' % ('/chat          ', 'end current chat'))
 		self.append_message(0, '%-8s - %s' % ('/blocks  <coin>', 'display block count'))
 		self.append_message(0, '%-8s - %s' % ('/peers   <coin>', 'display peer count'))
 		self.append_message(0, '%-8s - %s' % ('/tag           ', 'display routing tag public key'))
@@ -815,11 +816,19 @@ class ChatApp:
 
 				if match:
 
-					uuid = str(uuid4())
+					if self.txChat:
 
-					self.txChat = txChat(self, uuid, match.group('name'))
+						#TODO123 - Improve this aspect
 
-					self.txChat.resolve_chat()
+						self.append_message(0, 'Please end your existing chat first using /chat with no name')
+
+					else:
+
+						uuid = str(uuid4())
+
+						self.txChat = txChat(self, uuid, match.group('name'))
+
+						self.txChat.resolve_chat()
 
 				else:
 
@@ -1032,10 +1041,6 @@ class ChatApp:
 
 						self.echo_transactions(coin.symbol)
 
-			elif text.startswith('/x'):
-
-				self.process_packet_notification(1)
-
 			elif text.startswith('/'):
 
 				self.append_message(0, 'Unknown command syntax - try /help for a list of commands')
@@ -1241,13 +1246,17 @@ class ChatApp:
 
 					if data['cmmd'] == 'accept':
 
-						self.txChat.start_chat(data['name'])
+						if self.txChat:
+
+							self.txChat.start_chat(data['name'])
 
 					if data['cmmd'] == 'reject':
 
-						self.txChat.stop_chat()
+						if self.txChat:
 
-						self.txChat = None
+							self.txChat.stop_chat()
+
+							self.txChat = None
 
 		else:
 
