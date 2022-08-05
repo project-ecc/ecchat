@@ -30,7 +30,7 @@ The **ecc network ecosystem** consists of a growing range of client applications
 
 | App / Service | Status | Description |
 |:--|:--|:--|
-|ecchat|Released|Messenger application with integrated cross chain payments & swaps
+|ecchat|In Dev|Messenger application with integrated cross chain payments & swaps
 |ececho|Released|Chat bot which echos back any messages sent to it|
 |ecresolve|In Dev|Name resolution service for services, chat names & chat groups|
 |ectranslate|In Dev|Real time translation service for messaging|
